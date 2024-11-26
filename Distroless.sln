@@ -1,0 +1,27 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distroless.HealthChecks", "src\Distroless.HealthChecks\Distroless.HealthChecks.csproj", "{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{91C28071-6001-4B75-B2E3-8B3E85D8ABA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2EED11D-C97C-4702-A11F-CC5F565A539D}"
+	ProjectSection(SolutionItems) = preProject
+		editorconfig = .editorconfig
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95} = {91C28071-6001-4B75-B2E3-8B3E85D8ABA1}
+	EndGlobalSection
+EndGlobal
