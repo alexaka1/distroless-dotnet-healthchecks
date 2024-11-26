@@ -1,6 +1,8 @@
 using Distroless.HealthChecks;
+using Distroless.HealthChecks.Checks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,25 +11,30 @@ IHost host;
 try
 {
     var builder = Host.CreateApplicationBuilder(args);
-    builder.Services.AddHostedService<HealthCheck>()
-        .AddHttpClient<HealthCheckClient>();
-    builder.Configuration.AddJsonFile("healthchecks.json", optional: true);
+    builder.Configuration.AddJsonFile("healthchecks.json", true);
     var config = builder.Configuration;
     builder.Services.AddOptions<HealthCheckOptions>()
         .Bind(config)
         .ValidateOnStart();
+
+    builder.Logging.ClearProviders();
+    builder.Logging.AddConsole();
+
+    builder.Services.AddHttpClient(SimpleHealthCheck.Name);
     builder.Services.AddSingleton<IPostConfigureOptions<HealthCheckOptions>, PostConfigureHealthCheckOptions>();
     builder.Services.AddSingleton<StatusResult>();
-    builder.Logging.AddConsole();
-    builder.Services.AddHealthChecks();
 
+    builder.Services.AddHealthChecks()
+        .AddCheck<SimpleHealthCheck>(SimpleHealthCheck.Name, tags: ["simple"]);
+
+    builder.Services.AddHostedService<HealthCheckHostedService>();
     host = builder.Build();
 }
 catch (Exception e)
 {
     Console.Error.WriteLine("Healthcheck failed to start");
     Console.Error.WriteLine(e);
-    return 1;
+    return StatusResult.ExitCodes.UnHealthy;
 }
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
@@ -39,11 +46,11 @@ try
 catch (Exception e)
 {
     logger.LogCritical(e, "Healthcheck terminated unexpectedly");
-    return 1;
+    return StatusResult.ExitCodes.UnHealthy;
 }
 
-return result.IsHealthy switch
+return result.HealthStatus switch
 {
-    true => 0,
-    _ => 1,
+    HealthStatus.Healthy => StatusResult.ExitCodes.Healthy,
+    _ => StatusResult.ExitCodes.UnHealthy,
 };

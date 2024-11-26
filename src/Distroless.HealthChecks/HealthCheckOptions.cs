@@ -6,12 +6,12 @@ namespace Distroless.HealthChecks;
 
 public class HealthCheckOptions
 {
-    public const string Key = "HealthCheck";
-
     public string? Urls { get; set; }
 
     [JsonIgnore]
     public List<Uri> Uris { get; set; } = [];
+
+    public const string Key = "HealthCheck";
 }
 //
 // [OptionsValidator]
@@ -24,6 +24,14 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
     {
         if (string.IsNullOrWhiteSpace(options.Urls))
         {
+            // The complex configuration was probably used.
+            return;
+        }
+
+        if (options.Uris.Count != 0)
+        {
+            // Someone has already configured the Uris.
+            // They know what they are doing.
             return;
         }
 
@@ -36,19 +44,11 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
             }
             else
             {
-                InvalidUri(uri);
+                LogInvalidUri(uri);
             }
-        }
-
-        if (options.Uris.Count == 0)
-        {
-            NoValidUri();
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Invalid uri '{Uri}'")]
-    private partial void InvalidUri(string uri);
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "No valid uri found")]
-    private partial void NoValidUri();
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Invalid uri '{Uri}'", EventName = "InvalidUri")]
+    private partial void LogInvalidUri(string uri);
 }
