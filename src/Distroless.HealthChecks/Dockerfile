@@ -1,4 +1,4 @@
-﻿FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/runtime:9.0-noble-chiseled AS base
+﻿FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled-aot AS base
 WORKDIR /app
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-aot AS build
