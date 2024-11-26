@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{98C8D8
 	ProjectSection(SolutionItems) = preProject
 		.github\dependabot.yml = .github\dependabot.yml
 		.github\FUNDING.yml = .github\FUNDING.yml
+		.github\workflows\dependency-review.yml = .github\workflows\dependency-review.yml
+		.github\workflows\scorecards.yml = .github\workflows\scorecards.yml
 	EndProjectSection
 EndProject
 Global
