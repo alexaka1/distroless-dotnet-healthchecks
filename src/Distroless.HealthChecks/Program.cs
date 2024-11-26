@@ -49,8 +49,4 @@ catch (Exception e)
     return StatusResult.ExitCodes.UnHealthy;
 }
 
-return result.HealthStatus switch
-{
-    HealthStatus.Healthy => StatusResult.ExitCodes.Healthy,
-    _ => StatusResult.ExitCodes.UnHealthy,
-};
+return StatusResult.ToExitCode(result.HealthStatus);
