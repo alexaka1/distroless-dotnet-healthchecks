@@ -4,3 +4,18 @@ updates:
     directory: /
     schedule:
       interval: daily
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/Distroless.HealthChecks
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /src/Distroless.HealthChecks
+    schedule:
+      interval: daily
