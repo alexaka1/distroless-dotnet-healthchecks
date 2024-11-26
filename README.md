@@ -1,4 +1,4 @@
-![Docker Image Version (tag)](https://img.shields.io/docker/v/alexaka1/distroless-dotnet-healthchecks/main?logo=docker&label=docker.io&cacheSeconds=3600&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Falexaka1%2Fdistroless-dotnet-healthchecks)
+[![Docker Image Version (tag)](https://img.shields.io/docker/v/alexaka1/distroless-dotnet-healthchecks/main?logo=docker&label=docker.io&cacheSeconds=3600)](https://hub.docker.com/repository/docker/alexaka1/distroless-dotnet-healthchecks)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/alexaka1/distroless-dotnet-healthchecks/badge)](https://scorecard.dev/viewer/?uri=github.com/alexaka1/distroless-dotnet-healthchecks)
 
 # Docker HEALTHCHECK for .Net chiseled containers
