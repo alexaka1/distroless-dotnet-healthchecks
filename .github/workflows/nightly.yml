@@ -42,12 +42,12 @@ jobs:
         continue-on-error: true
         run: |
           $last_commit=$(git rev-parse HEAD)
-#          if gh run list --branch main --json conclusion,headSha -q '[.[] | select(.headSha=="'$last_commit'")][0].conclusion' | grep -q 'success'; then
+          #if gh run list --branch main --json conclusion,headSha -q '[.[] | select(.headSha=="'$last_commit'")][0].conclusion' | grep -q 'success'; then
             echo "::notice::This commit has already been processed. Skipping."
             exit 1
-#          else
+          #else
             echo "This commit has not been processed yet. Continuing."
-#          fi
+          #fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up QEMU
