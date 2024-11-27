@@ -15,20 +15,28 @@ public class StatusResult
         /// The service is overall healthy.
         /// </summary>
         public const byte Healthy = 0;
+
         /// <summary>
         /// The service is overall unhealthy.
         /// </summary>
         public const byte UnHealthy = 1;
+
         public const byte Degraded = 2;
     }
 
+    /// <summary>
+    /// Convert a <see cref="HealthStatus"/> to an exit code.
+    /// </summary>
+    /// <param name="healthStatus"></param>
+    /// <remarks>https://docs.docker.com/reference/dockerfile/#healthcheck</remarks>
+    /// <returns></returns>
     public static byte ToExitCode(HealthStatus healthStatus)
     {
         return healthStatus switch
         {
             HealthStatus.Healthy => ExitCodes.Healthy,
             HealthStatus.Unhealthy => ExitCodes.UnHealthy,
-            HealthStatus.Degraded => ExitCodes.Degraded,
+            // HealthStatus.Degraded => ExitCodes.Degraded,
             _ => ExitCodes.UnHealthy,
         };
     }
