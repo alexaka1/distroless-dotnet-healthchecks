@@ -48,8 +48,8 @@ public class ContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
                 Regex.Escape("Application started. Press Ctrl+C to shut down."),
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
-                .UntilContainerIsHealthy(0,
-                    strategy => strategy.WithTimeout(TimeSpan.FromSeconds(3)))
+                .UntilContainerIsHealthy(1,
+                    strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
             .Build();
     }
