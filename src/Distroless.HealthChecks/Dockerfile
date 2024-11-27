@@ -5,9 +5,10 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-ao
 ARG BUILD_CONFIGURATION=Release
 ARG TARGETARCH
 WORKDIR /src
+COPY ["nuget.config", "./"]
 COPY ["src/Distroless.HealthChecks/Distroless.HealthChecks.csproj", "src/Distroless.HealthChecks/"]
 RUN dotnet restore "src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" -a $TARGETARCH
-COPY . .
+COPY ["src/", "./src/"]
 WORKDIR "/src/src/Distroless.HealthChecks"
 RUN dotnet build "Distroless.HealthChecks.csproj" -c $BUILD_CONFIGURATION -o /app/build -a $TARGETARCH
 
