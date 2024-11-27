@@ -22,6 +22,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=distroless-dotnet-healthchecks /app /healthchecks
-HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 CMD cd /healthchecks/ && ./Distroless.HealthChecks --urls http://localhost:8080/healthz
+HEALTHCHECK --interval=1s --timeout=1s --retries=1 CMD cd /healthchecks/ && ./Distroless.HealthChecks --urls http://localhost:8080/healthz
 
 ENTRYPOINT ["dotnet", "Distroless.Sample.WebApp.dll"]
