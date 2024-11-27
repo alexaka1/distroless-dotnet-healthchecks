@@ -11,7 +11,8 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  HEALTHCHECK_IMAGE_NAME: distroless-dotnet-healthchecks:test
+  HEALTHCHECK_IMAGE_NAME: distroless-dotnet-healthchecks
+  HEALTHCHECK_IMAGE_TAG: test
 
 jobs:
   build-healthcheck:
@@ -40,7 +41,7 @@ jobs:
           target: final
           platforms: linux/amd64
           push: false
-          tags: ${{ env.HEALTHCHECK_IMAGE_NAME }}
+          tags: ${{ env.HEALTHCHECK_IMAGE_NAME }}:${{ env.HEALTHCHECK_IMAGE_TAG }}
           outputs: type=docker,dest=/tmp/image.tar
       - name: Upload artifact
         uses: actions/upload-artifact@v4
