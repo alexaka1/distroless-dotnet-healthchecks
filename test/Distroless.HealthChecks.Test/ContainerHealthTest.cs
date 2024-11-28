@@ -15,9 +15,19 @@ public class ContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
     [Fact]
     public async Task Container_is_healthy()
     {
-        await _container.StartAsync();
-        Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
-            $"Container was {_container.Health:G}");
+        try
+        {
+            await _container.StartAsync();
+            Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
+                $"Container was {_container.Health:G}");
+        }
+        catch (Exception e)
+        {
+            var logs = await _container.GetLogsAsync();
+            output.WriteLine(logs.Stdout);
+            output.WriteLine(logs.Stderr);
+            throw;
+        }
     }
 
     public async Task InitializeAsync()
