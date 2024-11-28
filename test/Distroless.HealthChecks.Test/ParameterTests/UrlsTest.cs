@@ -77,7 +77,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task Container_is_healthy(string image, string runtimeTag, string targetFramework, string dockerfile,
+    public async Task Container_returns_expected_health_status(string image, string runtimeTag, string targetFramework, string dockerfile,
         string urls, HealthStatus expected)
     {
         try
