@@ -8,7 +8,7 @@ public class RuntimeDeps9AotContainerTest(ITestOutputHelper output) : HealthyCon
     {
         get
         {
-            string[] images = ["mcr.microsoft.com/dotnet/runtime", "mcr.microsoft.com/dotnet/nightly/runtime"];
+            string[] images = ["mcr.microsoft.com/dotnet/runtime-deps", "mcr.microsoft.com/dotnet/nightly/runtime-deps"];
             string[] tags =
             [
                 "9.0",
