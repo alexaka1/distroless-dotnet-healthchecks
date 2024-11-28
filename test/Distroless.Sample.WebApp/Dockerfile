@@ -1,5 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -22,6 +21,7 @@ FROM base AS final
 WORKDIR /healthchecks
 COPY --from=distroless-dotnet-healthchecks:test / .
 HEALTHCHECK --interval=1s --timeout=1s --retries=3 CMD cd /healthchecks && ./Distroless.HealthChecks --urls http://localhost:8080/healthz
+USER $APP_UID
 WORKDIR /app
 COPY --from=publish --chown=$APP_UID /app/publish .
 
