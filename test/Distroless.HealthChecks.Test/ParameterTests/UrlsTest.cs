@@ -9,7 +9,6 @@ namespace Distroless.HealthChecks.Test.ParameterTests;
 
 public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 {
-    private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
     private string? _newDockerfile;
@@ -20,17 +19,19 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         {
             string[] images =
             [
-                // "mcr.microsoft.com/dotnet/runtime-deps",
+                "mcr.microsoft.com/dotnet/runtime-deps",
                 "mcr.microsoft.com/dotnet/nightly/runtime-deps",
             ];
             string[] tags =
             [
                 "9.0",
-                // "9.0-noble",
-                // "9.0-noble-chiseled",
-                // "9.0-azurelinux3.0-distroless",
+                "8.0",
+                "9.0-noble",
+                "9.0-noble-chiseled",
+                "9.0-azurelinux3.0-distroless",
                 "9.0-noble-chiseled-aot",
-                // "9.0-azurelinux3.0-distroless-aot",
+                "8.0-noble-chiseled-aot",
+                "9.0-azurelinux3.0-distroless-aot",
             ];
             (string url, HealthStatus expected)[] urls =
             [
@@ -68,6 +69,8 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
             return data;
         }
     }
+
+    private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
 
     public async Task DisposeAsync()
     {
@@ -156,7 +159,8 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         _newDockerfile = Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, "artifacts",
             Path.GetRandomFileName());
         File.WriteAllText(_newDockerfile, text);
-        return _newDockerfile.Replace(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath + "\\", "").Replace("\\", "/");
+        return _newDockerfile.Replace(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath + "\\", "")
+            .Replace("\\", "/");
     }
 
     private static string GetUrl(HealthStatus desired)

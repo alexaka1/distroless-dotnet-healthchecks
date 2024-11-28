@@ -24,7 +24,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
         return Task.CompletedTask;
     }
 
-    [Theory(Skip = "Temporary")]
+    [Theory]
     [MemberData(nameof(Data))]
     public async Task Container_is_healthy(string image, string runtimeTag, string targetFramework, string dockerfile)
     {
