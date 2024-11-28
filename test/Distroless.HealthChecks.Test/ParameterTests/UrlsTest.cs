@@ -152,15 +152,15 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     private string NewDockerfile(string dockerfile, string urls)
     {
+        string slnDirectory = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
         string text =
-            File.ReadAllText(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, dockerfile));
+            File.ReadAllText(Path.Combine(slnDirectory, dockerfile));
         text = text.Replace("http://localhost:8080/healthz", urls);
-        Directory.CreateDirectory(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, "artifacts"));
-        _newDockerfile = Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, "artifacts",
+        Directory.CreateDirectory(Path.Combine(slnDirectory, "artifacts"));
+        _newDockerfile = Path.Combine(slnDirectory, "artifacts",
             Path.GetRandomFileName());
         File.WriteAllText(_newDockerfile, text);
-        return _newDockerfile.Replace(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath + "\\", "")
-            .Replace("\\", "/");
+        return Path.GetRelativePath(slnDirectory, _newDockerfile);
     }
 
     private static string GetUrl(HealthStatus desired)
