@@ -7,11 +7,11 @@ using Xunit.Abstractions;
 
 namespace Distroless.HealthChecks.Test.HealthyTests;
 
-public abstract class HealthyContainerTest(ITestOutputHelper output) : IAsyncLifetime
+public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IAsyncLifetime where TData : ITestData
 {
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
-
+    public static TheoryData<string, string, string, string> Data => TData.GetTheoryData();
 
     public async Task DisposeAsync()
     {
@@ -24,7 +24,9 @@ public abstract class HealthyContainerTest(ITestOutputHelper output) : IAsyncLif
         return Task.CompletedTask;
     }
 
-    protected async Task ContainerIsHealthy(string image, string runtimeTag, string targetFramework, string dockerfile)
+    [Theory]
+    [MemberData(nameof(Data))]
+    public async Task Container_is_healthy(string image, string runtimeTag, string targetFramework, string dockerfile)
     {
         try
         {
