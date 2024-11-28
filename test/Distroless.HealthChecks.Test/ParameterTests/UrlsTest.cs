@@ -147,7 +147,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     private string NewDockerfile(string dockerfile, string urls)
     {
-        string text = File.ReadAllText(dockerfile);
+        string text = File.ReadAllText(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, dockerfile));
         text = text.Replace("http://localhost:8080/healthz", urls);
         _newDockerfile = Path.GetTempFileName();
         File.WriteAllText(_newDockerfile, text);
