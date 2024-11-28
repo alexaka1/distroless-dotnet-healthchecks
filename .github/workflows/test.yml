@@ -40,7 +40,7 @@ jobs:
         with:
           context: .
           file: src/Distroless.HealthChecks/Dockerfile
-          target: final
+          target: binary
           platforms: linux/amd64
           push: false
           tags: ${{ env.HEALTHCHECK_IMAGE_NAME }}:${{ env.HEALTHCHECK_IMAGE_TAG }}

@@ -22,3 +22,6 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["./Distroless.HealthChecks"]
 CMD ["--urls", "http://localhost:8080/healthz"]
+
+FROM scratch AS binary
+COPY --from=publish /app/publish .
