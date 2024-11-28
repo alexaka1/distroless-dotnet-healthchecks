@@ -2,21 +2,32 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
-using Xunit.Abstractions;
 
 namespace Distroless.HealthChecks.Test;
 
 public class ContainerHealthTest : IAsyncLifetime
 {
-    private IFutureDockerImage _image = null!;
-    private IFutureDockerImage _healthcheckImage = null!;
     private IContainer _container = null!;
+    private IFutureDockerImage _healthcheckImage = null!;
+    private IFutureDockerImage _image = null!;
 
     public static TheoryData<string> Data =>
     [
         "9.0",
         "8.0",
     ];
+
+    public async Task DisposeAsync()
+    {
+        await _image.DisposeAsync();
+        await _healthcheckImage.DisposeAsync();
+        await _container.DisposeAsync();
+    }
+
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
     [Theory]
     [MemberData(nameof(Data))]
@@ -26,11 +37,6 @@ public class ContainerHealthTest : IAsyncLifetime
         await _container.StartAsync();
         Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
             $"Container was {_container.Health:G}");
-    }
-
-    public Task InitializeAsync()
-    {
-        return Task.CompletedTask;
     }
 
     private async Task Init(TestData data)
@@ -65,13 +71,6 @@ public class ContainerHealthTest : IAsyncLifetime
                     strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
             .Build();
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _image.DisposeAsync();
-        await _healthcheckImage.DisposeAsync();
-        await _container.DisposeAsync();
     }
 }
 
