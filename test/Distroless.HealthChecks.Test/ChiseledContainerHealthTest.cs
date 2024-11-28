@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
@@ -78,6 +79,10 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             output.WriteLine(logs.Stdout);
             output.WriteLine("Errors:");
             output.WriteLine(logs.Stderr);
+            output.WriteLine("Health:");
+            (string @out, string error) = await InspectContainer(_container.Id);
+            output.WriteLine(@out);
+            output.WriteLine(error);
             throw;
         }
     }
@@ -106,4 +111,30 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
     }
 
     private record TestData(string RuntimeTag, string TargetFramework);
+
+    static async Task<(string output, string error)> InspectContainer(string containerId)
+    {
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "docker",
+                Arguments = $$$"""inspect --format='{{.State.Health.Status}}' {{{containerId}}}""",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = true,
+                CreateNoWindow = true,
+            }
+        };
+
+        process.Start();
+
+        string output = await process.StandardOutput.ReadToEndAsync(cts.Token);
+        string error = await process.StandardError.ReadToEndAsync(cts.Token);
+
+        await process.WaitForExitAsync(cts.Token);
+
+        return (output.Trim(), error.Trim());
+    }
 }
