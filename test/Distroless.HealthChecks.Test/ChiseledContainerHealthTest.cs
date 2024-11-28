@@ -2,10 +2,11 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
+using Xunit.Abstractions;
 
 namespace Distroless.HealthChecks.Test;
 
-public class ChiseledContainerHealthTestNet9 : ChiseledContainerHealthTest
+public class ChiseledContainerHealthTestNet9(ITestOutputHelper output) : ChiseledContainerHealthTest(output)
 {
     public static TheoryData<string, string> Data =>
         new()
@@ -24,7 +25,7 @@ public class ChiseledContainerHealthTestNet9 : ChiseledContainerHealthTest
     }
 }
 
-public class ChiseledContainerHealthTestNet8 : ChiseledContainerHealthTest
+public class ChiseledContainerHealthTestNet8(ITestOutputHelper output) : ChiseledContainerHealthTest(output)
 {
     public static TheoryData<string, string> Data =>
         new()
@@ -45,7 +46,7 @@ public class ChiseledContainerHealthTestNet8 : ChiseledContainerHealthTest
     }
 }
 
-public abstract class ChiseledContainerHealthTest : IAsyncLifetime
+public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
 {
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
@@ -64,10 +65,21 @@ public abstract class ChiseledContainerHealthTest : IAsyncLifetime
 
     protected async Task ContainerIsHealthy(string runtimeTag, string targetFramework)
     {
-        await Init(new TestData(runtimeTag, targetFramework));
-        await _container.StartAsync();
-        Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
-            $"Container was {_container.Health:G}");
+        try
+        {
+            await Init(new TestData(runtimeTag, targetFramework));
+            await _container.StartAsync();
+            Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
+                $"Container was {_container.Health:G}");
+        }
+        catch (Exception)
+        {
+            var logs = await _container.GetLogsAsync();
+            output.WriteLine(logs.Stdout);
+            output.WriteLine("Errors:");
+            output.WriteLine(logs.Stderr);
+            throw;
+        }
     }
 
     private async Task Init(TestData data)
