@@ -6,31 +6,34 @@ using Xunit.Abstractions;
 
 namespace Distroless.HealthChecks.Test;
 
-public class ContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
+public class ContainerHealthTest : IAsyncLifetime
 {
     private IFutureDockerImage _image = null!;
     private IFutureDockerImage _healthcheckImage = null!;
     private IContainer _container = null!;
 
-    [Fact]
-    public async Task Container_is_healthy()
+    public static TheoryData<string> Data =>
+    [
+        "9.0",
+        "8.0",
+    ];
+
+    [Theory]
+    [MemberData(nameof(Data))]
+    public async Task Container_is_healthy(string runtimeTag)
     {
-        try
-        {
-            await _container.StartAsync();
-            Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
-                $"Container was {_container.Health:G}");
-        }
-        catch (Exception e)
-        {
-            var logs = await _container.GetLogsAsync();
-            output.WriteLine(logs.Stdout);
-            output.WriteLine(logs.Stderr);
-            throw;
-        }
+        await Init(new TestData(runtimeTag));
+        await _container.StartAsync();
+        Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
+            $"Container was {_container.Health:G}");
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    private async Task Init(TestData data)
     {
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         _healthcheckImage = new ImageFromDockerfileBuilder()
@@ -47,7 +50,7 @@ public class ContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
         //     .ConfigureAwait(false);
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile("test/Distroless.Sample.WebApp/Dockerfile")
-            .WithCleanUp(true)
+            .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(timeoutCts.Token)
@@ -56,8 +59,8 @@ public class ContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
             .WithImage(_image)
             .WithCleanUp(true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
-                Regex.Escape("Application started. Press Ctrl+C to shut down."),
-                strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
+                    Regex.Escape("Application started. Press Ctrl+C to shut down."),
+                    strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
                 .UntilContainerIsHealthy(1,
                     strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
@@ -71,3 +74,5 @@ public class ContainerHealthTest(ITestOutputHelper output) : IAsyncLifetime
         await _container.DisposeAsync();
     }
 }
+
+public record TestData(string RuntimeTag);

@@ -42,8 +42,8 @@ try
     {
         null => Results.Ok(),
         0 => Results.Ok(new HealthStatus("Healthy")),
-        1 => Results.InternalServerError(new HealthStatus("Unhealthy")),
-        2 => Results.InternalServerError(new HealthStatus("Degraded")),
+        1 => Results.Json(new HealthStatus("Unhealthy"), AppJsonSerializerContext.Default.HealthStatus, statusCode: StatusCodes.Status500InternalServerError),
+        2 => Results.Json(new HealthStatus("Degraded"), AppJsonSerializerContext.Default.HealthStatus, statusCode: StatusCodes.Status500InternalServerError),
         _ => Results.BadRequest(),
     });
 
