@@ -20,7 +20,7 @@ RUN dotnet publish "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION /p:
 
 FROM base AS final
 WORKDIR /healthchecks
-COPY --from=distroless-dotnet-healthchecks:test --chown=$APP_UID /app .
+COPY --from=distroless-dotnet-healthchecks:test --chown=$APP_UID / .
 HEALTHCHECK --interval=1s --timeout=1s --retries=3 CMD ls -al && cd /healthchecks && ls -al && /healthchecks/Distroless.HealthChecks --urls http://localhost:8080/healthz
 WORKDIR /app
 COPY --from=publish /app/publish .
