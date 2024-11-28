@@ -37,7 +37,7 @@ jobs:
         id: check_commit
         continue-on-error: true
         run: |
-          $last_commit=$(git rev-parse HEAD)
+          last_commit=$(git rev-parse HEAD)
           if gh run list --branch ${{ env.branch }} --json conclusion,headSha -q '[.[] | select(.headSha=="'$last_commit'")][0].conclusion' | grep -q 'success'; then
             echo "::notice::This commit has already been processed. Skipping."
             echo "should-run=false" >> $GITHUB_OUTPUT
