@@ -25,7 +25,7 @@ EXPOSE 8080
 EXPOSE 8081
 WORKDIR /healthchecks
 COPY --from=distroless-dotnet-healthchecks:test / .
-HEALTHCHECK --interval=1s --timeout=1s --retries=3 CMD ["/healthchecks/Distroless.HealthChecks", "--urls", "${URLS}"]
+HEALTHCHECK --interval=1s --timeout=1s --retries=3 CMD ["/healthchecks/Distroless.HealthChecks", "--urls \"$URLS\""]
 USER $APP_UID
 WORKDIR /app
 COPY --from=publish --chown=$APP_UID /app/publish .
