@@ -35,8 +35,9 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
             Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
                 $"Container was {_container.Health:G}");
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            output.WriteLine(e.ToString());
             var logs = await _container.GetLogsAsync();
             output.WriteLine(logs.Stdout);
             output.WriteLine("Errors:");
