@@ -2,7 +2,6 @@
 ARG TARGET_FRAMEWORK="9.0"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
-ARG URLS="http://localhost:8080/healthz"
 FROM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-aot AS build
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
@@ -25,7 +24,7 @@ EXPOSE 8080
 EXPOSE 8081
 WORKDIR /healthchecks
 COPY --from=distroless-dotnet-healthchecks:test / .
-HEALTHCHECK --interval=1s --timeout=1s --retries=3 CMD ["/healthchecks/Distroless.HealthChecks", "--urls \"$URLS\""]
+HEALTHCHECK --interval=1s --timeout=1s --retries=3 CMD ["/healthchecks/Distroless.HealthChecks", "--urls", "http://localhost:8080/healthz"]
 USER $APP_UID
 WORKDIR /app
 COPY --from=publish --chown=$APP_UID /app/publish .

@@ -9,8 +9,10 @@ namespace Distroless.HealthChecks.Test.ParameterTests;
 
 public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 {
+    private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
+    private string? _newDockerfile;
 
     public static TheoryData<string, string, string, string, string, HealthStatus> Data
     {
@@ -55,7 +57,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                         data.Add(image,
                             tag,
                             "9.0",
-                            "test/Distroless.Sample.WebApp/aot.Dockerfile",
+                            Dockerfile,
                             url.url,
                             url.expected
                         );
@@ -71,6 +73,10 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     {
         await _image.DisposeAsync();
         await _container.DisposeAsync();
+        if (_newDockerfile != null && File.Exists(_newDockerfile))
+        {
+            File.Delete(_newDockerfile);
+        }
     }
 
     public Task InitializeAsync()
@@ -85,7 +91,8 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     {
         try
         {
-            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls));
+            string newDockerfile = NewDockerfile(dockerfile, urls);
+            await Init(new TestData(image, runtimeTag, targetFramework, newDockerfile, urls));
             await _container.StartAsync();
             // wait for the healthcheck to run within docker
             await Task.Delay(TimeSpan.FromSeconds(5));
@@ -125,7 +132,6 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
-            .WithBuildArgument("URLS", data.Urls)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(timeoutCts.Token)
@@ -137,6 +143,15 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
             .Build();
+    }
+
+    private string NewDockerfile(string dockerfile, string urls)
+    {
+        string text = File.ReadAllText(dockerfile);
+        text = text.Replace("http://localhost:8080/healthz", urls);
+        _newDockerfile = Path.GetTempFileName();
+        File.WriteAllText(_newDockerfile, text);
+        return _newDockerfile;
     }
 
     private static string GetUrl(HealthStatus desired)
