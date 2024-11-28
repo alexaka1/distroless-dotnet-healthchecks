@@ -2,7 +2,6 @@ using Distroless.HealthChecks;
 using Distroless.HealthChecks.Checks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Options;
 IHost host;
 try
 {
+    Utils.SetCurrentDirectoryToBinaryLocation();
     var builder = Host.CreateApplicationBuilder(args);
     builder.Configuration.AddJsonFile("healthchecks.json", true);
     var config = builder.Configuration;

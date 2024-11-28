@@ -13,10 +13,10 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: ["main"]
+    branches: [ "main" ]
   schedule:
     - cron: "0 0 * * 1"
 
@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["csharp"]
+        language: [ "csharp" ]
         # CodeQL supports [ $supported-codeql-languages ]
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 

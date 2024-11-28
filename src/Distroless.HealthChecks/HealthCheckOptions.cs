@@ -22,6 +22,7 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
 {
     public void PostConfigure(string? name, HealthCheckOptions options)
     {
+        LogUrls(options.Urls);
         if (string.IsNullOrWhiteSpace(options.Urls))
         {
             // The complex configuration was probably used.
@@ -51,4 +52,7 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Invalid uri '{Uri}'", EventName = "InvalidUri")]
     private partial void LogInvalidUri(string uri);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Urls: {Urls}", EventName = "Urls")]
+    private partial void LogUrls(string? urls);
 }
