@@ -1,14 +1,14 @@
 using Xunit.Abstractions;
 
-namespace Distroless.HealthChecks.Test;
+namespace Distroless.HealthChecks.Test.HealthyTests.Net9;
 
-public class Runtime9AotContainerTest(ITestOutputHelper output) : HealthyContainerTest(output)
+public class AspNet9ContainerTest(ITestOutputHelper output) : HealthyContainerTest(output)
 {
     public static TheoryData<string, string, string, string> Data
     {
         get
         {
-            string[] images = ["mcr.microsoft.com/dotnet/runtime", "mcr.microsoft.com/dotnet/nightly/runtime"];
+            string[] images = ["mcr.microsoft.com/dotnet/aspnet"];
             string[] tags =
             [
                 "9.0",
@@ -21,11 +21,7 @@ public class Runtime9AotContainerTest(ITestOutputHelper output) : HealthyContain
             {
                 foreach (string tag in tags)
                 {
-                    if (tag.Contains("aot") && !image.Contains("nightly"))
-                    {
-                        continue;
-                    }
-                    data.Add(image, tag, "9.0", "test/Distroless.Sample.WebApp/aot.Dockerfile");
+                    data.Add(image, tag, "9.0", "test/Distroless.Sample.WebApp/chiseled.Dockerfile");
                 }
             }
 

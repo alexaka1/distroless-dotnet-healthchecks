@@ -5,7 +5,7 @@ using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
 using Xunit.Abstractions;
 
-namespace Distroless.HealthChecks.Test;
+namespace Distroless.HealthChecks.Test.HealthyTests;
 
 public abstract class HealthyContainerTest(ITestOutputHelper output) : IAsyncLifetime
 {

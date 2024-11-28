@@ -1,14 +1,14 @@
 using Xunit.Abstractions;
 
-namespace Distroless.HealthChecks.Test;
+namespace Distroless.HealthChecks.Test.HealthyTests.Net8;
 
-public class RuntimeDeps8AotContainerTest(ITestOutputHelper output) : HealthyContainerTest(output)
+public class Runtime8AotContainerTest(ITestOutputHelper output) : HealthyContainerTest(output)
 {
     public static TheoryData<string, string, string, string> Data
     {
         get
         {
-            string[] images = ["mcr.microsoft.com/dotnet/runtime-deps", "mcr.microsoft.com/dotnet/nightly/runtime-deps"];
+            string[] images = ["mcr.microsoft.com/dotnet/runtime", "mcr.microsoft.com/dotnet/nightly/runtime"];
             string[] tags =
             [
                 "8.0",
@@ -18,9 +18,6 @@ public class RuntimeDeps8AotContainerTest(ITestOutputHelper output) : HealthyCon
                 "8.0-noble-chiseled",
                 "8.0-jammy-chiseled",
                 "8.0-azurelinux3.0-distroless",
-                "8.0-noble-chiseled-aot",
-                "8.0-jammy-chiseled-aot",
-                "8.0-azurelinux3.0-distroless-aot",
             ];
             var data = new TheoryData<string, string, string, string>();
             foreach (string image in images)
@@ -29,9 +26,9 @@ public class RuntimeDeps8AotContainerTest(ITestOutputHelper output) : HealthyCon
                 {
                     if (tag.Contains("aot") && !image.Contains("nightly"))
                     {
-                        // aot tags are only available for nightly images
                         continue;
                     }
+
                     data.Add(image, tag, "8.0", "test/Distroless.Sample.WebApp/aot.Dockerfile");
                 }
             }

@@ -1,8 +1,8 @@
 using Xunit.Abstractions;
 
-namespace Distroless.HealthChecks.Test;
+namespace Distroless.HealthChecks.Test.HealthyTests.Net8;
 
-public class AspNet9AotContainerTest(ITestOutputHelper output) : HealthyContainerTest(output)
+public class AspNet8AotContainerTest(ITestOutputHelper output) : HealthyContainerTest(output)
 {
     public static TheoryData<string, string, string, string> Data
     {
@@ -11,17 +11,25 @@ public class AspNet9AotContainerTest(ITestOutputHelper output) : HealthyContaine
             string[] images = ["mcr.microsoft.com/dotnet/aspnet", "mcr.microsoft.com/dotnet/nightly/aspnet"];
             string[] tags =
             [
-                "9.0",
-                "9.0-noble",
-                "9.0-noble-chiseled",
-                "9.0-azurelinux3.0-distroless",
+                "8.0",
+                "8.0-noble",
+                "8.0-jammy",
+                // "8.0-alpine", // this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
+                "8.0-noble-chiseled",
+                "8.0-jammy-chiseled",
+                "8.0-azurelinux3.0-distroless",
             ];
             var data = new TheoryData<string, string, string, string>();
             foreach (string image in images)
             {
                 foreach (string tag in tags)
                 {
-                    data.Add(image, tag, "9.0", "test/Distroless.Sample.WebApp/aot.Dockerfile");
+                    if (tag.Contains("aot") && !image.Contains("nightly"))
+                    {
+                        continue;
+                    }
+
+                    data.Add(image, tag, "8.0", "test/Distroless.Sample.WebApp/aot.Dockerfile");
                 }
             }
 
