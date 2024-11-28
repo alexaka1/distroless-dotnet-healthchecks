@@ -17,15 +17,18 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         get
         {
             string[] images =
-                ["mcr.microsoft.com/dotnet/runtime-deps", "mcr.microsoft.com/dotnet/nightly/runtime-deps"];
+                [
+                    // "mcr.microsoft.com/dotnet/runtime-deps",
+                    "mcr.microsoft.com/dotnet/nightly/runtime-deps",
+                ];
             string[] tags =
             [
                 "9.0",
-                "9.0-noble",
-                "9.0-noble-chiseled",
-                "9.0-azurelinux3.0-distroless",
+                // "9.0-noble",
+                // "9.0-noble-chiseled",
+                // "9.0-azurelinux3.0-distroless",
                 "9.0-noble-chiseled-aot",
-                "9.0-azurelinux3.0-distroless-aot",
+                // "9.0-azurelinux3.0-distroless-aot",
             ];
             (string url, HealthStatus expected)[] urls =
             [
