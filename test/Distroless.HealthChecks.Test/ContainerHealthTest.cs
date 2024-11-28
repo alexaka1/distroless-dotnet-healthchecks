@@ -72,6 +72,6 @@ public class ContainerHealthTest : IAsyncLifetime
             )
             .Build();
     }
-}
 
-public record TestData(string RuntimeTag);
+    private record TestData(string RuntimeTag);
+}
