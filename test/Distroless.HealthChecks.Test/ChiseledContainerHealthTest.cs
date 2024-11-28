@@ -120,7 +120,7 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             StartInfo = new ProcessStartInfo
             {
                 FileName = "docker",
-                Arguments = $$$"""inspect --format='{{.State.Health.Status}}' {{{containerId}}}""",
+                Arguments = $$$"""inspect --format='{{json .State.Health}}' {{{containerId}}}""",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
