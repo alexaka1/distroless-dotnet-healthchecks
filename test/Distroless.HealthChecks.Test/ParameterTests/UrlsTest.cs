@@ -19,10 +19,10 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         get
         {
             string[] images =
-                [
-                    // "mcr.microsoft.com/dotnet/runtime-deps",
-                    "mcr.microsoft.com/dotnet/nightly/runtime-deps",
-                ];
+            [
+                // "mcr.microsoft.com/dotnet/runtime-deps",
+                "mcr.microsoft.com/dotnet/nightly/runtime-deps",
+            ];
             string[] tags =
             [
                 "9.0",
@@ -86,7 +86,8 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task Container_returns_expected_health_status(string image, string runtimeTag, string targetFramework, string dockerfile,
+    public async Task Container_returns_expected_health_status(string image, string runtimeTag, string targetFramework,
+        string dockerfile,
         string urls, HealthStatus expected)
     {
         try
@@ -109,8 +110,9 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 _ => HealthStatus.UnHealthy,
             });
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            output.WriteLine(e.ToString());
             var logs = await _container.GetLogsAsync();
             output.WriteLine(logs.Stdout);
             output.WriteLine("Errors:");
@@ -147,11 +149,14 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     private string NewDockerfile(string dockerfile, string urls)
     {
-        string text = File.ReadAllText(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, dockerfile));
+        string text =
+            File.ReadAllText(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, dockerfile));
         text = text.Replace("http://localhost:8080/healthz", urls);
-        _newDockerfile = Path.GetTempFileName();
+        Directory.CreateDirectory(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, "artifacts"));
+        _newDockerfile = Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, "artifacts",
+            Path.GetRandomFileName());
         File.WriteAllText(_newDockerfile, text);
-        return _newDockerfile;
+        return _newDockerfile.Replace(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath + "\\", "").Replace("\\", "/");
     }
 
     private static string GetUrl(HealthStatus desired)
