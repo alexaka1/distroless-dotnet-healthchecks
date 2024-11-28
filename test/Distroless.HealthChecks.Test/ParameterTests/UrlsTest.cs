@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
@@ -13,7 +12,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
 
-    public static TheoryData<string, string, string, string, UrlTest> Data
+    public static TheoryData<string, string, string, string, string, HealthStatus> Data
     {
         get
         {
@@ -38,7 +37,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                     HealthStatus.UnHealthy),
                 (string.Join(',', [GetUrl(HealthStatus.Degraded)]), HealthStatus.UnHealthy),
             ];
-            var data = new TheoryData<string, string, string, string, UrlTest>();
+            var data = new TheoryData<string, string, string, string, string, HealthStatus>();
             foreach (string image in images)
             {
                 foreach (var url in urls)
@@ -54,7 +53,8 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                             tag,
                             "9.0",
                             "test/Distroless.Sample.WebApp/aot.Dockerfile",
-                            new UrlTest(url.url, url.expected)
+                            url.url,
+                            url.expected
                         );
                     }
                 }
@@ -78,18 +78,18 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     [Theory]
     [MemberData(nameof(Data))]
     public async Task Container_is_healthy(string image, string runtimeTag, string targetFramework, string dockerfile,
-        UrlTest urlTest)
+        string urls, HealthStatus expected)
     {
         try
         {
-            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urlTest));
+            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls));
             await _container.StartAsync();
             // wait for the healthcheck to run within docker
             await Task.Delay(TimeSpan.FromSeconds(5));
             // refresh container status within TestContainers
             await _container.StartAsync();
 
-            Assert.Equal(urlTest.Expected, _container.Health switch
+            Assert.Equal(expected, _container.Health switch
             {
                 TestcontainersHealthStatus.Undefined => HealthStatus.UnHealthy,
                 TestcontainersHealthStatus.None => HealthStatus.UnHealthy,
@@ -122,7 +122,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
-            .WithBuildArgument("URLS", data.UrlTest.Urls)
+            .WithBuildArgument("URLS", data.Urls)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(timeoutCts.Token)
@@ -152,37 +152,5 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         string RuntimeTag,
         string TargetFramework,
         string Dockerfile,
-        UrlTest UrlTest);
-
-    public class UrlTest : IXunitSerializable
-    {
-        public required string Urls { get; set; }
-
-        public required HealthStatus Expected { get; set; }
-
-        [Obsolete(
-            "Called by the de-serializer; should only be called by deriving classes for de-serialization purposes")]
-        public UrlTest()
-        {
-        }
-
-        [SetsRequiredMembers]
-        public UrlTest(string urls, HealthStatus expected)
-        {
-            Urls = urls;
-            Expected = expected;
-        }
-
-        public void Deserialize(IXunitSerializationInfo info)
-        {
-            Urls = info.GetValue<string>(nameof(Urls));
-            Expected = info.GetValue<HealthStatus>(nameof(Urls));
-        }
-
-        public void Serialize(IXunitSerializationInfo info)
-        {
-            info.AddValue(nameof(Urls), Urls, typeof(string));
-            info.AddValue(nameof(Expected), Expected, typeof(HealthStatus));
-        }
-    }
+        string Urls);
 }
