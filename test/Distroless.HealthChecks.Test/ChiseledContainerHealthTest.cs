@@ -123,7 +123,6 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
                 Arguments = $$$"""inspect --format='{{.State.Health.Status}}' {{{containerId}}}""",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                UseShellExecute = true,
                 CreateNoWindow = true,
             }
         };
