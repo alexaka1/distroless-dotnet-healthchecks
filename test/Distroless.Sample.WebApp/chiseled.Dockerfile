@@ -1,5 +1,6 @@
-﻿ARG RUNTIME_TAG="9.0-noble-chiseled"
-ARG TARGET_FRAMEWORK="net9.0"
+﻿ARG RUNTIME_TAG="9.0"
+ARG TARGET_FRAMEWORK="9.0"
+ARG IMAGE="mcr.microsoft.com/dotnet/aspnet"
 ARG BUILD_CONFIGURATION=Release
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG TARGET_FRAMEWORK
@@ -17,7 +18,7 @@ ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
 RUN dotnet publish "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION /p:PublishAot=false -o /app/publish /p:UseAppHost=false -f net${TARGET_FRAMEWORK}
 
-FROM mcr.microsoft.com/dotnet/aspnet:${RUNTIME_TAG} AS final
+FROM ${IMAGE}:${RUNTIME_TAG} AS final
 EXPOSE 8080
 EXPOSE 8081
 WORKDIR /healthchecks
