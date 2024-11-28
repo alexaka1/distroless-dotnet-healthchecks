@@ -76,7 +76,8 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
                 $"Container was {_container.Health:G}");
             (string @out, string error) = await InspectContainer(output, _container.Name);
-            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out), new JsonSerializerOptions { WriteIndented = true }));
+            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
+                new JsonSerializerOptions { WriteIndented = true }));
             output.WriteLine(error);
         }
         catch (Exception)
@@ -87,7 +88,8 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             output.WriteLine(logs.Stderr);
             output.WriteLine("Health:");
             (string @out, string error) = await InspectContainer(output, _container.Name);
-            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out), new JsonSerializerOptions { WriteIndented = true }));
+            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
+                new JsonSerializerOptions { WriteIndented = true }));
             output.WriteLine(error);
             throw;
         }
@@ -116,9 +118,8 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             .Build();
     }
 
-    private record TestData(string RuntimeTag, string TargetFramework);
-
-    private static async Task<(string output, string error)> InspectContainer(ITestOutputHelper helper, string containerId)
+    private static async Task<(string output, string error)> InspectContainer(ITestOutputHelper helper,
+        string containerId)
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var process = new Process
@@ -131,7 +132,7 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
-            }
+            },
         };
 
         helper.WriteLine($"Running {process.StartInfo.FileName} {process.StartInfo.Arguments}");
@@ -144,4 +145,6 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
 
         return (output.Trim(), error.Trim());
     }
+
+    private record TestData(string RuntimeTag, string TargetFramework);
 }
