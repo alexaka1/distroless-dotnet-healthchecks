@@ -80,7 +80,7 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             output.WriteLine("Errors:");
             output.WriteLine(logs.Stderr);
             output.WriteLine("Health:");
-            (string @out, string error) = await InspectContainer(output, _container.Id);
+            (string @out, string error) = await InspectContainer(output, _container.Name);
             output.WriteLine(@out);
             output.WriteLine(error);
             throw;
@@ -112,7 +112,7 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
 
     private record TestData(string RuntimeTag, string TargetFramework);
 
-    static async Task<(string output, string error)> InspectContainer(ITestOutputHelper helper, string containerId)
+    private static async Task<(string output, string error)> InspectContainer(ITestOutputHelper helper, string containerId)
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var process = new Process
