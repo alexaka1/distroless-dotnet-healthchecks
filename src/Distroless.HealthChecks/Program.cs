@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 IHost host;
 try
 {
+    Utils.SetCurrentDirectoryToBinaryLocation();
     var builder = Host.CreateApplicationBuilder(args);
     builder.Configuration.AddJsonFile("healthchecks.json", true);
     var config = builder.Configuration;

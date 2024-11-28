@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -12,6 +13,7 @@ public class ChiseledContainerHealthTestNet9(ITestOutputHelper output) : Chisele
     public static TheoryData<string, string> Data =>
         new()
         {
+            { "9.0", "9.0" },
             { "9.0-noble", "9.0" },
             { "9.0-alpine", "9.0" },
             { "9.0-noble-chiseled", "9.0" },
@@ -31,6 +33,7 @@ public class ChiseledContainerHealthTestNet8(ITestOutputHelper output) : Chisele
     public static TheoryData<string, string> Data =>
         new()
         {
+            { "8.0", "8.0" },
             { "8.0-alpine", "8.0" },
             { "8.0-noble", "8.0" },
             { "8.0-jammy", "8.0" },
@@ -72,6 +75,9 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             await _container.StartAsync();
             Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
                 $"Container was {_container.Health:G}");
+            (string @out, string error) = await InspectContainer(output, _container.Name);
+            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out), new JsonSerializerOptions { WriteIndented = true }));
+            output.WriteLine(error);
         }
         catch (Exception)
         {
@@ -81,7 +87,7 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             output.WriteLine(logs.Stderr);
             output.WriteLine("Health:");
             (string @out, string error) = await InspectContainer(output, _container.Name);
-            output.WriteLine(@out);
+            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out), new JsonSerializerOptions { WriteIndented = true }));
             output.WriteLine(error);
             throw;
         }
@@ -100,7 +106,7 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
             .ConfigureAwait(false);
         _container = new ContainerBuilder()
             .WithImage(_image)
-            .WithCleanUp(true)
+            .WithCleanUp(false)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
                     Regex.Escape("Application started. Press Ctrl+C to shut down."),
                     strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
@@ -119,8 +125,9 @@ public abstract class ChiseledContainerHealthTest(ITestOutputHelper output) : IA
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "docker",
-                Arguments = $$$"""inspect --format='{{json .State.Health}}' {{{containerId}}}""",
+                // FileName = "docker",
+                Arguments = $$$"""-c "docker inspect --format='{{json .State.Health}}' {{{containerId}}}" """,
+                FileName = "bash",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
