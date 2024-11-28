@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Distroless.HealthChecks.Test;
 
-public class Utils
+public static class Utils
 {
     public static async Task<(string output, string error)> InspectContainer(string containerId)
     {
