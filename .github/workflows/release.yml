@@ -36,7 +36,6 @@ jobs:
       - changesets
     outputs:
       can-release: ${{ !fromJSON(steps.check-image.outputs.exists) }}
-      version: ${{ steps.version.outputs.version }}
       semver: ${{ steps.version.outputs.semver }}
       major: ${{ steps.version.outputs.major }}
       minor: ${{ steps.version.outputs.minor }}
@@ -75,7 +74,6 @@ jobs:
             tag="${tag:-}"
             echo "tag=${BASH_REMATCH[4]}" >> "$GITHUB_OUTPUT"
           fi
-          echo "version=${{ matrix.image }}:$VERSION" >> "$GITHUB_OUTPUT"
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -85,7 +83,7 @@ jobs:
       - name: Check for existing image
         id: check-image
         run: |
-          exists=$(docker manifest inspect ghcr.io/${{ steps.version.outputs.version }} > /dev/null 2>&1 && echo true || echo false)
+          exists=$(docker manifest inspect ghcr.io/${{ matrix.image }}:${{ steps.version.outputs.version }} > /dev/null 2>&1 && echo true || echo false)
           echo "exists=$exists" >> "$GITHUB_OUTPUT"
   release-docker:
     name: Release docker images
@@ -95,7 +93,7 @@ jobs:
         shell: bash
     needs:
       - check-release
-    if: needs.check-release.outputs.can-release
+#    if: needs.check-release.outputs.can-release
     environment: Production
     permissions:
       contents: write # for tagging and gh release
@@ -191,8 +189,8 @@ jobs:
           annotations: ${{ steps.meta.outputs.annotations }}
       - name: Tag release
         run: |
-          git tag -s ${{ needs.check-release.outputs.version }} -m "Release ${{ needs.check-release.outputs.version }}"
-          git push origin ${{ needs.check-release.outputs.version }}
+          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
+          git push origin ${{ matrix.image }}-${{ needs.check-release.outputs.semver }}
       - name: Create GitHub release
         uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
         with:
@@ -207,7 +205,7 @@ jobs:
           generate_release_notes: true
           #          fail_on_unmatched_files: true
           #          append_body: true
-          tag_name: ${{ needs.check-release.outputs.version }}
+          tag_name: "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}"
           target_commitish: ${{ github.sha }}
           name: ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}
       - name: Update repo description
