@@ -94,7 +94,7 @@ jobs:
         shell: bash
     needs:
       - check-release
-    if: needs.check-release.outputs.can-release
+    if: ${{ needs.check-release.outputs.can-release }}
     environment: Production
     permissions:
       contents: write # for tagging and gh release
