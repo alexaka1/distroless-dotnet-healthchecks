@@ -29,7 +29,7 @@ jobs:
     needs:
       - changesets
     outputs:
-      can-release: ${{ !fromJSON(steps.check-image.outputs.exists) }}
+      can-release: ${{ ! fromJSON(steps.check-image.outputs.exists) }}
       semver: ${{ steps.version.outputs.semver }}
       major: ${{ steps.version.outputs.major }}
       minor: ${{ steps.version.outputs.minor }}
@@ -77,17 +77,23 @@ jobs:
       - name: Check for existing image
         id: check-image
         run: |
-          exists=$(docker manifest inspect ghcr.io/${{ matrix.image }}:${{ steps.version.outputs.version }} > /dev/null 2>&1 && echo true || echo false)
+          exists=$(docker manifest inspect ghcr.io/${{ matrix.image }}:${{ steps.version.outputs.semver }} > /dev/null 2>&1 && echo true || echo false)
           echo "exists=$exists" >> "$GITHUB_OUTPUT"
+      - name: Package already exists so workflow exits
+        if: ${{ fromJSON(steps.check-image.outputs.exists) }}
+        run: |
+          echo "::notice::Package already exists so workflow exits"
+          echo "see https://github.com/orgs/community/discussions/37883 for more info why"
+          exit 1
   release-docker:
     name: Release docker images
+    if: ${{ needs.check-release.outputs.can-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
     needs:
       - check-release
-    if: ${{ needs.check-release.outputs.can-release }}
     environment: Production
     permissions:
       contents: write # for tagging and gh release

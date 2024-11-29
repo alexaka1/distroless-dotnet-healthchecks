@@ -1,5 +1,4 @@
 [![Docker Image Version (tag)](https://img.shields.io/docker/v/alexaka1/distroless-dotnet-healthchecks/latest?logo=docker&label=docker.io&cacheSeconds=3600)](https://hub.docker.com/repository/docker/alexaka1/distroless-dotnet-healthchecks)
-![Release](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml/badge.svg?branch=main)
 ![Nigthly](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg?branch=main)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/alexaka1/distroless-dotnet-healthchecks/badge)](https://scorecard.dev/viewer/?uri=github.com/alexaka1/distroless-dotnet-healthchecks)
 
