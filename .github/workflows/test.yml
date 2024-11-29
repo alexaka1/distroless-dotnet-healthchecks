@@ -96,7 +96,7 @@ jobs:
           RunConfiguration.CollectSourceInformation=true
       - name: TRX report
         if: always()
-        run: dotnet trx --output --gh-summary false
+        run: dotnet trx --output --gh-summary False --gh-comment True
       - name: TRX report upload
         if: failure()
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
