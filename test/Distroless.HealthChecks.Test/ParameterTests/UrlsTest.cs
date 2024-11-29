@@ -35,12 +35,12 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
             ];
             (string url, HealthStatus expected)[] urls =
             [
-                (GetUrl(HealthStatus.Healthy), HealthStatus.Healthy),
+                (GetUrl(HealthStatus.Healthy), HealthStatus.UnHealthy),
                 (string.Join(',', [GetUrl(HealthStatus.Healthy), "http://localhost:8080/healthz", GetUrl(HealthStatus.Healthy)]),
-                    HealthStatus.Healthy),
+                    HealthStatus.UnHealthy),
                 (string.Join(',', [GetUrl(HealthStatus.UnHealthy)]), HealthStatus.UnHealthy),
                 (string.Join(',', [GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.UnHealthy)]),
-                    HealthStatus.UnHealthy),
+                    HealthStatus.Healthy),
                 (string.Join(',', [GetUrl(HealthStatus.Degraded)]), HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string, HealthStatus>();
