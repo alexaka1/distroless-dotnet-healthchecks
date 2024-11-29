@@ -45,7 +45,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 (string.Join(',', [GetUrl(HealthStatus.Degraded)]), HealthStatus.UnHealthy),
                 (string.Join(',', ["http://127.0.0.1:8080/healthz"]), HealthStatus.Healthy),
                 (string.Join(',', ["http://attacker.com:8080/healthz"]), HealthStatus.Healthy),
-                (string.Join(',', ["https://google.com/"]), HealthStatus.UnHealthy),
+                (string.Join(',', ["https://status.cloud.google.com/"]), HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string, HealthStatus>();
             foreach (string image in images)
