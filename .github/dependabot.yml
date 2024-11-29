@@ -34,3 +34,13 @@ updates:
     directory: /test/Distroless.Sample.WebApp
     schedule:
       interval: daily
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/Distroless.HealthChecks
+    schedule:
+      interval: daily
