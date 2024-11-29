@@ -193,10 +193,10 @@ jobs:
           subject-name: ghcr.io/${{ matrix.image }}
           subject-digest: ${{ steps.docker_build.outputs.digest }}
           push-to-registry: true
-      - name: Tag release
-        run: |
-          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
-          git push origin ${{ matrix.image }}-${{ needs.check-release.outputs.semver }}
+#      - name: Tag release
+#        run: |
+#          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
+#          git push origin ${{ matrix.image }}-${{ needs.check-release.outputs.semver }}
       - name: Create GitHub release
         uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
         with:
