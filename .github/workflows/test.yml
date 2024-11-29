@@ -82,10 +82,15 @@ jobs:
         with:
           dotnet-version: |
             9.0.x
+      - name: DotNet tools restore
+        run: dotnet tool restore
       - name: Run tests
         run: >
           dotnet test 
           --configuration Release
           --logger "GitHubActions;summary.includeSkippedTests=true"
+          --logger trx
           --
           RunConfiguration.CollectSourceInformation=true
+          ;
+          dotnet trx --output
