@@ -33,7 +33,6 @@ jobs:
       run:
         shell: bash
     needs:
-      - test
       - changesets
     outputs:
       can-release: ${{ !fromJSON(steps.check-image.outputs.exists) }}
@@ -93,6 +92,7 @@ jobs:
       run:
         shell: bash
     needs:
+      - test
       - check-release
     if: ${{ needs.check-release.outputs.can-release }}
     environment: Production
