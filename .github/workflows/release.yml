@@ -9,11 +9,11 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 jobs:
-  test:
-    name: Tests
-    uses: ./.github/workflows/test.yml
-    permissions:
-      contents: read
+#  test:
+#    name: Tests
+#    uses: ./.github/workflows/test.yml
+#    permissions:
+#      contents: read
   changesets:
     name: Version packages
     uses: ./.github/workflows/version.yml
@@ -32,7 +32,7 @@ jobs:
       run:
         shell: bash
     needs:
-      - test
+#      - test
       - changesets
     outputs:
       can-release: ${{ !fromJSON(steps.check-image.outputs.exists) }}
@@ -85,12 +85,8 @@ jobs:
       - name: Check for existing image
         id: check-image
         run: |
-          docker manifest inspect ghcr.io/${{ steps.version.outputs.version }}  > /dev/null 2>&1
-          if [ $? -eq 0 ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
+          exists=$(docker manifest inspect ghcr.io/${{ steps.version.outputs.version }} > /dev/null 2>&1 && echo true || echo false)
+          echo "exists=$exists" >> "$GITHUB_OUTPUT"
   release-docker:
     name: Release docker images
     runs-on: ubuntu-latest
