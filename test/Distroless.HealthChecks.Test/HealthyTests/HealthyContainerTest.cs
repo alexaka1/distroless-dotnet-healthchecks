@@ -53,7 +53,6 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
 
     private async Task Init(TestData data)
     {
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
@@ -61,7 +60,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
             .WithBuildArgument("IMAGE", data.Image)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
-        await _image.CreateAsync(timeoutCts.Token)
+        await _image.CreateAsync()
             .ConfigureAwait(false);
         _container = new ContainerBuilder()
             .WithImage(_image)

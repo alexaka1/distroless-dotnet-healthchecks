@@ -131,7 +131,6 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     private async Task Init(TestData data)
     {
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
@@ -139,7 +138,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
             .WithBuildArgument("IMAGE", data.Image)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
-        await _image.CreateAsync(timeoutCts.Token)
+        await _image.CreateAsync()
             .ConfigureAwait(false);
         _container = new ContainerBuilder()
             .WithImage(_image)
