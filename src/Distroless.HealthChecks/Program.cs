@@ -1,5 +1,6 @@
 using Distroless.HealthChecks;
 using Distroless.HealthChecks.Checks;
+using Distroless.HealthChecks.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,9 @@ try
     var config = builder.Configuration;
     builder.Services.AddOptions<HealthCheckOptions>()
         .Bind(config)
+        .ValidateOnStart();
+    builder.Services.AddOptions<Features>()
+        .Bind(config.GetSection(Features.Key))
         .ValidateOnStart();
 
     builder.Logging.ClearProviders();
