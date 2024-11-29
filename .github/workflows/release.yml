@@ -9,11 +9,11 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 jobs:
-#  test:
-#    name: Tests
-#    uses: ./.github/workflows/test.yml
-#    permissions:
-#      contents: read
+  test:
+    name: Tests
+    uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
   changesets:
     name: Version packages
     uses: ./.github/workflows/version.yml
@@ -32,7 +32,7 @@ jobs:
       run:
         shell: bash
     needs:
-#      - test
+      - test
       - changesets
     outputs:
       can-release: ${{ !fromJSON(steps.check-image.outputs.exists) }}
@@ -93,7 +93,7 @@ jobs:
         shell: bash
     needs:
       - check-release
-#    if: needs.check-release.outputs.can-release
+    if: needs.check-release.outputs.can-release
     environment: Production
     permissions:
       contents: write # for tagging and gh release
@@ -193,10 +193,10 @@ jobs:
           subject-name: ghcr.io/${{ matrix.image }}
           subject-digest: ${{ steps.docker_build.outputs.digest }}
           push-to-registry: true
-#      - name: Tag release
-#        run: |
-#          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
-#          git push origin ${{ matrix.image }}-${{ needs.check-release.outputs.semver }}
+      - name: Tag release
+        run: |
+          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
+          git push origin ${{ matrix.image }}-${{ needs.check-release.outputs.semver }}
       - name: Create GitHub release
         uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
         with:
