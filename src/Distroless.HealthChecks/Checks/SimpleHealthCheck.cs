@@ -8,7 +8,8 @@ namespace Distroless.HealthChecks.Checks;
 public partial class SimpleHealthCheck(
     IOptions<HealthCheckOptions> options,
     IHttpClientFactory clientFactory,
-    ILogger<SimpleHealthCheck> logger) : IHealthCheck
+    ILogger<SimpleHealthCheck> logger
+    ) : IHealthCheck
 {
     public const string Name = "SimpleCheck";
 

@@ -17,11 +17,15 @@ public class HealthCheckOptions
 // [OptionsValidator]
 // public partial class HealthCheckOptionsValidator : IValidateOptions<HealthCheckOptions>;
 
-public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealthCheckOptions> logger)
+public partial class PostConfigureHealthCheckOptions(
+    ILogger<PostConfigureHealthCheckOptions> logger,
+    IOptions<Features.Features> features
+)
     : IPostConfigureOptions<HealthCheckOptions>
 {
     public void PostConfigure(string? name, HealthCheckOptions options)
     {
+        var f = features.Value;
         LogUrls(options.Urls);
         if (string.IsNullOrWhiteSpace(options.Urls))
         {
@@ -31,15 +35,19 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
 
         if (options.Uris.Count != 0)
         {
-            foreach (var uri in options.Uris.Where(uri => !uri.IsLoopback))
+            if (!f.AllowUnsafeExternalUris)
             {
-                throw new NotSupportedException($"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
+                foreach (var uri in options.Uris.Where(uri => !uri.IsLoopback))
                 {
-                    Data =
+                    throw new NotSupportedException(
+                        $"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
                     {
-                        { "Uri", uri },
-                    },
-                };
+                        Data =
+                        {
+                            { "Uri", uri },
+                        },
+                    };
+                }
             }
 
             // Someone has already configured the Uris.
@@ -52,9 +60,10 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
         {
             if (Uri.TryCreate(uri, UriKind.Absolute, out var uriResult))
             {
-                if (!uriResult.IsLoopback)
+                if (!f.AllowUnsafeExternalUris && !uriResult.IsLoopback)
                 {
-                    throw new NotSupportedException($"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
+                    throw new NotSupportedException(
+                        $"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
                     {
                         Data =
                         {
@@ -62,6 +71,7 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
                         },
                     };
                 }
+
                 options.Uris.Add(uriResult);
             }
             else
