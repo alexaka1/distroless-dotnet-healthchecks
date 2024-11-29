@@ -6,7 +6,6 @@ public static class Utils
 {
     public static async Task<(string output, string error)> InspectContainer(string containerId)
     {
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -21,10 +20,10 @@ public static class Utils
 
         process.Start();
 
-        string output = await process.StandardOutput.ReadToEndAsync(cts.Token);
-        string error = await process.StandardError.ReadToEndAsync(cts.Token);
+        string output = await process.StandardOutput.ReadToEndAsync();
+        string error = await process.StandardError.ReadToEndAsync();
 
-        await process.WaitForExitAsync(cts.Token);
+        await process.WaitForExitAsync();
 
         return (output.Trim(), error.Trim());
     }

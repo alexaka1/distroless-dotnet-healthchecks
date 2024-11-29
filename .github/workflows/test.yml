@@ -92,6 +92,7 @@ jobs:
           --configuration Release
           --logger "GitHubActions;summary.includeSkippedTests=true"
           --logger trx
+          --blame-hang-timeout 5m
           --
           RunConfiguration.CollectSourceInformation=true
       - name: TRX report
