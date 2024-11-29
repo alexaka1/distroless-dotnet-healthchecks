@@ -1,7 +1,7 @@
 name: "Version packages"
 on:
   workflow_call:
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency: ${{ github.workflow }}-${{ github.ref }}-changesets
 permissions:
   contents: read
 jobs:
