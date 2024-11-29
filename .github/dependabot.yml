@@ -19,3 +19,18 @@ updates:
     directory: /src/Distroless.HealthChecks
     schedule:
       interval: daily
+
+  - package-ecosystem: nuget
+    directory: /test/Distroless.HealthChecks.Test
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /test/Distroless.Sample.WebApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /test/Distroless.Sample.WebApp
+    schedule:
+      interval: daily
