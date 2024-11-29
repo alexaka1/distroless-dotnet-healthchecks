@@ -8,7 +8,9 @@ jobs:
   check-release:
     name: Prepare release
     runs-on: ubuntu-latest
-    shell: bash
+    defaults:
+      run:
+        shell: bash
     permissions:
       pull-requests: write
       contents: write
