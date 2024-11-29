@@ -1,8 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup Label="Package">
+    <PackageId>Alexaka1.Distroless.HealthChecks</PackageId>
+    <Description>A simple .Net app, that is able to perform health checks inside a distroless container that only has the .Net runtime as a dependency.</Description>
+    <Version>0.0.0</Version>
+    <Authors>Alex Martossy</Authors>
+    <PackageTags>docker;healthcheck;dotnet;distroless;chiseled-container</PackageTags>
+    <PackageProjectUrl>https://github.com/alexaka1/distroless-dotnet-healthchecks</PackageProjectUrl>
+    <!--    <PackageLicenseExpression></PackageLicenseExpression>-->
+  </PropertyGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>0.0.1</Version>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AnalysisLevel>latest</AnalysisLevel>
@@ -10,8 +18,6 @@
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
-    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
@@ -29,8 +35,12 @@
     <StackTraceSupport>false</StackTraceSupport>
   </PropertyGroup>
 
+  <PropertyGroup Label="Source generation">
+    <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
   <ItemGroup>
-    <!--    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="8.0.1" />-->
     <PackageReference Include="AspNetCore.HealthChecks.UI.Core" Version="8.0.1"/>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0"/>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0"/>
