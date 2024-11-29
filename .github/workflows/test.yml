@@ -92,5 +92,6 @@ jobs:
           --logger trx
           --
           RunConfiguration.CollectSourceInformation=true
-          ;
-          dotnet trx --output
+      - name: TRX report
+        if: always()
+        run: dotnet trx --output
