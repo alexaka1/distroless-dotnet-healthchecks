@@ -1,6 +1,7 @@
 using Distroless.HealthChecks;
 using Distroless.HealthChecks.Checks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,8 +11,18 @@ IHost host;
 try
 {
     Utils.SetCurrentDirectoryToBinaryLocation();
-    var builder = Host.CreateApplicationBuilder(args);
-    builder.Configuration.AddJsonFile("healthchecks.json", true);
+    var loggingConfig = new MemoryConfigurationSource
+    {
+        InitialData = new Dictionary<string, string?>
+        {
+            ["Logging:LogLevel:Default"] = "Error",
+        },
+    };
+    var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+    {
+        Args = args,
+        Configuration = new ConfigurationManager { Sources = { loggingConfig } },
+    });
     var config = builder.Configuration;
     builder.Services.AddOptions<HealthCheckOptions>()
         .Bind(config)

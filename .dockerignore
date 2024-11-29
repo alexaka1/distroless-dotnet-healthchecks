@@ -23,4 +23,5 @@
 **/values.dev.yaml
 LICENSE
 README.md
-**/appsettings.Development.json
+src/Distroless.HealthChecks/appsettings.Development.jsonsrc/Distroless.HealthChecks/appsettings.json
+src/Distroless.HealthChecks/appsettings.Development.jsonsrc/Distroless.HealthChecks/appsettings.Development.json
