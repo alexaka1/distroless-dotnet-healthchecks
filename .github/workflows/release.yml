@@ -1,0 +1,224 @@
+name: Release images
+on:
+  push:
+    branches:
+      - main
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions: { }
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+jobs:
+  test:
+    name: Tests
+    uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
+  changesets:
+    name: Version packages
+    uses: ./.github/workflows/version.yml
+    permissions:
+      pull-requests: write
+      contents: write
+      issues: read
+      id-token: write
+  check-release:
+    name: Check if release is needed of '${{ matrix.package }}' package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    shell: bash
+    needs:
+      - test
+      - changesets
+    outputs:
+      can-release: ${{ !fromJSON(steps.check-image.outputs.exists) }}
+      version: ${{ steps.version.outputs.version }}
+      semver: ${{ steps.version.outputs.semver }}
+      major: ${{ steps.version.outputs.major }}
+      minor: ${{ steps.version.outputs.minor }}
+      patch: ${{ steps.version.outputs.patch }}
+      tag: ${{ steps.version.outputs.tag }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - src/Distroless.HealthChecks
+        include:
+          - package: src/Distroless.HealthChecks
+            image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: audit
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: chainguard-dev/actions/setup-gitsign@57cb0b7560d9b9b081c15ac5ef689f73f4dda03e
+      - name: Get version of package
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' "${{ matrix.package }}/package.json")
+          echo "semver=$VERSION" >> "$GITHUB_OUTPUT"
+          if [[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-.*)?$ ]]; then
+            echo "major=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "minor=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "patch=${BASH_REMATCH[3]}" >> "$GITHUB_OUTPUT"
+            tag="${BASH_REMATCH[4]}"
+          
+            # If tag is null, set it to an empty string
+            tag="${tag:-}"
+            echo "tag=${BASH_REMATCH[4]}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=${{ matrix.image }}:$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check for existing image
+        id: check-image
+        run: |
+          docker manifest inspect ghcr.io/${{ steps.version.outputs.version }}  > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+  release-docker:
+    name: Release docker images
+    runs-on: ubuntu-latest
+    needs:
+      - check-release
+    if: needs.check-release.outputs.can-release
+    environment: Production
+    permissions:
+      contents: write # for tagging and gh release
+      packages: write # for ghcr.io
+      attestations: write # for attestations
+      id-token: write # for tag signing
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - src/Distroless.HealthChecks
+        include:
+          - package: src/Distroless.HealthChecks
+            image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+            target: binary
+            platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64
+            readme: ./README.md
+            context: "."
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: audit
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # we use credentials to push tags below
+          persist-credentials: true
+      - uses: chainguard-dev/actions/setup-gitsign@57cb0b7560d9b9b081c15ac5ef689f73f4dda03e
+      #- name: Create changelog for release
+      #  id: changelog
+      #  run: |
+      #    input_file="${{ env.changelog }}"
+      #    output_file="changes.md"
+      #    # Find the line number of the first version heading
+      #    start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
+      #
+      #    # Find the line number of the next version heading, if it exists
+      #    end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
+      #
+      #    if [ -z "$end_line" ]; then
+      #      # If there is no next version, extract till the end of the file
+      #      sed -n "${start_line},\$p" "$input_file" > "$output_file"
+      #    else
+      #      # Extract only the section for the uppermost version
+      #      sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
+      #    fi
+      #    echo "changes=$output_file" >> "$GITHUB_OUTPUT"
+      #    echo "prerelease=false" >> "$GITHUB_OUTPUT"
+      #    if [ -f ".changeset/pre.json" ]; then
+      #      echo "prerelease=true" >> "$GITHUB_OUTPUT"
+      #    fi
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
+        with:
+          images: |
+            name=ghcr.io/${{ matrix.image }}
+            name=docker.io/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}},priority=1001
+            type=raw,value=${{ needs.check-release.outputs.major }},enable=${{ needs.check-release.outputs.major != '' && needs.check-release.outputs.tag == '' && needs.check-release.outputs.major != '0'  }},priority=902
+            type=raw,value=${{ needs.check-release.outputs.major }}.${{ needs.check-release.outputs.minor }},enable=${{ needs.check-release.outputs.major != '' && needs.check-release.outputs.minor != '' && needs.check-release.outputs.tag == '' }},priority=901
+            type=raw,value=${{ needs.check-release.outputs.semver }},enable=${{ needs.check-release.outputs.semver != '' }},priority=900
+            type=edge
+      - name: Build and push
+        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6.10.0
+        id: docker_build
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.package }}/Dockerfile
+          target: ${{ matrix.target }}
+          platforms: ${{ matrix.platforms }}
+          provenance: mode=max
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+      - name: Tag release
+        run: |
+          git tag -s ${{ needs.check-release.outputs.version }} -m "Release ${{ needs.check-release.outputs.version }}"
+          git push origin ${{ needs.check-release.outputs.version }}
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
+        with:
+          #          files: |
+          #            ${{ github.workspace }}/artifacts/*.nupkg
+          #            ${{ github.workspace }}/artifacts/*.snupkg
+          #            ${{ env.changelog }}
+          #          body_path: ${{ steps.changelog.outputs.changes }}
+          #          body: Oh no, it looks like the change-notes were not generated correctly by the action.
+          draft: false
+          #          prerelease: ${{ steps.changelog.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          #          fail_on_unmatched_files: true
+          #          append_body: true
+          tag_name: ${{ needs.check-release.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ matrix.image }}
+          readme-filepath: ${{ matrix.readme }}
+      - name: Attest GitHub Container Registry
+        uses: actions/attest-build-provenance@ef244123eb79f2f7a7e75d99086184180e6d0018 # v1.4.4
+        with:
+          subject-name: ghcr.io/${{ matrix.image }}
+          subject-digest: ${{ steps.docker_build.outputs.digest }}
+          push-to-registry: true

@@ -1,8 +1,5 @@
 name: "Version packages"
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
@@ -11,19 +8,12 @@ jobs:
   check-release:
     name: Prepare release
     runs-on: ubuntu-latest
+    shell: bash
     permissions:
       pull-requests: write
       contents: write
       issues: read
       id-token: write
-      attestations: none
-    strategy:
-      matrix:
-        package:
-          - src/Distroless.HealthChecks
-        include:
-          - package: src/Distroless.HealthChecks
-            csproj: Distroless.HealthChecks.csproj
     outputs:
       publishable: ${{ steps.pack.outputs.canPack == 'true'}}
       version: ${{ steps.pack.outputs.version }}
@@ -37,10 +27,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Setup Dotnet
-        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.1.0
-        with:
-          dotnet-version: 9.x
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
@@ -54,8 +40,7 @@ jobs:
         id: changesets
         uses: changesets/action@c8bada60c408975afd1a20b3db81d6eee6789308 # v1.4.9
         with:
-          # outputs versionExists=true if version already exists on nuget
-          version: pnpm run version ${{ matrix.package }}/package.json ${{ matrix.package }}/${{ matrix.csproj }}
+          version: pnpm run version
           setupGitUser: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
