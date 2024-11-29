@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
@@ -42,6 +43,9 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 (string.Join(',', [GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.UnHealthy)]),
                     HealthStatus.UnHealthy),
                 (string.Join(',', [GetUrl(HealthStatus.Degraded)]), HealthStatus.UnHealthy),
+                (string.Join(',', ["http://127.0.0.1:8080/healthz"]), HealthStatus.Healthy),
+                (string.Join(',', ["http://attacker.com:8080/healthz"]), HealthStatus.Healthy),
+                (string.Join(',', ["https://google.com/"]), HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string, HealthStatus>();
             foreach (string image in images)
@@ -146,6 +150,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 Regex.Escape("Application started. Press Ctrl+C to shut down."),
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
+            .WithExtraHost("attacker.com", "127.0.0.1")
             .Build();
     }
 
@@ -159,7 +164,14 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         _newDockerfile = Path.Combine(slnDirectory, "artifacts",
             Path.GetRandomFileName());
         File.WriteAllText(_newDockerfile, text);
-        return Path.GetRelativePath(slnDirectory, _newDockerfile);
+        string relativePath = Path.GetRelativePath(slnDirectory, _newDockerfile);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            // TestContainers doesn't like Windows path separators
+            relativePath = relativePath.Replace("\\", "/");
+        }
+
+        return relativePath;
     }
 
     private static string GetUrl(HealthStatus desired)
