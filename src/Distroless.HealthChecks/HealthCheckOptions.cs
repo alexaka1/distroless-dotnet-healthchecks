@@ -17,11 +17,15 @@ public class HealthCheckOptions
 // [OptionsValidator]
 // public partial class HealthCheckOptionsValidator : IValidateOptions<HealthCheckOptions>;
 
-public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealthCheckOptions> logger)
+public partial class PostConfigureHealthCheckOptions(
+    ILogger<PostConfigureHealthCheckOptions> logger,
+    IOptions<Features.Features> features
+)
     : IPostConfigureOptions<HealthCheckOptions>
 {
     public void PostConfigure(string? name, HealthCheckOptions options)
     {
+        var f = features.Value;
         LogUrls(options.Urls);
         if (string.IsNullOrWhiteSpace(options.Urls))
         {
@@ -31,6 +35,21 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
 
         if (options.Uris.Count != 0)
         {
+            if (!f.AllowUnsafeExternalUris)
+            {
+                foreach (var uri in options.Uris.Where(uri => !uri.IsLoopback))
+                {
+                    throw new NotSupportedException(
+                        $"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
+                    {
+                        Data =
+                        {
+                            { "Uri", uri },
+                        },
+                    };
+                }
+            }
+
             // Someone has already configured the Uris.
             // They know what they are doing.
             return;
@@ -41,6 +60,18 @@ public partial class PostConfigureHealthCheckOptions(ILogger<PostConfigureHealth
         {
             if (Uri.TryCreate(uri, UriKind.Absolute, out var uriResult))
             {
+                if (!f.AllowUnsafeExternalUris && !uriResult.IsLoopback)
+                {
+                    throw new NotSupportedException(
+                        $"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
+                    {
+                        Data =
+                        {
+                            { "Uri", uri },
+                        },
+                    };
+                }
+
                 options.Uris.Add(uriResult);
             }
             else
