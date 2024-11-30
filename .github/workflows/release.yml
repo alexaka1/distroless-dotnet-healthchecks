@@ -43,6 +43,7 @@ jobs:
         include:
           - package: src/Distroless.HealthChecks
             image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+            artifact: Distroless.HealthChecks
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
@@ -79,22 +80,68 @@ jobs:
         run: |
           exists=$(docker manifest inspect ghcr.io/${{ matrix.image }}:${{ steps.version.outputs.semver }} > /dev/null 2>&1 && echo true || echo false)
           echo "exists=$exists" >> "$GITHUB_OUTPUT"
-      - name: Package already exists so workflow exits
-        if: ${{ fromJSON(steps.check-image.outputs.exists) }}
+
+      - name: Package does not exist
+        if: ${{ ! fromJSON(steps.check-image.outputs.exists) }}
         run: |
-          echo "::notice::Package already exists so workflow exits"
-          echo "see https://github.com/orgs/community/discussions/37883 for more info why"
-          exit 1
-  release-docker:
-    name: Release docker images
-    if: ${{ needs.check-release.outputs.can-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
+          echo "see https://github.com/orgs/community/discussions/37883 for more info why this step is needed"
+          echo "should deploy" > ${{ matrix.artifact }}.md
+      - name: "Upload if package should be released"
+        if: ${{ ! fromJSON(steps.check-image.outputs.exists) }}
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: check-release-${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.md
+          retention-days: 1
+  should-release:
+    name: Check if at least one package should be released
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     needs:
       - check-release
-    environment: Production
+    outputs:
+      should-release: ${{ steps.check-release.outputs.should-release }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Download artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          pattern: check-release-*
+          path: /tmp/check-release
+          merge-multiple: true
+      - name: Check if at least one package should be released
+        id: check-release
+        run: |
+          should_release=false
+          for file in /tmp/check-release/*.md; do
+            if [[ -f "$file" ]]; then
+              should_release=true
+              break
+            fi
+          done
+          echo "should-release=$should_release" >> "$GITHUB_OUTPUT"
+  release-docker:
+    name: Release docker images
+    if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
+    uses: ./.github/workflows/release-docker.yml
+    with:
+      package: ${{ matrix.package }}
+      image: ${{ matrix.image }}
+      target: ${{ matrix.target }}
+      platforms: ${{ matrix.platforms }}
+      readme: ${{ matrix.readme }}
+      context: ${{ matrix.context }}
+      run: ${{ fromJSON(needs.check-release.outputs.can-release) }}
+      semver: ${{ needs.check-release.outputs.semver }}
+      major: ${{ needs.check-release.outputs.major }}
+      minor: ${{ needs.check-release.outputs.minor }}
+      tag: ${{ needs.check-release.outputs.tag }}
+    needs:
+      - check-release
+      - should-release
     permissions:
       contents: write # for tagging and gh release
       packages: write # for ghcr.io
@@ -112,114 +159,3 @@ jobs:
             platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64
             readme: ./README.md
             context: "."
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
-        with:
-          egress-policy: audit
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to Docker Hub
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          # we use credentials to push tags below
-          persist-credentials: true
-      - uses: chainguard-dev/actions/setup-gitsign@57cb0b7560d9b9b081c15ac5ef689f73f4dda03e
-      #- name: Create changelog for release
-      #  id: changelog
-      #  run: |
-      #    input_file="${{ env.changelog }}"
-      #    output_file="changes.md"
-      #    # Find the line number of the first version heading
-      #    start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
-      #
-      #    # Find the line number of the next version heading, if it exists
-      #    end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
-      #
-      #    if [ -z "$end_line" ]; then
-      #      # If there is no next version, extract till the end of the file
-      #      sed -n "${start_line},\$p" "$input_file" > "$output_file"
-      #    else
-      #      # Extract only the section for the uppermost version
-      #      sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
-      #    fi
-      #    echo "changes=$output_file" >> "$GITHUB_OUTPUT"
-      #    echo "prerelease=false" >> "$GITHUB_OUTPUT"
-      #    if [ -f ".changeset/pre.json" ]; then
-      #      echo "prerelease=true" >> "$GITHUB_OUTPUT"
-      #    fi
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
-        with:
-          images: |
-            name=ghcr.io/${{ matrix.image }}
-            name=docker.io/${{ matrix.image }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}},priority=1001
-            type=raw,value=${{ needs.check-release.outputs.major }},enable=${{ needs.check-release.outputs.major != '' && needs.check-release.outputs.tag == '' && needs.check-release.outputs.major != '0'  }},priority=902
-            type=raw,value=${{ needs.check-release.outputs.major }}.${{ needs.check-release.outputs.minor }},enable=${{ needs.check-release.outputs.major != '' && needs.check-release.outputs.minor != '' && needs.check-release.outputs.tag == '' }},priority=901
-            type=raw,value=${{ needs.check-release.outputs.semver }},enable=${{ needs.check-release.outputs.semver != '' }},priority=900
-            type=edge
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-      - name: Build and push
-        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6.10.0
-        id: docker_build
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.package }}/Dockerfile
-          target: ${{ matrix.target }}
-          platforms: ${{ matrix.platforms }}
-          provenance: mode=max
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
-      - name: Attest GitHub Container Registry
-        uses: actions/attest-build-provenance@ef244123eb79f2f7a7e75d99086184180e6d0018 # v1.4.4
-        with:
-          subject-name: ghcr.io/${{ matrix.image }}
-          subject-digest: ${{ steps.docker_build.outputs.digest }}
-          push-to-registry: true
-      - name: Tag release
-        run: |
-          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
-          git push origin ${{ matrix.image }}-${{ needs.check-release.outputs.semver }}
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
-        with:
-          #          files: |
-          #            ${{ github.workspace }}/artifacts/*.nupkg
-          #            ${{ github.workspace }}/artifacts/*.snupkg
-          #            ${{ env.changelog }}
-          #          body_path: ${{ steps.changelog.outputs.changes }}
-          #          body: Oh no, it looks like the change-notes were not generated correctly by the action.
-          draft: false
-          #          prerelease: ${{ steps.changelog.outputs.prerelease == 'true' }}
-          generate_release_notes: true
-          #          fail_on_unmatched_files: true
-          #          append_body: true
-          tag_name: "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}"
-          target_commitish: ${{ github.sha }}
-          name: ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}
-      - name: Update repo description
-        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
-        with:
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ matrix.image }}
-          readme-filepath: ${{ matrix.readme }}

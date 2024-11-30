@@ -108,4 +108,4 @@ jobs:
         with:
           subject-name: ghcr.io/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.docker_build.outputs.digest }}
-          push-to-registry: true
+          push-to-registry: false

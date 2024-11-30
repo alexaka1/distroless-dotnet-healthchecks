@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{98C8D8
 		.github\workflows\test.yml = .github\workflows\test.yml
 		.github\workflows\release.yml = .github\workflows\release.yml
 		.github\workflows\version.yml = .github\workflows\version.yml
+		.github\workflows\release-docker.yml = .github\workflows\release-docker.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2D6540E7-2AB7-4DB1-BD83-5ED16D7EA5BF}"
