@@ -61,7 +61,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
                         data.Add(image,
                             tag,
-                            "9.0",
+                            tag[..3],
                             Dockerfile,
                             url.url,
                             url.expected
@@ -151,6 +151,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
             .WithExtraHost("attacker.com", "127.0.0.1")
+            // .WithEnvironment("DOTNET_Logging__LogLevel__Distroless.HealthChecks", "Trace")
             .Build();
     }
 

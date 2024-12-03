@@ -17,11 +17,11 @@ ARG BUILD_CONFIGURATION=Release
 ARG TARGETARCH
 RUN dotnet publish "Distroless.HealthChecks.csproj" -c $BUILD_CONFIGURATION -a $TARGETARCH -o /app/publish
 
+FROM scratch AS binary
+COPY --from=publish /app/publish .
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["./Distroless.HealthChecks"]
 CMD ["--urls", "http://localhost:8080/healthz"]
-
-FROM scratch AS binary
-COPY --from=publish /app/publish .
