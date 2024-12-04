@@ -43,6 +43,8 @@ on:
       DOCKERHUB_TOKEN:
         required: true
 
+permissions: { }
+
 jobs:
   release-docker:
     name: Release docker images
@@ -153,13 +155,13 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
         with:
-        #  files: |
+          # files: |
           body_path: ${{ steps.changelog.outputs.changes }}
           body: Oh no, it looks like the change-notes were not generated correctly by the action.
           draft: false
           prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
           generate_release_notes: true
-        #  fail_on_unmatched_files: true
+          # fail_on_unmatched_files: true
           append_body: true
           tag_name: "${{ inputs.image }}-${{ inputs.semver }}"
           target_commitish: ${{ github.sha }}
