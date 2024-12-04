@@ -43,6 +43,8 @@ on:
       DOCKERHUB_TOKEN:
         required: true
 
+permissions: { }
+
 jobs:
   release-docker:
     name: Release docker images
@@ -83,29 +85,29 @@ jobs:
           # we use credentials to push tags below
           persist-credentials: true
       - uses: chainguard-dev/actions/setup-gitsign@57cb0b7560d9b9b081c15ac5ef689f73f4dda03e
-      #- name: Create changelog for release
-      #  id: changelog
-      #  run: |
-      #    input_file="${{ env.changelog }}"
-      #    output_file="changes.md"
-      #    # Find the line number of the first version heading
-      #    start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
-      #
-      #    # Find the line number of the next version heading, if it exists
-      #    end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
-      #
-      #    if [ -z "$end_line" ]; then
-      #      # If there is no next version, extract till the end of the file
-      #      sed -n "${start_line},\$p" "$input_file" > "$output_file"
-      #    else
-      #      # Extract only the section for the uppermost version
-      #      sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
-      #    fi
-      #    echo "changes=$output_file" >> "$GITHUB_OUTPUT"
-      #    echo "prerelease=false" >> "$GITHUB_OUTPUT"
-      #    if [ -f ".changeset/pre.json" ]; then
-      #      echo "prerelease=true" >> "$GITHUB_OUTPUT"
-      #    fi
+      - name: Create changelog for release
+        id: changelog
+        run: |
+          input_file="${{ inputs.package }}/CHANGELOG.md"
+          output_file="/tmp/${{ inputs.package }}/changes.md"
+          # Find the line number of the first version heading
+          start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
+
+          # Find the line number of the next version heading, if it exists
+          end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
+
+          if [ -z "$end_line" ]; then
+            # If there is no next version, extract till the end of the file
+            sed -n "${start_line},\$p" "$input_file" > "$output_file"
+          else
+            # Extract only the section for the uppermost version
+            sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
+          fi
+          echo "changes=$output_file" >> "$GITHUB_OUTPUT"
+          echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          if [ -f ".changeset/pre.json" ]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
@@ -153,17 +155,14 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # v2.1.0
         with:
-          #          files: |
-          #            ${{ github.workspace }}/artifacts/*.nupkg
-          #            ${{ github.workspace }}/artifacts/*.snupkg
-          #            ${{ env.changelog }}
-          #          body_path: ${{ steps.changelog.outputs.changes }}
-          #          body: Oh no, it looks like the change-notes were not generated correctly by the action.
+          # files: |
+          body_path: ${{ steps.changelog.outputs.changes }}
+          body: Oh no, it looks like the change-notes were not generated correctly by the action.
           draft: false
-          #          prerelease: ${{ steps.changelog.outputs.prerelease == 'true' }}
+          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
           generate_release_notes: true
-          #          fail_on_unmatched_files: true
-          #          append_body: true
+          # fail_on_unmatched_files: true
+          append_body: true
           tag_name: "${{ inputs.image }}-${{ inputs.semver }}"
           target_commitish: ${{ github.sha }}
           name: ${{ inputs.image }}:${{ inputs.semver }}

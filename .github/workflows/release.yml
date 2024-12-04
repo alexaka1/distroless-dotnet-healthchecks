@@ -67,7 +67,7 @@ jobs:
           
             # If tag is null, set it to an empty string
             tag="${tag:-}"
-            echo "tag=${BASH_REMATCH[4]}" >> "$GITHUB_OUTPUT"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
           fi
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0

@@ -1,5 +1,6 @@
 [![Docker Image Version (tag)](https://img.shields.io/docker/v/alexaka1/distroless-dotnet-healthchecks/latest?logo=docker&label=docker.io&cacheSeconds=3600)](https://hub.docker.com/repository/docker/alexaka1/distroless-dotnet-healthchecks)
-![Nigthly](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg?branch=main)
+[![Release images](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml/badge.svg?event=push)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml)
+[![Nightly build](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/alexaka1/distroless-dotnet-healthchecks/badge)](https://scorecard.dev/viewer/?uri=github.com/alexaka1/distroless-dotnet-healthchecks)
 
 # Docker HEALTHCHECK for .Net chiseled containers
@@ -10,14 +11,58 @@ This is a simple pre-compiled .Net app, that is able to run a health check again
 
 ## Usage
 
-TODO
+It works with any `.NET 8` or `.NET 9` base image (even those that are not chiseled). For example
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled AS final
+# Get the executable and copy it to /healthchecks
+COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /healthchecks
+# Setup the healthcheck using the EXEC array syntax
+HEALTHCHECK CMD ["/healthchecks/Distroless.HealthChecks", "--urls", "http://localhost:8080/healthz"]
+
+# Start your app as normal
+WORKDIR /app
+ENTRYPOINT ["dotnet", "My.Awesome.Webapp.dll"]
+```
+
+The published docker image contains only the executable of the health check at root. This is so it can be conveniently copied inside a Dockerfile. But you can also get the binary from GitHub and copy it manually into your image.
+
+It takes in a single argument named `urls`, which is **a comma separated list of URIs** that the app will check. If all the URIs return a 200 status code, the health check will pass.
+
+If you don't want to use GitHub Container Registry, the image is also available on [Docker Hub](https://hub.docker.com/r/alexaka1/distroless-dotnet-healthchecks).
+
+> [!NOTE]
+> You can only use loopback address for the URIs. Using a URI that does not resolve to the container will result in a failure.
+
+## Advanced Usage
+
+Health check is compiled as AOT, so it can run on the most bare `runtime-deps:*-chiseled-aot` images with no issues. These aot images are only published on the nightly channel as of .NET 9.
+
+It uses a [generic host](https://learn.microsoft.com/en-us/dotnet/core/extensions/generic-host?tabs=appbuilder), so you have the full [.NET Configuration system](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) available to you. For example, you don't have to bake in your healthcheck uri into your image, you can use `DISTROLESS_HEALTHCHECKS_` prefixed environment variables to specify the runtime settings.
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot
+
+# Get the executable and copy it to any path you want
+COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /iamspecial
+# Setup your healthcheck endpoints via environment variable in Dockerfile, or at runtime via `docker run -e DISTROLESS_HEALTHCHECKS_URLS="http://localhost/healthz,http://localhost/some/other/endpoint"`
+ENV DISTROLESS_HEALTHCHECKS_URLS="http://localhost/healthz,http://localhost/some/other/endpoint"
+# Setup the healthcheck using the EXEC array syntax
+HEALTHCHECK CMD ["/iamspecial/Distroless.HealthChecks"]
+
+# Start your app as normal
+WORKDIR /app
+ENTRYPOINT ["./My.Awesome.Aot.WebApp"]
+```
+
+> [!IMPORTANT]
+> For simplicity's sake the health check uses the generic host from `Host.CreateApplicationBuilder(settings)`. This means that if your app uses `DOTNET_` prefixed environment variables, they will interfere with the health check as they will be read by the host.
+
+> [!NOTE]
+> The `DISTROLESS_HEALTHCHECKS_` prefix environment variables are read after the `DOTNET_` prefixed environment variables, so if `DOTNET_` prefixed environment variables are defined, they will take precedence for certain defaults of the generic host. This may not be ideal for all use cases. Feel free to open an issue with your use case.
+
+The image uses semver. It is recommended that you pin it to at least a major version, instead of `latest`. I.e. `ghcr.io/alexaka1/distroless-dotnet-healthchecks:1`.
 
 ## Building
 
-You will need the .Net 9 SDK installed.
-
-TODO
-
-## Contributing
-
-TODO
+You will need the .Net 9 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.
