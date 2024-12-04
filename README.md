@@ -1,5 +1,6 @@
 [![Docker Image Version (tag)](https://img.shields.io/docker/v/alexaka1/distroless-dotnet-healthchecks/latest?logo=docker&label=docker.io&cacheSeconds=3600)](https://hub.docker.com/repository/docker/alexaka1/distroless-dotnet-healthchecks)
-![Nigthly](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg?branch=main)
+[![Release images](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml/badge.svg?event=push)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml)
+[![Nightly build](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/alexaka1/distroless-dotnet-healthchecks/badge)](https://scorecard.dev/viewer/?uri=github.com/alexaka1/distroless-dotnet-healthchecks)
 
 # Docker HEALTHCHECK for .Net chiseled containers
@@ -31,7 +32,7 @@ It takes in a single argument named `urls`, which is **a comma separated list of
 If you don't want to use GitHub Container Registry, the image is also available on [Docker Hub](https://hub.docker.com/r/alexaka1/distroless-dotnet-healthchecks).
 
 > [!NOTE]
-> For now you can only use loopback address for the URIs. Using an URI that does not resolve to the container will result in a failure.
+> You can only use loopback address for the URIs. Using a URI that does not resolve to the container will result in a failure.
 
 ## Advanced Usage
 
@@ -58,14 +59,8 @@ ENTRYPOINT ["./My.Awesome.Aot.WebApp"]
 > For simplicity's sake the health check uses the generic host from `Host.CreateApplicationBuilder(settings)`. This means that if your app uses `DOTNET_` prefixed environment variables, they will interfere with the health check as they will be read by the host.
 
 > [!NOTE]
-> The `DISTROLESS_HEALTHCHECKS_` prefix environment variables are read before the `DOTNET_` prefixed environment variables, so if `DOTNET_` prefixed environment variables are defined, they will take precedence.
+> The `DISTROLESS_HEALTHCHECKS_` prefix environment variables are read after the `DOTNET_` prefixed environment variables, so if `DOTNET_` prefixed environment variables are defined, they will take precedence. This may not be ideal for all use cases. Feel free to open an issue with your use case.
 
 ## Building
 
-You will need the .Net 9 SDK installed, along with docker and buildx.
-
-TODO
-
-## Contributing
-
-TODO
+You will need the .Net 9 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.
