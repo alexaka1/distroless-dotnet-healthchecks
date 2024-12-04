@@ -89,7 +89,7 @@ jobs:
         id: changelog
         run: |
           input_file="${{ inputs.package }}/CHANGELOG.md"
-          output_file="/tmp/${{ inputs.package }}/changes.md"
+          output_file="/tmp/changes.md"
           # Find the line number of the first version heading
           start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
 
