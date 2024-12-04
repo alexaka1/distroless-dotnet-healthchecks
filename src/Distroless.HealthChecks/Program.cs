@@ -12,18 +12,15 @@ IHost host;
 try
 {
     Utils.SetCurrentDirectoryToBinaryLocation();
-    var loggingConfig = new MemoryConfigurationSource
-    {
-        InitialData = new Dictionary<string, string?>
-        {
-            ["Logging:LogLevel:Default"] = "Error",
-        },
-    };
-    var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+    var settings = new HostApplicationBuilderSettings
     {
         Args = args,
-        Configuration = new ConfigurationManager { Sources = { loggingConfig } },
-    });
+        Configuration = new ConfigurationManager(),
+        ContentRootPath = Directory.GetCurrentDirectory(),
+    };
+    settings.Configuration.AddInMemoryCollection([new KeyValuePair<string, string?>("Logging:LogLevel:Default", "Error")]);
+    settings.Configuration.AddEnvironmentVariables("DISTROLESS_HEALTHCHECKS_");
+    var builder = Host.CreateApplicationBuilder(settings);
     var config = builder.Configuration;
     builder.Services.AddOptions<HealthCheckOptions>()
         .Bind(config)
