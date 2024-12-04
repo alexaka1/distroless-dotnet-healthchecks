@@ -43,6 +43,9 @@ on:
       DOCKERHUB_TOKEN:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   release-docker:
     name: Release docker images
