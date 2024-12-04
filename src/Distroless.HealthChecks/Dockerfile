@@ -15,7 +15,7 @@ RUN dotnet build "Distroless.HealthChecks.csproj" --no-restore -c $BUILD_CONFIGU
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 ARG TARGETARCH
-RUN dotnet publish "Distroless.HealthChecks.csproj" --no-restore -c $BUILD_CONFIGURATION -a $TARGETARCH -o /app/publish
+RUN dotnet publish "Distroless.HealthChecks.csproj" -c $BUILD_CONFIGURATION -a $TARGETARCH -o /app/publish
 
 FROM scratch AS binary
 COPY --from=publish /app/publish .
