@@ -12,7 +12,6 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 {
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
-    private string? _newDockerfile;
 
     public static TheoryData<string, string, string, string, string, HealthStatus> Data
     {
@@ -80,10 +79,6 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     {
         await _image.DisposeAsync();
         await _container.DisposeAsync();
-        if (_newDockerfile != null && File.Exists(_newDockerfile))
-        {
-            File.Delete(_newDockerfile);
-        }
     }
 
     public Task InitializeAsync()
@@ -99,8 +94,8 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     {
         try
         {
-            string newDockerfile = NewDockerfile(dockerfile, urls);
-            await Init(new TestData(image, runtimeTag, targetFramework, newDockerfile, urls));
+            // string newDockerfile = NewDockerfile(dockerfile, urls);
+            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls));
             await _container.StartAsync();
             // wait for the healthcheck to run within docker
             await Task.Delay(TimeSpan.FromSeconds(5));
@@ -151,28 +146,9 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
             .WithExtraHost("attacker.com", "127.0.0.1")
-            // .WithEnvironment("DOTNET_Logging__LogLevel__Distroless.HealthChecks", "Trace")
+            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Logging__LogLevel__Distroless.HealthChecks", "Trace")
+            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Urls", data.Urls)
             .Build();
-    }
-
-    private string NewDockerfile(string dockerfile, string urls)
-    {
-        string slnDirectory = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
-        string text =
-            File.ReadAllText(Path.Combine(slnDirectory, dockerfile));
-        text = text.Replace("http://localhost:8080/healthz", urls);
-        Directory.CreateDirectory(Path.Combine(slnDirectory, "artifacts"));
-        _newDockerfile = Path.Combine(slnDirectory, "artifacts",
-            Path.GetRandomFileName());
-        File.WriteAllText(_newDockerfile, text);
-        string relativePath = Path.GetRelativePath(slnDirectory, _newDockerfile);
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            // TestContainers doesn't like Windows path separators
-            relativePath = relativePath.Replace("\\", "/");
-        }
-
-        return relativePath;
     }
 
     private static string GetUrl(HealthStatus desired)
