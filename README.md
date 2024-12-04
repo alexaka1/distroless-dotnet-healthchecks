@@ -16,7 +16,7 @@ It works with any `.NET 8` or `.NET 9` base image (even those that are not chise
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled AS final
 # Get the executable and copy it to /healthchecks
-COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 / /healthchecks
+COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /healthchecks
 # Setup the healthcheck using the EXEC array syntax
 HEALTHCHECK CMD ["/healthchecks/Distroless.HealthChecks", "--urls", "http://localhost:8080/healthz"]
 
@@ -44,7 +44,7 @@ It uses a [generic host](https://learn.microsoft.com/en-us/dotnet/core/extension
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot
 
 # Get the executable and copy it to any path you want
-COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 / /iamspecial
+COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /iamspecial
 # Setup your healthcheck endpoints via environment variable in Dockerfile, or at runtime via `docker run -e DISTROLESS_HEALTHCHECKS_URLS="http://localhost/healthz,http://localhost/some/other/endpoint"`
 ENV DISTROLESS_HEALTHCHECKS_URLS="http://localhost/healthz,http://localhost/some/other/endpoint"
 # Setup the healthcheck using the EXEC array syntax
@@ -59,7 +59,9 @@ ENTRYPOINT ["./My.Awesome.Aot.WebApp"]
 > For simplicity's sake the health check uses the generic host from `Host.CreateApplicationBuilder(settings)`. This means that if your app uses `DOTNET_` prefixed environment variables, they will interfere with the health check as they will be read by the host.
 
 > [!NOTE]
-> The `DISTROLESS_HEALTHCHECKS_` prefix environment variables are read after the `DOTNET_` prefixed environment variables, so if `DOTNET_` prefixed environment variables are defined, they will take precedence. This may not be ideal for all use cases. Feel free to open an issue with your use case.
+> The `DISTROLESS_HEALTHCHECKS_` prefix environment variables are read after the `DOTNET_` prefixed environment variables, so if `DOTNET_` prefixed environment variables are defined, they will take precedence for certain defaults of the generic host. This may not be ideal for all use cases. Feel free to open an issue with your use case.
+
+The image uses semver. It is recommended that you pin it to at least a major version, instead of `latest`. I.e. `ghcr.io/alexaka1/distroless-dotnet-healthchecks:1`.
 
 ## Building
 
