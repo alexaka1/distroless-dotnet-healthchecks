@@ -139,6 +139,8 @@ jobs:
       major: ${{ needs.check-release.outputs.major }}
       minor: ${{ needs.check-release.outputs.minor }}
       tag: ${{ needs.check-release.outputs.tag }}
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     needs:
       - check-release
       - should-release

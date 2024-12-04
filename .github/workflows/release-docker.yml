@@ -39,6 +39,9 @@ on:
       tag:
         type: string
         required: false
+    secrets:
+      DOCKERHUB_TOKEN:
+        required: true
 
 jobs:
   release-docker:
