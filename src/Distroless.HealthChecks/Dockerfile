@@ -10,7 +10,7 @@ COPY ["src/Distroless.HealthChecks/Distroless.HealthChecks.csproj", "src/Distrol
 RUN dotnet restore "src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" -a $TARGETARCH
 COPY ["src/", "./src/"]
 WORKDIR "/src/src/Distroless.HealthChecks"
-RUN dotnet build "Distroless.HealthChecks.csproj" -c $BUILD_CONFIGURATION -o /app/build -a $TARGETARCH
+RUN dotnet build "Distroless.HealthChecks.csproj" --no-restore -c $BUILD_CONFIGURATION -o /app/build -a $TARGETARCH
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release

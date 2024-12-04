@@ -1,8 +1,7 @@
-using Xunit.Abstractions;
-
 namespace Distroless.HealthChecks.Test.HealthyTests.Net9;
 
-public class AspNet9ContainerTest(ITestOutputHelper output) : HealthyContainerTest<AspNet9Data>(output);
+public class AspNet9ContainerTest(ITestOutputHelper output, ITestContextAccessor testContext)
+    : HealthyContainerTest<AspNet9Data>(output, testContext);
 
 public abstract class AspNet9Data : ITestData
 {

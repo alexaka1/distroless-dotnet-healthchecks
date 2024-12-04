@@ -3,25 +3,25 @@ using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
-using Xunit.Abstractions;
 
 namespace Distroless.HealthChecks.Test.HealthyTests;
 
-public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IAsyncLifetime where TData : ITestData
+public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITestContextAccessor testContext)
+    : IAsyncLifetime where TData : ITestData
 {
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
     public static TheoryData<string, string, string, string> Data => TData.GetTheoryData();
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _image.DisposeAsync();
         await _container.DisposeAsync();
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [Theory]
@@ -30,20 +30,22 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
     {
         try
         {
-            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile));
-            await _container.StartAsync();
+            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile),
+                testContext.Current.CancellationToken);
+            await _container.StartAsync(testContext.Current.CancellationToken);
             Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
                 $"Container was {_container.Health:G}");
         }
         catch (Exception e)
         {
             output.WriteLine(e.ToString());
-            var logs = await _container.GetLogsAsync();
+            var logs = await _container.GetLogsAsync(ct: testContext.Current.CancellationToken);
             output.WriteLine(logs.Stdout);
             output.WriteLine("Errors:");
             output.WriteLine(logs.Stderr);
             output.WriteLine("Health:");
-            (string @out, string error) = await Utils.InspectContainer(_container.Id);
+            (string @out, string error) =
+                await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
             output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
                 new JsonSerializerOptions { WriteIndented = true }));
             output.WriteLine(error);
@@ -51,7 +53,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
         }
     }
 
-    private async Task Init(TestData data)
+    private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
@@ -60,7 +62,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output) : IA
             .WithBuildArgument("IMAGE", data.Image)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
-        await _image.CreateAsync()
+        await _image.CreateAsync(cancellationToken)
             .ConfigureAwait(false);
         _container = new ContainerBuilder()
             .WithImage(_image)

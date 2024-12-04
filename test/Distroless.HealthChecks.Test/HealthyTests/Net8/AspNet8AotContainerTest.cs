@@ -1,8 +1,7 @@
-using Xunit.Abstractions;
-
 namespace Distroless.HealthChecks.Test.HealthyTests.Net8;
 
-public class AspNet8AotContainerTest(ITestOutputHelper output) : HealthyContainerTest<AspNet8AotData>(output);
+public class AspNet8AotContainerTest(ITestOutputHelper output, ITestContextAccessor testContext)
+    : HealthyContainerTest<AspNet8AotData>(output, testContext);
 
 public abstract class AspNet8AotData : ITestData
 {
