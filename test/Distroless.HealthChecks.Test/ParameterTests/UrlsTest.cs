@@ -1,14 +1,12 @@
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
-using Xunit.Abstractions;
 
 namespace Distroless.HealthChecks.Test.ParameterTests;
 
-public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
+public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor testContext) : IAsyncLifetime
 {
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
@@ -75,15 +73,15 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
 
     private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _image.DisposeAsync();
         await _container.DisposeAsync();
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [Theory]
@@ -94,13 +92,13 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
     {
         try
         {
-            // string newDockerfile = NewDockerfile(dockerfile, urls);
-            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls));
-            await _container.StartAsync();
+            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls),
+                testContext.Current.CancellationToken);
+            await _container.StartAsync(testContext.Current.CancellationToken);
             // wait for the healthcheck to run within docker
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(5), testContext.Current.CancellationToken);
             // refresh container status within TestContainers
-            await _container.StartAsync();
+            await _container.StartAsync(testContext.Current.CancellationToken);
 
             Assert.Equal(expected, _container.Health switch
             {
@@ -115,12 +113,13 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         catch (Exception e)
         {
             output.WriteLine(e.ToString());
-            var logs = await _container.GetLogsAsync();
+            var logs = await _container.GetLogsAsync(ct: testContext.Current.CancellationToken);
             output.WriteLine(logs.Stdout);
             output.WriteLine("Errors:");
             output.WriteLine(logs.Stderr);
             output.WriteLine("Health:");
-            (string @out, string error) = await Utils.InspectContainer(_container.Id);
+            (string @out, string error) =
+                await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
             output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
                 new JsonSerializerOptions { WriteIndented = true }));
             output.WriteLine(error);
@@ -128,7 +127,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
         }
     }
 
-    private async Task Init(TestData data)
+    private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
@@ -137,7 +136,7 @@ public class UrlsTest(ITestOutputHelper output) : IAsyncLifetime
             .WithBuildArgument("IMAGE", data.Image)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
-        await _image.CreateAsync()
+        await _image.CreateAsync(cancellationToken)
             .ConfigureAwait(false);
         _container = new ContainerBuilder()
             .WithImage(_image)

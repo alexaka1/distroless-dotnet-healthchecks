@@ -1,8 +1,7 @@
-using Xunit.Abstractions;
-
 namespace Distroless.HealthChecks.Test.HealthyTests.Net9;
 
-public class Runtime9AotContainerTest(ITestOutputHelper output) : HealthyContainerTest<Runtime9AotData>(output);
+public class Runtime9AotContainerTest(ITestOutputHelper output, ITestContextAccessor testContext)
+    : HealthyContainerTest<Runtime9AotData>(output, testContext);
 
 public abstract class Runtime9AotData : ITestData
 {

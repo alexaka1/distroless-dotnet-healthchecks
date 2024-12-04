@@ -4,7 +4,8 @@ namespace Distroless.HealthChecks.Test;
 
 public static class Utils
 {
-    public static async Task<(string output, string error)> InspectContainer(string containerId)
+    public static async Task<(string output, string error)> InspectContainer(string containerId,
+        CancellationToken cancellationToken = default)
     {
         var process = new Process
         {
@@ -20,10 +21,10 @@ public static class Utils
 
         process.Start();
 
-        string output = await process.StandardOutput.ReadToEndAsync();
-        string error = await process.StandardError.ReadToEndAsync();
+        string output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+        string error = await process.StandardError.ReadToEndAsync(cancellationToken);
 
-        await process.WaitForExitAsync();
+        await process.WaitForExitAsync(cancellationToken);
 
         return (output.Trim(), error.Trim());
     }
