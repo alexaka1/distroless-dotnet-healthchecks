@@ -51,8 +51,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build:
-    needs: [ check-run ]
-    if: needs.check-run.outputs.should-run == 'true'
+#    needs: [ check-run ]
+#    if: needs.check-run.outputs.should-run == 'true'
     environment: Nightly
     permissions:
       contents: read
