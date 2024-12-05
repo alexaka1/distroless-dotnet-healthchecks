@@ -15,61 +15,32 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
     {
         get
         {
-            List<(string image, string tag)> images = [];
-            using (var stream =
-                   File.OpenRead(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, Tags)))
-            using (var reader = new StreamReader(stream))
-            {
-                while (reader.ReadLine() is { } line)
-                {
-                    const string Prefix = "FROM ";
-                    if (!line.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
+            var images =
+                Utils.GetImageTagsFromDockerfile(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath,
+                    Tags));
 
-                    int tagSeparator = line.IndexOf(':');
-                    images.Add((line[Prefix.Length..tagSeparator], line[(tagSeparator + 1)..]));
-                }
-            }
 
-            // string[] images =
-            // [
-            //     "mcr.microsoft.com/dotnet/runtime-deps",
-            //     // "mcr.microsoft.com/dotnet/nightly/runtime-deps",
-            // ];
-            // string[] tags =
-            // [
-            //     "9.0@sha256:8ffcf58f74f4ee100fdc971003480069ffc47391e0676982cafe1a003ef44747",
-            //     // "8.0",
-            //     // "9.0-noble",
-            //     // "9.0-noble-chiseled",
-            //     // "9.0-azurelinux3.0-distroless",
-            //     // "9.0-noble-chiseled-aot",
-            //     // "8.0-noble-chiseled-aot",
-            //     // "9.0-azurelinux3.0-distroless-aot",
-            // ];
             (string[] urls, HealthStatus expected)[] urls =
             [
                 ([GetUrl(HealthStatus.Healthy)], HealthStatus.Healthy),
-                // ([GetUrl(HealthStatus.Healthy), "http://localhost:8080/healthz", GetUrl(HealthStatus.Healthy)],
-                //     HealthStatus.Healthy),
-                // ([GetUrl(HealthStatus.UnHealthy)], HealthStatus.UnHealthy),
-                // ([GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.UnHealthy)],
-                //     HealthStatus.UnHealthy),
-                // ([GetUrl(HealthStatus.Degraded)], HealthStatus.UnHealthy),
-                // (["http://127.0.0.1:8080/healthz"], HealthStatus.Healthy),
-                // (["http://alexaka1.dev:8080/healthz"], HealthStatus.Healthy),
-                // (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
+                ([GetUrl(HealthStatus.Healthy), "http://localhost:8080/healthz", GetUrl(HealthStatus.Healthy)],
+                    HealthStatus.Healthy),
+                ([GetUrl(HealthStatus.UnHealthy)], HealthStatus.UnHealthy),
+                ([GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.UnHealthy)],
+                    HealthStatus.UnHealthy),
+                ([GetUrl(HealthStatus.Degraded)], HealthStatus.UnHealthy),
+                (["http://127.0.0.1:8080/healthz"], HealthStatus.Healthy),
+                (["http://alexaka1.dev:8080/healthz"], HealthStatus.Healthy),
+                (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string[], HealthStatus>();
-            foreach (var (image, tag) in images)
+            foreach (var image in images)
             {
                 foreach (var url in urls)
                 {
-                    data.Add(image,
-                        tag,
-                        tag[..3],
+                    data.Add(image.Image,
+                        image.Tag,
+                        image.Tag[..3],
                         Dockerfile,
                         url.urls,
                         url.expected
@@ -82,7 +53,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
     }
 
     private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
-    private const string Tags = "test/Distroless.Sample.WebApp/aot.bases.Dockerfile";
+    private const string Tags = "test/Distroless.Sample.WebApp/urlsTest.bases.Dockerfile";
 
     public async ValueTask DisposeAsync()
     {

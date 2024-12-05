@@ -28,4 +28,25 @@ public static class Utils
 
         return (output.Trim(), error.Trim());
     }
+
+    public static List<DockerImage> GetImageTagsFromDockerfile(string dockerfile)
+    {
+        var images = new List<DockerImage>();
+        using var stream =
+            File.OpenRead(dockerfile);
+        using var reader = new StreamReader(stream);
+        while (reader.ReadLine() is { } line)
+        {
+            const string Prefix = "FROM ";
+            if (!line.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            int tagSeparator = line.IndexOf(':');
+            images.Add(new DockerImage(line[Prefix.Length..tagSeparator], line[(tagSeparator + 1)..]));
+        }
+
+        return images;
+    }
 }
