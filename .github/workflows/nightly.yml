@@ -2,6 +2,9 @@ name: Nightly build
 on:
   schedule:
     - cron: '0 0 * * *'
+  push:
+    branches:
+      - sbom
 
 concurrency:
   group: ${{ github.workflow }}
@@ -87,7 +90,7 @@ jobs:
           tags: |
             type=schedule
             type=ref,event=branch
-            type=edge
+#            type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Build and push
@@ -99,6 +102,7 @@ jobs:
           target: final
           platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64
           provenance: mode=max
+          sbom: true
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
