@@ -26,7 +26,8 @@ public partial class HealthCheckOptionsValidator(
         var f = features.Value;
         var builder = new ValidateOptionsResultBuilder();
 
-        if (options.Uri is not null && options.Uris.Count > 0)
+        if ((options.Uri is not null && options.Uris.Count > 1) ||
+            (options.Uri is not null && options.Uris.Count is 1 && options.Uris[0] != options.Uri))
         {
             builder.AddError("Uri and Uris cannot be used together. Please use only one of them.", nameof(options.Uri));
         }

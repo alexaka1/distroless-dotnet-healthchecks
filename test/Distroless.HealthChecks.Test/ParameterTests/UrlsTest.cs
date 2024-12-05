@@ -148,7 +148,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
             .WithEnvironment("DISTROLESS_HEALTHCHECKS_Logging__LogLevel__Distroless.HealthChecks", "Trace");
         foreach ((int index, string url) in data.Urls.Index())
         {
-            containerBuilder = containerBuilder.WithEnvironment($"Uris__{index}", url);
+            containerBuilder = containerBuilder.WithEnvironment($"DISTROLESS_HEALTHCHECKS_Uris__{index}", url);
         }
 
         _container = containerBuilder
