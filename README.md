@@ -18,7 +18,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled AS final
 # Get the executable and copy it to /healthchecks
 COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /healthchecks
 # Setup the healthcheck using the EXEC array syntax
-HEALTHCHECK CMD ["/healthchecks/Distroless.HealthChecks", "--urls", "http://localhost:8080/healthz"]
+HEALTHCHECK CMD ["/healthchecks/Distroless.HealthChecks", "--uri", "http://localhost:8080/healthz"]
 
 # Start your app as normal
 WORKDIR /app
@@ -27,7 +27,7 @@ ENTRYPOINT ["dotnet", "My.Awesome.Webapp.dll"]
 
 The published docker image contains only the executable of the health check at root. This is so it can be conveniently copied inside a Dockerfile. But you can also get the binary from GitHub and copy it manually into your image.
 
-It takes in a single argument named `urls`, which is **a comma separated list of URIs** that the app will check. If all the URIs return a 200 status code, the health check will pass.
+It takes in a single argument named `uri`, which is a URI that the app will check. If the URI returns a 200 status code, the health check will pass.
 
 If you don't want to use GitHub Container Registry, the image is also available on [Docker Hub](https://hub.docker.com/r/alexaka1/distroless-dotnet-healthchecks).
 
@@ -45,8 +45,8 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot
 
 # Get the executable and copy it to any path you want
 COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /iamspecial
-# Setup your healthcheck endpoints via environment variable in Dockerfile, or at runtime via `docker run -e DISTROLESS_HEALTHCHECKS_URLS="http://localhost/healthz,http://localhost/some/other/endpoint"`
-ENV DISTROLESS_HEALTHCHECKS_URLS="http://localhost/healthz,http://localhost/some/other/endpoint"
+# Setup your healthcheck endpoints via environment variable in Dockerfile, or at runtime via `docker run -e DISTROLESS_HEALTHCHECKS_URIS__0="http://localhost/healthz" -e DISTROLESS_HEALTHCHECKS_URIS__1="http://localhost/some/other/endpoint"`
+ENV DISTROLESS_HEALTHCHECKS_URI="http://localhost/healthz"
 # Setup the healthcheck using the EXEC array syntax
 HEALTHCHECK CMD ["/iamspecial/Distroless.HealthChecks"]
 
@@ -63,6 +63,12 @@ ENTRYPOINT ["./My.Awesome.Aot.WebApp"]
 
 The image uses semver. It is recommended that you pin it to at least a major version, instead of `latest`. I.e. `ghcr.io/alexaka1/distroless-dotnet-healthchecks:1`.
 
+### .NET Configuration
+
+The `Uri` parameter is just a convenience input for baking in the url to the Dockerfile. You can however set logic to your builds to configure the underlying Uri array instead. Such as: `DISTROLESS_HEALTHCHECKS_Uris__0=http://localhost:8080/healthz` and `DISTROLESS_HEALTHCHECKS_Uris__1=http://localhost/some/other/path`.
+
 ## Building
 
 You will need the .Net 9 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.
+
+On Windows you must use WSL2 as the docker backend.

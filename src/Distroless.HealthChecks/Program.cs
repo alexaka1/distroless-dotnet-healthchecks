@@ -2,7 +2,6 @@ using Distroless.HealthChecks;
 using Distroless.HealthChecks.Checks;
 using Distroless.HealthChecks.Features;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -18,11 +17,15 @@ try
         Configuration = new ConfigurationManager(),
         ContentRootPath = Directory.GetCurrentDirectory(),
     };
-    settings.Configuration.AddInMemoryCollection([new KeyValuePair<string, string?>("Logging:LogLevel:Default", "Error")]);
+    settings.Configuration.AddInMemoryCollection([
+        new KeyValuePair<string, string?>("Logging:LogLevel:Default", "Error"),
+    ]);
     settings.Configuration.AddEnvironmentVariables("DISTROLESS_HEALTHCHECKS_");
     var builder = Host.CreateApplicationBuilder(settings);
     var config = builder.Configuration;
-    builder.Services.AddOptions<HealthCheckOptions>()
+    builder.Services
+        .AddSingleton<IValidateOptions<HealthCheckOptions>, HealthCheckOptionsValidator>()
+        .AddOptions<HealthCheckOptions>()
         .Bind(config)
         .ValidateOnStart();
     builder.Services.AddOptions<Features>()

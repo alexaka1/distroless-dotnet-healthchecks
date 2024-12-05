@@ -24,4 +24,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["./Distroless.HealthChecks"]
-CMD ["--urls", "http://localhost:8080/healthz"]
+CMD ["--uri", "http://localhost:8080/healthz"]

@@ -9,7 +9,7 @@ public partial class SimpleHealthCheck(
     IOptions<HealthCheckOptions> options,
     IHttpClientFactory clientFactory,
     ILogger<SimpleHealthCheck> logger
-    ) : IHealthCheck
+) : IHealthCheck
 {
     public const string Name = "SimpleCheck";
 

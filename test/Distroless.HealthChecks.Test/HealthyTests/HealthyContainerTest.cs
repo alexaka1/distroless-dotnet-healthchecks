@@ -46,8 +46,12 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
             output.WriteLine("Health:");
             (string @out, string error) =
                 await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
-            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
-                new JsonSerializerOptions { WriteIndented = true }));
+            if (string.IsNullOrWhiteSpace(@out) is false)
+            {
+                output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
+                    new JsonSerializerOptions { WriteIndented = true }));
+            }
+
             output.WriteLine(error);
             throw;
         }
@@ -72,6 +76,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
                 .UntilContainerIsHealthy(3,
                     strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
+            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Uri", "http://localhost:8080/healthz")
             .Build();
     }
 
