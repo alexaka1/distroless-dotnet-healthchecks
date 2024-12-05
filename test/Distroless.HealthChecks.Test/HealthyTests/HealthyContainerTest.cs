@@ -76,6 +76,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
                 .UntilContainerIsHealthy(3,
                     strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
+            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Uri", "http://localhost:8080/healthz")
             .Build();
     }
 
