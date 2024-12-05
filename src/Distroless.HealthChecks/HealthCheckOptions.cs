@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -7,82 +6,50 @@ namespace Distroless.HealthChecks;
 
 public class HealthCheckOptions
 {
-    public string? Urls { get; set; }
+    public Uri? Uri { get; set; }
 
-    [JsonIgnore]
     public List<Uri> Uris { get; set; } = [];
 
     public const string Key = "HealthCheck";
 }
-//
-// [OptionsValidator]
-// public partial class HealthCheckOptionsValidator : IValidateOptions<HealthCheckOptions>;
 
-public partial class PostConfigureHealthCheckOptions(
-    ILogger<PostConfigureHealthCheckOptions> logger,
-    IOptions<Features.Features> features
-)
-    : IPostConfigureOptions<HealthCheckOptions>
+public partial class HealthCheckOptionsValidator(
+    ILogger<HealthCheckOptionsValidator> logger,
+    IOptions<Features.Features> features)
+    : IValidateOptions<HealthCheckOptions>
 {
     private readonly Lazy<IPAddress[]> _localAddresses = new(() =>
         [..Dns.GetHostAddresses(Dns.GetHostName()), IPAddress.Loopback, IPAddress.IPv6Loopback]);
 
-    public void PostConfigure(string? name, HealthCheckOptions options)
+    public ValidateOptionsResult Validate(string? name, HealthCheckOptions options)
     {
         var f = features.Value;
-        LogUrls(options.Urls);
-        if (string.IsNullOrWhiteSpace(options.Urls))
+        var builder = new ValidateOptionsResultBuilder();
+
+        if (options.Uri is not null && options.Uris.Count > 0)
         {
-            // The complex configuration was probably used.
-            return;
+            builder.AddError("Uri and Uris cannot be used together. Please use only one of them.", nameof(options.Uri));
         }
 
-        if (options.Uris.Count != 0)
+        if (f.AllowUnsafeExternalUris is false)
         {
-            if (!f.AllowUnsafeExternalUris)
+            var uris = options.Uris.AsEnumerable();
+            if (options.Uri is not null)
             {
-                foreach (var uri in options.Uris.Where(uri => !IsLoopback(uri)))
+                uris = uris.Append(options.Uri);
+            }
+
+            foreach (var uri in uris)
+            {
+                if (!IsLoopback(uri))
                 {
-                    throw new NotSupportedException(
-                        $"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
-                    {
-                        Data =
-                        {
-                            { "Uri", uri },
-                        },
-                    };
+                    builder.AddError($"$Uri {uri} must be a loopback address", nameof(options.Uris));
                 }
             }
-
-            // Someone has already configured the Uris.
-            // They know what they are doing.
-            return;
         }
 
-        string[] uris = options.Urls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        foreach (string uri in uris)
-        {
-            if (Uri.TryCreate(uri, UriKind.Absolute, out var uriResult))
-            {
-                if (!f.AllowUnsafeExternalUris && !IsLoopback(uriResult))
-                {
-                    throw new NotSupportedException(
-                        $"Health checks are only supported on loopback addresses. {uri} is not a loopback address.")
-                    {
-                        Data =
-                        {
-                            { "Uri", uri },
-                        },
-                    };
-                }
 
-                options.Uris.Add(uriResult);
-            }
-            else
-            {
-                LogInvalidUri(uri);
-            }
-        }
+        return builder.Build();
     }
 
     private bool IsLoopback(Uri uri)
@@ -130,4 +97,16 @@ public partial class PostConfigureHealthCheckOptions(
     [LoggerMessage(Level = LogLevel.Trace, Message = "Host address of machine is {HostAddress}",
         EventName = "HostAddress")]
     private partial void LogHostAddress(IPAddress[] hostAddress);
+}
+
+public class PostConfigureHealthCheckOptions
+    : IPostConfigureOptions<HealthCheckOptions>
+{
+    public void PostConfigure(string? name, HealthCheckOptions options)
+    {
+        if (options.Uri is not null)
+        {
+            options.Uris.Add(options.Uri);
+        }
+    }
 }

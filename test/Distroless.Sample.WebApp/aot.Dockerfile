@@ -22,7 +22,7 @@ FROM ${IMAGE}:${RUNTIME_TAG} AS final
 ARG URLS
 EXPOSE 8080
 EXPOSE 8081
-ENV DISTROLESS_HEALTHCHECKS_Urls="http://localhost:8080/healthz"
+ENV DISTROLESS_HEALTHCHECKS_Uri="http://localhost:8080/healthz"
 WORKDIR /healthchecks
 COPY --from=distroless-dotnet-healthchecks:test / .
 HEALTHCHECK --interval=1s --timeout=1s --retries=3 \

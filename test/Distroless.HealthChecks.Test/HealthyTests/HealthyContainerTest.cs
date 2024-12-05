@@ -46,8 +46,12 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
             output.WriteLine("Health:");
             (string @out, string error) =
                 await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
-            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
-                new JsonSerializerOptions { WriteIndented = true }));
+            if (string.IsNullOrWhiteSpace(@out) is false)
+            {
+                output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
+                    new JsonSerializerOptions { WriteIndented = true }));
+            }
+
             output.WriteLine(error);
             throw;
         }

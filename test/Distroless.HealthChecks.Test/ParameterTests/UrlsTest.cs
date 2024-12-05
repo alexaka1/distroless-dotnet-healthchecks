@@ -11,7 +11,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
 
-    public static TheoryData<string, string, string, string, string, HealthStatus> Data
+    public static TheoryData<string, string, string, string, string[], HealthStatus> Data
     {
         get
         {
@@ -31,20 +31,20 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
                 "8.0-noble-chiseled-aot",
                 "9.0-azurelinux3.0-distroless-aot",
             ];
-            (string url, HealthStatus expected)[] urls =
+            (string[] urls, HealthStatus expected)[] urls =
             [
-                (GetUrl(HealthStatus.Healthy), HealthStatus.Healthy),
-                (string.Join(',', [GetUrl(HealthStatus.Healthy), "http://localhost:8080/healthz", GetUrl(HealthStatus.Healthy)]),
+                ([GetUrl(HealthStatus.Healthy)], HealthStatus.Healthy),
+                ([GetUrl(HealthStatus.Healthy), "http://localhost:8080/healthz", GetUrl(HealthStatus.Healthy)],
                     HealthStatus.Healthy),
-                (string.Join(',', [GetUrl(HealthStatus.UnHealthy)]), HealthStatus.UnHealthy),
-                (string.Join(',', [GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.UnHealthy)]),
+                ([GetUrl(HealthStatus.UnHealthy)], HealthStatus.UnHealthy),
+                ([GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.Healthy), GetUrl(HealthStatus.UnHealthy)],
                     HealthStatus.UnHealthy),
-                (string.Join(',', [GetUrl(HealthStatus.Degraded)]), HealthStatus.UnHealthy),
-                (string.Join(',', ["http://127.0.0.1:8080/healthz"]), HealthStatus.Healthy),
-                (string.Join(',', ["http://attacker.com:8080/healthz"]), HealthStatus.Healthy),
-                (string.Join(',', ["https://status.cloud.google.com/"]), HealthStatus.UnHealthy),
+                ([GetUrl(HealthStatus.Degraded)], HealthStatus.UnHealthy),
+                (["http://127.0.0.1:8080/healthz"], HealthStatus.Healthy),
+                (["http://alexaka1.dev:8080/healthz"], HealthStatus.Healthy),
+                (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
             ];
-            var data = new TheoryData<string, string, string, string, string, HealthStatus>();
+            var data = new TheoryData<string, string, string, string, string[], HealthStatus>();
             foreach (string image in images)
             {
                 foreach (var url in urls)
@@ -60,7 +60,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
                             tag,
                             tag[..3],
                             Dockerfile,
-                            url.url,
+                            url.urls,
                             url.expected
                         );
                     }
@@ -88,7 +88,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
     [MemberData(nameof(Data))]
     public async Task Container_returns_expected_health_status(string image, string runtimeTag, string targetFramework,
         string dockerfile,
-        string urls, HealthStatus expected)
+        string[] urls, HealthStatus expected)
     {
         try
         {
@@ -102,11 +102,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
 
             Assert.Equal(expected, _container.Health switch
             {
-                TestcontainersHealthStatus.Undefined => HealthStatus.UnHealthy,
-                TestcontainersHealthStatus.None => HealthStatus.UnHealthy,
-                TestcontainersHealthStatus.Starting => HealthStatus.UnHealthy,
                 TestcontainersHealthStatus.Healthy => HealthStatus.Healthy,
-                TestcontainersHealthStatus.Unhealthy => HealthStatus.UnHealthy,
                 _ => HealthStatus.UnHealthy,
             });
         }
@@ -120,8 +116,12 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
             output.WriteLine("Health:");
             (string @out, string error) =
                 await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
-            output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
-                new JsonSerializerOptions { WriteIndented = true }));
+            if (string.IsNullOrWhiteSpace(@out) is false)
+            {
+                output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
+                    new JsonSerializerOptions { WriteIndented = true }));
+            }
+
             output.WriteLine(error);
             throw;
         }
@@ -138,15 +138,20 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
             .Build();
         await _image.CreateAsync(cancellationToken)
             .ConfigureAwait(false);
-        _container = new ContainerBuilder()
+        var containerBuilder = new ContainerBuilder()
             .WithImage(_image)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
                 Regex.Escape("Application started. Press Ctrl+C to shut down."),
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30)))
             )
-            .WithExtraHost("attacker.com", "127.0.0.1")
-            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Logging__LogLevel__Distroless.HealthChecks", "Trace")
-            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Urls", data.Urls)
+            .WithExtraHost("alexaka1.dev", "127.0.0.1")
+            .WithEnvironment("DISTROLESS_HEALTHCHECKS_Logging__LogLevel__Distroless.HealthChecks", "Trace");
+        foreach ((int index, string url) in data.Urls.Index())
+        {
+            containerBuilder = containerBuilder.WithEnvironment($"Uris__{index}", url);
+        }
+
+        _container = containerBuilder
             .Build();
     }
 
@@ -166,5 +171,5 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
         string RuntimeTag,
         string TargetFramework,
         string Dockerfile,
-        string Urls);
+        string[] Urls);
 }
