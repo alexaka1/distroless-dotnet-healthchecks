@@ -45,7 +45,7 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot
 
 # Get the executable and copy it to any path you want
 COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:latest / /iamspecial
-# Setup your healthcheck endpoints via environment variable in Dockerfile, or at runtime via `docker run -e DISTROLESS_HEALTHCHECKS_URIS_0="http://localhost/healthz" -e DISTROLESS_HEALTHCHECKS_URIS_1="http://localhost/some/other/endpoint"`
+# Setup your healthcheck endpoints via environment variable in Dockerfile, or at runtime via `docker run -e DISTROLESS_HEALTHCHECKS_URIS__0="http://localhost/healthz" -e DISTROLESS_HEALTHCHECKS_URIS__1="http://localhost/some/other/endpoint"`
 ENV DISTROLESS_HEALTHCHECKS_URI="http://localhost/healthz"
 # Setup the healthcheck using the EXEC array syntax
 HEALTHCHECK CMD ["/iamspecial/Distroless.HealthChecks"]
