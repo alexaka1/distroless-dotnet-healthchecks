@@ -26,8 +26,6 @@ jobs:
     defaults:
       run:
         shell: bash
-    needs:
-      - changesets
     outputs:
       can-release: ${{ ! fromJSON(steps.check-image.outputs.exists) }}
       semver: ${{ steps.version.outputs.semver }}
