@@ -1,5 +1,13 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 0.2.0
+
+### Minor Changes
+
+- [#27](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/27) [`9af1f1a`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/9af1f1acf8680db05864886166240bee53c5ac26) Thanks [@alexaka1](https://github.com/alexaka1)! - Change arguments to be `Uri` and `Uris` respectively
+
+  `Uri` takes a single uri, and is mutually exclusive with `Uris` which takes a list of uris using the index syntax such as `Uris__0`, `Uris__1` etc.
+
 ## 0.1.0
 
 ### Minor Changes
