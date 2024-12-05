@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using DotNet.Testcontainers.Builders;
 
 namespace Distroless.HealthChecks.Test;
 
@@ -31,6 +32,11 @@ public static class Utils
 
     public static List<DockerImage> GetImageTagsFromDockerfile(string dockerfile)
     {
+        if (!Path.IsPathRooted(dockerfile))
+        {
+            dockerfile = Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, dockerfile);
+        }
+
         var images = new List<DockerImage>();
         using var stream =
             File.OpenRead(dockerfile);

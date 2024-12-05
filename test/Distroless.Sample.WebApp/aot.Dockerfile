@@ -19,7 +19,6 @@ ARG BUILD_CONFIGURATION
 RUN dotnet publish "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish -f net${TARGET_FRAMEWORK}
 
 FROM ${IMAGE}:${RUNTIME_TAG} AS final
-ARG URLS
 EXPOSE 8080
 EXPOSE 8081
 WORKDIR /healthchecks
