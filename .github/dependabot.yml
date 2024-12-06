@@ -35,17 +35,17 @@ updates:
     schedule:
       interval: daily
     ignore:
-      - dependency-name: "mcr.microsoft.com/dotnet/runtime"
+      - dependency-name: "dotnet/runtime"
         update-types: [ "version-update:semver-major" ]
-      - dependency-name: "mcr.microsoft.com/dotnet/nightly/runtime"
+      - dependency-name: "dotnet/nightly/runtime"
         update-types: [ "version-update:semver-major" ]
-      - dependency-name: "mcr.microsoft.com/dotnet/runtime-deps"
+      - dependency-name: "dotnet/runtime-deps"
         update-types: [ "version-update:semver-major" ]
-      - dependency-name: "mcr.microsoft.com/dotnet/nightly/runtime-deps"
+      - dependency-name: "dotnet/nightly/runtime-deps"
         update-types: [ "version-update:semver-major" ]
-      - dependency-name: "mcr.microsoft.com/dotnet/aspnet"
+      - dependency-name: "dotnet/aspnet"
         update-types: [ "version-update:semver-major" ]
-      - dependency-name: "mcr.microsoft.com/dotnet/nightly/aspnet"
+      - dependency-name: "dotnet/nightly/aspnet"
         update-types: [ "version-update:semver-major" ]
 
   - package-ecosystem: npm
