@@ -7,10 +7,10 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy@sha256:5cc8734767c61b1ba4c0a9836
 FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled@sha256:1ee542ce320d7063d204926619f4e58e17386e5058d914c268325262575fd64b
 FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy-chiseled@sha256:f50b13c931ecef4538f75f98b417947085ec03c697a4df167306ff30ff81e43f
 FROM mcr.microsoft.com/dotnet/runtime:8.0-azurelinux3.0-distroless@sha256:aea932dda9523d7fb1034e02b5b9b2b715be0569eee25c796abe0f3415cc87ac
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0@sha256:b63966fb8e5b962e44ba4fff4709ddbeffaa30361e0c0828beb7774193055e94
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-noble@sha256:62967ea21e8d308f0f3631a92aa5118b886e72ffffcd691fce3d47e2a0389e5a
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy@sha256:8b38e8c105a7c5161c4f1d7b37c4eb767e4793f99f9fdb756b72d1e869e1c5cc
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0@sha256:2cb6f4a3c1bf44a0cef694816b2c6eeeec9ac2bc79dc1e87b6d6f9fed1b6eb56
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-noble@sha256:2ed7eb6b4a2f6a8e2567c5a4779c1f08544088d34ee0bbb1fa0e798fec308fc2
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy@sha256:3467c0056857a76e41d79464d06ebb803cf152121ab29191e0de99f0111a7ff6
 #FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-alpine@sha256:8a0add9d16939ab33bae85a6adb36e219e0b557fcf105522598ec7f08dba0ca5
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-noble-chiseled@sha256:6949378271975ac15a5653345b195f6c2c6c8bca9f13884e3f306eed0b958e47
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled@sha256:0769426fce3905c0b18bd2500e8235423677e4885d49e4101a4f39f86fa7badd
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-azurelinux3.0-distroless@sha256:bcc2f5fb6cdbaa5b13d3d156e8cebbfde290498e4675607db1f2fca57d24c017
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-noble-chiseled@sha256:b904a5f497ffb71d8e1f3a8e16875115088ceab60b61fd205d88d99b5855d2b3
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled@sha256:71a1186d4fc087c0b7c35de1eb5eae868910023d3af3158b6c989dee820fdfe6
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-azurelinux3.0-distroless@sha256:9e02f8ca3b7b695c91075fd09799a4d5aeb27498d6fb5c8cd0af30b885327d2c
