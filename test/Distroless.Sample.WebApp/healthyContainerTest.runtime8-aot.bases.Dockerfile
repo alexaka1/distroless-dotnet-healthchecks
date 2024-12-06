@@ -1,12 +1,12 @@
 # docker manifest inspect mcr.microsoft.com/dotnet/runtime:8.0 -v | jq -r '.[0].Descriptor.digest'
-FROM mcr.microsoft.com/dotnet/runtime:8.0@sha256:74ae244aa186678055533e7396a5b037c43c814e68e993f63b447852b2ed9c3e
-FROM mcr.microsoft.com/dotnet/runtime:8.0-noble@sha256:c1101c15b76b5f7588d9ca1ea5067654b73718683309423a5623f03165ab016f
-FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy@sha256:0c5702732dbe07e0800f7aa5a8eec80bdb49361a03cec0ab48917db77f275bba
+FROM mcr.microsoft.com/dotnet/runtime:9.0@sha256:b7afeeb945d9cfaf215e8262c5e17ffcba4e4397b7a6fb37610d4c3a30b85906
+FROM mcr.microsoft.com/dotnet/runtime:9.0-noble@sha256:d5c0e8bfef9e0b506a0129af076af2677c51d02f73c5995e54cd33e8ce3cc6e0
+FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy@sha256:5cc8734767c61b1ba4c0a98362ab3bf62860aec79510eaa230a5e8f0b553209d
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine@sha256:6970cb2d1f8ba6e87d49cfb35687106f0b80c874171978b60d8962daaa8e097f
-FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled@sha256:6c110966a61045c43c33e8015874d457d2a86accab81b308df9e7bed52faf2e8
-FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy-chiseled@sha256:c5d6502d9f2e3db5cf73d06347ab6b79b3c12b208662c2598685a517634e5379
-FROM mcr.microsoft.com/dotnet/runtime:8.0-azurelinux3.0-distroless@sha256:481a1ca563f99886a40f4744fc74bb14c0008ea90307ce26d7294a226370ebac
+FROM mcr.microsoft.com/dotnet/runtime:9.0-noble-chiseled@sha256:29943341fb6216992c659c352e716c18f8dd973b1575bfda709cf314e60f2d2e
+FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy-chiseled@sha256:f50b13c931ecef4538f75f98b417947085ec03c697a4df167306ff30ff81e43f
+FROM mcr.microsoft.com/dotnet/runtime:9.0-azurelinux3.0-distroless@sha256:5eabdbfa69b1abfa488fb35355c155cfd953fc49a24a0d2943f9f95d3a192d5b
 FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0@sha256:b63966fb8e5b962e44ba4fff4709ddbeffaa30361e0c0828beb7774193055e94
 FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-noble@sha256:62967ea21e8d308f0f3631a92aa5118b886e72ffffcd691fce3d47e2a0389e5a
 FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy@sha256:8b38e8c105a7c5161c4f1d7b37c4eb767e4793f99f9fdb756b72d1e869e1c5cc
