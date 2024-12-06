@@ -13,7 +13,7 @@ public abstract class RuntimeDeps9AotData : ITestData
         var data = new TheoryData<string, string, string, string>();
         foreach (var image in images)
         {
-            data.Add(image.Image, image.Tag, "9.0", "test/Distroless.Sample.WebApp/aot.Dockerfile");
+            data.Add(image.Image, image.Tag, "9.0", "test/Distroless.Sample.WebApp/Dockerfile");
         }
 
         return data;

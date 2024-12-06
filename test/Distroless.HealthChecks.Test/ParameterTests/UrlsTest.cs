@@ -52,7 +52,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
         }
     }
 
-    private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
+    private const string Dockerfile = "test/Distroless.Sample.WebApp/Dockerfile";
     private const string Tags = "test/Distroless.Sample.WebApp/urlsTest.bases.Dockerfile";
 
     public async ValueTask DisposeAsync()
