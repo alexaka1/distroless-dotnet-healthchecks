@@ -34,6 +34,19 @@ updates:
     directory: /test/Distroless.Sample.WebApp
     schedule:
       interval: daily
+    ignore:
+      - dependency-name: "mcr.microsoft.com/dotnet/runtime"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "mcr.microsoft.com/dotnet/nightly/runtime"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "mcr.microsoft.com/dotnet/runtime-deps"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "mcr.microsoft.com/dotnet/nightly/runtime-deps"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "mcr.microsoft.com/dotnet/aspnet"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "mcr.microsoft.com/dotnet/nightly/aspnet"
+        update-types: [ "version-update:semver-major" ]
 
   - package-ecosystem: npm
     directory: /
