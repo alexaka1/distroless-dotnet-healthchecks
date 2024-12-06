@@ -7,29 +7,13 @@ public abstract class RuntimeDeps9AotData : ITestData
 {
     public static TheoryData<string, string, string, string> GetTheoryData()
     {
-        string[] images =
-            ["mcr.microsoft.com/dotnet/runtime-deps", "mcr.microsoft.com/dotnet/nightly/runtime-deps"];
-        string[] tags =
-        [
-            "9.0",
-            "9.0-noble",
-            "9.0-noble-chiseled",
-            "9.0-azurelinux3.0-distroless",
-            "9.0-noble-chiseled-aot",
-            "9.0-azurelinux3.0-distroless-aot",
-        ];
+        var images =
+            Utils.GetImageTagsFromDockerfile(
+                "test/Distroless.Sample.WebApp/healthyContainerTest.runtime-deps9-aot.bases.Dockerfile");
         var data = new TheoryData<string, string, string, string>();
-        foreach (string image in images)
+        foreach (var image in images)
         {
-            foreach (string tag in tags)
-            {
-                if (tag.Contains("aot") && !image.Contains("nightly"))
-                {
-                    continue;
-                }
-
-                data.Add(image, tag, "9.0", "test/Distroless.Sample.WebApp/aot.Dockerfile");
-            }
+            data.Add(image.Image, image.Tag, "9.0", "test/Distroless.Sample.WebApp/Dockerfile");
         }
 
         return data;

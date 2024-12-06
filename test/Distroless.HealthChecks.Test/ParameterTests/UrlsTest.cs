@@ -15,22 +15,11 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
     {
         get
         {
-            string[] images =
-            [
-                "mcr.microsoft.com/dotnet/runtime-deps",
-                "mcr.microsoft.com/dotnet/nightly/runtime-deps",
-            ];
-            string[] tags =
-            [
-                "9.0",
-                "8.0",
-                "9.0-noble",
-                "9.0-noble-chiseled",
-                "9.0-azurelinux3.0-distroless",
-                "9.0-noble-chiseled-aot",
-                "8.0-noble-chiseled-aot",
-                "9.0-azurelinux3.0-distroless-aot",
-            ];
+            var images =
+                Utils.GetImageTagsFromDockerfile(Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath,
+                    Tags));
+
+
             (string[] urls, HealthStatus expected)[] urls =
             [
                 ([GetUrl(HealthStatus.Healthy)], HealthStatus.Healthy),
@@ -45,25 +34,17 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
                 (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string[], HealthStatus>();
-            foreach (string image in images)
+            foreach (var image in images)
             {
                 foreach (var url in urls)
                 {
-                    foreach (string tag in tags)
-                    {
-                        if (tag.Contains("aot") && !image.Contains("nightly"))
-                        {
-                            continue;
-                        }
-
-                        data.Add(image,
-                            tag,
-                            tag[..3],
-                            Dockerfile,
-                            url.urls,
-                            url.expected
-                        );
-                    }
+                    data.Add(image.Image,
+                        image.Tag,
+                        image.Tag[..3],
+                        Dockerfile,
+                        url.urls,
+                        url.expected
+                    );
                 }
             }
 
@@ -71,7 +52,8 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
         }
     }
 
-    private const string Dockerfile = "test/Distroless.Sample.WebApp/aot.Dockerfile";
+    private const string Dockerfile = "test/Distroless.Sample.WebApp/Dockerfile";
+    private const string Tags = "test/Distroless.Sample.WebApp/urlsTest.bases.Dockerfile";
 
     public async ValueTask DisposeAsync()
     {

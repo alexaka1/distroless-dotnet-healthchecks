@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using DotNet.Testcontainers.Builders;
 
 namespace Distroless.HealthChecks.Test;
 
@@ -27,5 +28,31 @@ public static class Utils
         await process.WaitForExitAsync(cancellationToken);
 
         return (output.Trim(), error.Trim());
+    }
+
+    public static List<DockerImage> GetImageTagsFromDockerfile(string dockerfile)
+    {
+        if (!Path.IsPathRooted(dockerfile))
+        {
+            dockerfile = Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, dockerfile);
+        }
+
+        var images = new List<DockerImage>();
+        using var stream =
+            File.OpenRead(dockerfile);
+        using var reader = new StreamReader(stream);
+        while (reader.ReadLine() is { } line)
+        {
+            const string Prefix = "FROM ";
+            if (!line.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            int tagSeparator = line.IndexOf(':');
+            images.Add(new DockerImage(line[Prefix.Length..tagSeparator], line[(tagSeparator + 1)..]));
+        }
+
+        return images;
     }
 }
