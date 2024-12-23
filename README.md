@@ -81,7 +81,7 @@ To run the tests, first build the test image:
 docker build -f src/Distroless.HealthChecks/Dockerfile -t distroless-dotnet-healthchecks:test --target binary .
 ```
 
-Then run the tests (it takes an unsubstantial amount of time):
+Then run the tests (it can take a long time):
 
 ```bash
 dotnet test
