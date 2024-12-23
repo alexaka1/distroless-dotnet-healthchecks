@@ -24,7 +24,17 @@ env:
 
 jobs:
   build-healthcheck:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        platform:
+          - amd64
+#          - arm64
+        include:
+          - target-os: linux
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
@@ -46,18 +56,28 @@ jobs:
           context: .
           file: src/Distroless.HealthChecks/Dockerfile
           target: binary
-          platforms: linux/amd64
+          platforms: ${{ matrix.target-os }}/${{ matrix.platform }}
           push: false
           tags: ${{ env.HEALTHCHECK_IMAGE_NAME }}:${{ env.HEALTHCHECK_IMAGE_TAG }}
           outputs: type=docker,dest=/tmp/image.tar
       - name: Upload artifact
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
-          name: ${{ env.HEALTHCHECK_IMAGE_NAME }}
+          name: ${{ env.HEALTHCHECK_IMAGE_NAME }}-${{ matrix.target-os }}-${{ matrix.platform }}
           path: /tmp/image.tar
   test:
     needs: build-healthcheck
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        platform:
+          - amd64
+#          - arm64
+        include:
+          - target-os: linux
     permissions:
       contents: read
       pull-requests: write
@@ -78,7 +98,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: ${{ env.HEALTHCHECK_IMAGE_NAME }}
+          name: ${{ env.HEALTHCHECK_IMAGE_NAME }}-${{ matrix.target-os }}-${{ matrix.platform }}
           path: /tmp
       - name: Load image
         run: |
