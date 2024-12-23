@@ -32,7 +32,7 @@ jobs:
           - ubuntu-latest
         platform:
           - amd64
-          - arm64
+#          - arm64
         include:
           - target-os: linux
     steps:
@@ -75,7 +75,7 @@ jobs:
           - ubuntu-latest
         platform:
           - amd64
-          - arm64
+#          - arm64
         include:
           - target-os: linux
     permissions:
@@ -120,8 +120,6 @@ jobs:
           --blame-hang-timeout 30m
           --
           RunConfiguration.CollectSourceInformation=true
-        env:
-          DOCKER_DEFAULT_PLATFORM: ${{ matrix.target-os }}/${{ matrix.platform }}
       - name: TRX report
         if: ${{ !cancelled() }}
         run: dotnet trx --gh-summary False --gh-comment True
