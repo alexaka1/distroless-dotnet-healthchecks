@@ -72,3 +72,17 @@ The `Uri` parameter is just a convenience input for baking in the url to the Doc
 You will need the .Net 9 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.
 
 On Windows you must use WSL2 as the docker backend.
+
+### Tests
+
+To run the tests, first build the test image:
+
+```bash
+docker build -f src/Distroless.HealthChecks/Dockerfile -t distroless-dotnet-healthchecks:test --target binary .
+```
+
+Then run the tests (it can take a long time):
+
+```bash
+dotnet test
+```
