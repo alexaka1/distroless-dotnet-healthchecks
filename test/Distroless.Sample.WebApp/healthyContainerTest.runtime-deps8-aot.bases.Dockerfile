@@ -1,18 +1,18 @@
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:74a14ce3ebbb56752032d643754dd0509da15418f2eea1526241b8e104114021
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:4e44a5d4cfca4ef238046c9dc75acf3b9044f23562c5b948f7c4bf4070a61303
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:dd7e0c208c64be85809f3cae95da06acde1ef1741d97b2ee99a3ce9d9645cd71
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy@sha256:53c897319e81d09e5362094bdd02284a82fbc2af49db638578ccd4024ce09568
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:511ea6fd479d4de4f142244f58a0cf7d5561196069ca365d3f32b35cfbaddcd0
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled@sha256:df82f5ec8647c20714adf52f9b9c4ffe25bd568f1ba00ba30ccb6391e640518d
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled@sha256:de6d21521a8022eed8a0b66e2f08371275bf24537cb98441ad89c3596b7afe2d
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy-chiseled@sha256:06ff459a341cc6a709d1e92b62ba5ba871d1bd0fef3f3bf17543accc0ee0465c
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-azurelinux3.0-distroless@sha256:89a97fbedaf34ea35c460c4b64bed7423b9e463a86d90e88a1560d44de2835f9
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-azurelinux3.0-distroless@sha256:e229b2760f8e9930cd33db3f7c53e68dbaf5bea11c4615a155a21de2b7bb129e
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:6abee90e75eed04edf0c3f7ace01890dfd3a0396e9ab531ffa807be661a3a04b
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble@sha256:82dfe1750a34fdaa4ea51d8c9cad6ad50830ec6db11188aafccbfd5b739b90a0
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy@sha256:c840afa9499a1db300c4c757890844bbada74efc96b09b1f80a4af1e6146f572
 #FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-alpine@sha256:365fce739f974ab13f57937c1a964d197386d34eeced0642c27f4a74f2ac23c4
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled@sha256:455c9074801ddb8dda673195de803567af136e5cf66737f1a6ae7fa88f99c67d
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:3c9f54d63c33e97f1a96917aa2e11cccc8406dfc61bf473c2ec55bd10d0e97dc
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled@sha256:73971c36a1152bda540b5973d99ff289706248bfb1f2d35a1442802769a42d54
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled-aot@sha256:307c91b714b1a420ff5992f543800a1388fe8cc4b80096e421162b11a763f914
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless@sha256:e1d67b2af04078c4ccf6206e0562fc79947108caa2c3d097ed422e0b620f6ecc
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless-aot@sha256:ec6d67e1d38a8da0e2dc585dcef8d0aa7e35bae0cdd9a771f9eb43c0afdf5179
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled@sha256:c6c4441c94506ab1d15a0a0f8ebfdc518c93196d95e780cd4a426907be52f31a
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:c2b6a0b8b3d55607deef1449229c0f3e8ce885e2b9a52be947fb38af8b4b5758
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled@sha256:49353fe639fe9e3d9f1ae58fad35878686792def33730b73f5d09efb154b67a9
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled-aot@sha256:df9d3d92e6bde5db0a36076365a90a25de386efe4996730d200ce3ce7d95569f
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless@sha256:ffb6df4bfd76ffb66ef13481160229b9052a52056df6968eee3dac472a69bae9
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless-aot@sha256:06d1390b03ad63e2174eda84e6bcae2d808820118cd4b1fb9a99df7ae691770d
