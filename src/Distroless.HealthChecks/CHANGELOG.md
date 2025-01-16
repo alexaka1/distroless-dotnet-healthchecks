@@ -1,5 +1,13 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.0.1
+
+### Patch Changes
+
+- [#112](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/112) [`0ff7660`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/0ff76609eff4c256df75436db51268dddb3412e2) Thanks [@alexaka1](https://github.com/alexaka1)! - Bump deps to .NET 9.0.1
+
+  Recompile with newer SDK
+
 ## 1.0.0
 
 ### Major Changes
