@@ -1,7 +1,7 @@
 # docker manifest inspect mcr.microsoft.com/dotnet/runtime:8.0 -v | jq -r '.[0].Descriptor.digest'
 FROM mcr.microsoft.com/dotnet/runtime:8.0@sha256:312b67256e903c2cc175e5390245dd77c427527a20e83c6e0389e6e1e8e5a033
-FROM mcr.microsoft.com/dotnet/runtime:8.0-noble@sha256:e0ad6fc8f41318976f02c48dec8bc63faf938915bd2ca59d150bd7561be374e6
-FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy@sha256:9cfa840cebf76974d274d3a81e772b83d332b0d98941b9367bf53a072ad3809c
+FROM mcr.microsoft.com/dotnet/runtime:8.0-noble@sha256:4686961bbf1efbfb31ec383674ede23947a11cb9eb566e3028726796b4638c9f
+FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy@sha256:fbd9a6b8ad63a4813d9a8cc6d05cd89437ca8807a9b217084a38d76087c84272
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine@sha256:6970cb2d1f8ba6e87d49cfb35687106f0b80c874171978b60d8962daaa8e097f
 FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled@sha256:301240025bf84c623c7db49c8481ec4ea19d38ab0c31c8b05450918abe420255
