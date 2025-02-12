@@ -1,10 +1,10 @@
 # this file contains the test cases for the base images
 # this is so dependabot can conveniently update these images
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:ef3ead62e1159910ed1ebe65a350bad061c022cf4d7b793fdab7a45b32739dc7
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:80fd1757ac9900a2a2afd55f92b93c0362ac32e959514a8aa837e93db9282ac1
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:73c874bc3c12db34fca565af2617c5426137efc12842a004432fe3954d080c8d
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:6f7466eda39e24efaf7eab2325e15d776a685d13cc93b4ea0cde9ee4f7982210
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:5f534b13655c87e1d11d1a89eedd924f7f0f1d6017ebfa97ecd68e7752e84908
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:8d11e38518ca9e0a6473872779b9cc6973007ed31ceff698e00c07b51d438015
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:382ddb37fa5cf03bfd8a6ae96d035e3faf87d62425254db139c08e92a3fed393
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:92e002c6791a68c8405e9fda1e6d83ee10649a7f690d82662bbe6e4e8e31748a
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:8078ffb835cce18846788e570e34e99cf9161f202fb4efc7c580031b0fd0aecb
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:4d90ab65a65566038518b6109bd4c1f83b92afa6c38aca357642e105e7075772
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:4c9333f156b5296f874696a6b873b09f99b80167307660ba779eac52279fa29e
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:c2b6a0b8b3d55607deef1449229c0f3e8ce885e2b9a52be947fb38af8b4b5758
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0@sha256:c1f55d20ef9d037a0f4caff532333aff1e3cbb4842507ebc9899e3c07cb1167c

@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:f77d967b8c3ec67b9af4bf577177c1a350e4f769618ff419f632b674edfa9be8
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:d44d3e474e5c210b5fab9943833027e4d453b74ae533c2b8f511688c2326dd3e
+FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:adc89f84d53514cdc17677f3334775879d80d08ac8997a4b3fba8d20a6d6de9d
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:9e0ad7347e9838e862e4146d8d7c9ffb4c2b9efc915e6d52297ef137a3775925
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine@sha256:73c64859278d20ed7a90046c1eaa5c750d9f053cd8760781209540f452e92bcb
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled@sha256:2aae5a49d55c1d7eebabca26f60a5208071142884fdf26cc2f087ac52685c5c2
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless@sha256:c9937dafa47d55f3568c38c4e09417d4b986047dc2fef1d5cc707793c0682e56
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled@sha256:ecaecad2614c3c946727a3fc22ef829771ce6527e9d82c639080771c2f67ea0a
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless@sha256:a34151d2b44b2d0fd4a7c54c727613c0b00076bfc9a6a261cddc691ac84b3160
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0@sha256:c7228ce6e099cbbc351118a9bc3157460aa6f3237f00cdb20c2904ebe7746d25
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0-noble@sha256:5b69dee7b9176378fb773d35eef6d2a2f4a04890f5e1d965c8d1265153aba655
 #FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0-alpine@sha256:8ea92afa53ae5bd3d4bace14656285d9047ec786a2b5e337f2e0c6330c78e374
