@@ -4,7 +4,7 @@ ARG BUILD_CONFIGURATION=Release
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled-aot@sha256:716f5a59534a1a93edced745be5b2ba78f5a3a29caabf510cae923166dd2496c AS base
 WORKDIR /app
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-aot@sha256:24d16144633a7dbc8e8a5bcb52a9e58256172b48edcc467f912ed29ff25a3c98 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-aot@sha256:e362db89e25be72201300d747fe2214c01d2b7e31e870cb047bcc0c355f6dbc3 AS build
 ARG BUILD_CONFIGURATION
 ARG TARGETARCH
 WORKDIR /src
