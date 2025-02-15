@@ -4,5 +4,7 @@
   "initialVersions": {
     "alexaka1/distroless-dotnet-healthchecks": "1.0.1"
   },
-  "changesets": []
+  "changesets": [
+    "popular-papayas-notice"
+  ]
 }
