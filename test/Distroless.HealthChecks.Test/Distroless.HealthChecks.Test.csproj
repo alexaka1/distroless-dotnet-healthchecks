@@ -7,20 +7,19 @@
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
+  <PropertyGroup Label="Microsoft.Testing.Platform">
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="1.6.0" />
     <PackageReference Include="Testcontainers" Version="4.2.0"/>
-    <PackageReference Include="xunit.v3" Version="1.0.1"/>
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="xunit.v3" Version="1.1.0"/>
   </ItemGroup>
 
   <ItemGroup>
