@@ -121,8 +121,8 @@ jobs:
           --crashdump
           --hangdump
           --hangdump-timeout 30m
-          --retry-failed-tests true
-          --retry-failed-tests-max-tests 3
+          --retry-failed-tests 2
+          --retry-failed-tests-max-tests 5
       - name: TRX report
         if: ${{ !cancelled() }}
         run: dotnet trx --gh-summary False --gh-comment True
