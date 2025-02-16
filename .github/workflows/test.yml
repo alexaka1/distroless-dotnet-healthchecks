@@ -112,13 +112,17 @@ jobs:
       - name: DotNet tools restore
         run: dotnet tool restore
       - name: Run tests
-        run: >
+        run: >-
           dotnet test 
           --configuration Release
           --logger "GitHubActions;summary.includeSkippedTests=true"
           --logger trx
-          --blame-hang-timeout 30m
           --
+          --crashdump
+          --hangdump
+          --hangdump-timeout 30m
+          --retry-failed-tests
+          --retry-failed-tests-max-tests 3
           RunConfiguration.CollectSourceInformation=true
       - name: TRX report
         if: ${{ !cancelled() }}
