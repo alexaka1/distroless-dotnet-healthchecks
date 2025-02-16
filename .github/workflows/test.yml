@@ -116,7 +116,6 @@ jobs:
           dotnet test 
           --configuration Release
           --logger "GitHubActions;summary.includeSkippedTests=true"
-          --logger trx
           --
           --crashdump
           --hangdump
