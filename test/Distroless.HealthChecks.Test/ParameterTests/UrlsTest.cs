@@ -72,7 +72,6 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
         string dockerfile,
         string[] urls, HealthStatus expected)
     {
-        Assert.Fail();
         try
         {
             await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls),
