@@ -118,7 +118,6 @@ jobs:
           --logger "GitHubActions;summary.includeSkippedTests=true"
           --logger trx
           --
-          RunConfiguration.CollectSourceInformation=true
           --crashdump
           --hangdump
           --hangdump-timeout 30m
