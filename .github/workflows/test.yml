@@ -118,12 +118,12 @@ jobs:
           --logger "GitHubActions;summary.includeSkippedTests=true"
           --logger trx
           --
+          RunConfiguration.CollectSourceInformation=true
           --crashdump
           --hangdump
           --hangdump-timeout 30m
-          --retry-failed-tests
+          --retry-failed-tests true
           --retry-failed-tests-max-tests 3
-          RunConfiguration.CollectSourceInformation=true
       - name: TRX report
         if: ${{ !cancelled() }}
         run: dotnet trx --gh-summary False --gh-comment True
