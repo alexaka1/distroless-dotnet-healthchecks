@@ -120,7 +120,7 @@ jobs:
           --report-xunit-trx
       - name: TRX report
         if: ${{ !cancelled() }}
-        run: dotnet trx --gh-summary False --gh-comment True
+        run: dotnet trx --gh-summary False --gh-comment True -v verbose
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: TRX report upload
