@@ -1,0 +1,52 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    "security:openssf-scorecard",
+    ":automergePr",
+    ":automergePatch",
+    ":automergeRequireAllStatusChecks",
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "npm",
+        "node-version"
+      ],
+      "addLabels": [
+        "javascript"
+      ]
+    },
+    {
+      "matchDatasources": [
+        "nuget"
+      ],
+      "addLabels": [
+        ".NET"
+      ]
+    },
+    {
+      "matchDatasources": [
+        "docker"
+      ],
+      "addLabels": [
+        "docker"
+      ]
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    //"**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**"
+  ]
+}
+
+
