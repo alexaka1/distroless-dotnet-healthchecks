@@ -156,6 +156,6 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
         string Dockerfile,
         string[] Urls);
 
-    [GeneratedRegex(@"^(\d+)")]
+    [GeneratedRegex(@"^(\d+)\.\d+")]
     private static partial Regex DotnetMajorVersion();
 }
