@@ -156,6 +156,10 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
         string Dockerfile,
         string[] Urls);
 
+    /// <summary>
+    /// Gets the major version of dotnet from a docker image tag. For example, `10.0.0-preview.1-alpine3.21` would return `10`.
+    /// </summary>
+    /// <returns></returns>
     [GeneratedRegex(@"^(\d+)\.\d+")]
     private static partial Regex DotnetMajorVersion();
 }
