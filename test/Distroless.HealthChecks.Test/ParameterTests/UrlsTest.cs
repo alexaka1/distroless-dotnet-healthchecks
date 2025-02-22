@@ -6,7 +6,7 @@ using DotNet.Testcontainers.Images;
 
 namespace Distroless.HealthChecks.Test.ParameterTests;
 
-public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor testContext) : IAsyncLifetime
+public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAccessor testContext) : IAsyncLifetime
 {
     private IContainer _container = null!;
     private IFutureDockerImage _image = null!;
@@ -20,6 +20,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
                     Tags));
 
 
+            var dotnetMajorVersion = DotnetMajorVersion();
             (string[] urls, HealthStatus expected)[] urls =
             [
                 ([GetUrl(HealthStatus.Healthy)], HealthStatus.Healthy),
@@ -40,7 +41,7 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
                 {
                     data.Add(image.Image,
                         image.Tag,
-                        image.Tag[..3],
+                        $"{dotnetMajorVersion.Match(image.Tag).Groups[1].Value}.0",
                         Dockerfile,
                         url.urls,
                         url.expected
@@ -154,4 +155,11 @@ public sealed class UrlsTest(ITestOutputHelper output, ITestContextAccessor test
         string TargetFramework,
         string Dockerfile,
         string[] Urls);
+
+    /// <summary>
+    /// Gets the major version of dotnet from a docker image tag. For example, `10.0.0-preview.1-alpine3.21` would return `10`.
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"^(\d+)\.\d+")]
+    private static partial Regex DotnetMajorVersion();
 }
