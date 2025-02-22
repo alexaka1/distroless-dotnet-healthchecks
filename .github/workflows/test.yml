@@ -110,7 +110,7 @@ jobs:
         run: dotnet tool restore
       - name: Run tests
         run: >-
-          dotnet test 
+          dotnet test
           test/Distroless.HealthChecks.Test/
           --configuration Release
           --
