@@ -110,7 +110,8 @@ jobs:
         run: dotnet tool restore
       - name: Run tests
         run: >-
-          dotnet test 
+          dotnet test
+          test/Distroless.HealthChecks.Test/
           --configuration Release
           --
           --crashdump
@@ -121,7 +122,7 @@ jobs:
           --report-xunit-trx
       - name: TRX report
         if: ${{ !cancelled() }}
-        run: dotnet trx --gh-summary False --gh-comment True -v verbose
+        run: dotnet trx --gh-summary False --gh-comment True
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: TRX report upload
