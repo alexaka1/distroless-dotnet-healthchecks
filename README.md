@@ -11,7 +11,7 @@ This is a simple pre-compiled .Net app, that is able to run a health check again
 
 ## Usage
 
-It works with any `.NET 8` or `.NET 9` base image (even those that are not chiseled). For example
+It works with any `.NET 8`, `.NET 9` or `.NET 10` base image (even those that are not chiseled). For example
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled AS final
