@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - beta
 concurrency: ${{ github.workflow }}-${{ github.ref }}-release
 permissions: { }
 env:
@@ -137,6 +138,7 @@ jobs:
       major: ${{ needs.check-release.outputs.major }}
       minor: ${{ needs.check-release.outputs.minor }}
       tag: ${{ needs.check-release.outputs.tag }}
+      environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     needs:

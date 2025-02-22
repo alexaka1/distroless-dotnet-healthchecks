@@ -39,6 +39,10 @@ on:
       tag:
         type: string
         required: false
+      environment:
+        description: The environment to use for the release
+        type: string
+        required: true
     secrets:
       DOCKERHUB_TOKEN:
         required: true
@@ -53,7 +57,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    environment: Production
+    environment: ${{ inputs.environment }}
     permissions:
       contents: write # for tagging and gh release
       packages: write # for ghcr.io
