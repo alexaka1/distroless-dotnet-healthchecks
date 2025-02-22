@@ -111,6 +111,7 @@ jobs:
       - name: Run tests
         run: >-
           dotnet test 
+          test/Distroless.HealthChecks.Test/
           --configuration Release
           --
           --crashdump
