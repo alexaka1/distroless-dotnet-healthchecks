@@ -5,6 +5,7 @@ ARG BUILD_CONFIGURATION=Release
 FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble AS build
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
+RUN apt update && apt install clang zlib1g-dev -y
 WORKDIR /src
 COPY ["nuget.config", "./"]
 COPY ["test/Distroless.Sample.WebApp/Distroless.Sample.WebApp.csproj", "test/Distroless.Sample.WebApp/"]
