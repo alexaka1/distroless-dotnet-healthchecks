@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:8d11e38518ca9e0a6473872779b9cc6973007ed31ceff698e00c07b51d438015
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:f14161ac04f03d5a58f7ce2a665c2c2a2803330d04ded1556f8e2eefe2aa4515
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:5c0322fd57c6682673aebdbf2f9b325c07837f18fcaff74fc70f6456e323f34c
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy@sha256:f3a208df7eab198eb7f734892d164f2287f92aabf787427b0ad177a295d6ed39
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
