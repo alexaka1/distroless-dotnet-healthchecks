@@ -124,7 +124,6 @@ jobs:
           --retry-failed-tests 2
           --retry-failed-tests-max-tests 5
           --report-xunit-trx
-          --max-threads 1
       - name: TRX report
         if: ${{ !cancelled() }}
         run: dotnet trx --gh-summary False --gh-comment True
