@@ -177,6 +177,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: ${{ inputs.image }}:${{ inputs.semver }}
       - name: Update repo description
+        if: ${{ ! fromJSON(steps.changelog.outputs.prerelease) }}
         uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
         with:
           username: ${{ github.repository_owner }}
