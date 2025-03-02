@@ -5,6 +5,7 @@
     "alexaka1/distroless-dotnet-healthchecks": "1.0.1"
   },
   "changesets": [
+    "lucky-hornets-allow",
     "popular-papayas-notice"
   ]
 }
