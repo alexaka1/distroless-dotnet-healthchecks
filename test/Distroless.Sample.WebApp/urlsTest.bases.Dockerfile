@@ -13,7 +13,7 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled@sha256:1d6
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled-aot@sha256:716f5a59534a1a93edced745be5b2ba78f5a3a29caabf510cae923166dd2496c
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-azurelinux3.0-distroless@sha256:82c62cc4f1c9f9165b10dd3482ed85d13d1306c91f16a7179f38650e8bc88e19
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-azurelinux3.0-distroless-aot@sha256:752c13141f2462420f0da92be52c1713613f6f4b73b722c57b192b178f098f12
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview@sha256:299d5f27a9664cb3f23301714798a04b09caa5b4f482ce3627754974438790c3
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview@sha256:8d7047e70ce55fe451c61c21d87f52336e8e4482bd795d6e3815bced09e73ca4
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble@sha256:8d7047e70ce55fe451c61c21d87f52336e8e4482bd795d6e3815bced09e73ca4
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled@sha256:cabdde76630651de6af5285582f84659a32002135136d5658278fd5951068f2d
 #FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled-aot
