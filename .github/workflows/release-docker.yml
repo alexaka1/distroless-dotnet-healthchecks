@@ -142,13 +142,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
       - name: Attest GitHub Container Registry
-        uses: actions/attest-build-provenance@bd77c077858b8d561b7a36cbe48ef4cc642ca39d # v2.2.2
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         with:
           subject-name: ghcr.io/${{ inputs.image }}
           subject-digest: ${{ steps.docker_build.outputs.digest }}
           push-to-registry: false
       - name: Attest Docker Hub
-        uses: actions/attest-build-provenance@bd77c077858b8d561b7a36cbe48ef4cc642ca39d # v2.2.2
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         with:
           subject-name: docker.io/${{ inputs.image }}
           subject-digest: ${{ steps.docker_build.outputs.digest }}
