@@ -5,7 +5,9 @@
     "security:openssf-scorecard",
     ":automergePr",
     ":automergePatch",
+    ":automergeDigest",
     ":automergeRequireAllStatusChecks",
+    ":rebaseStalePrs",
   ],
   "baseBranches": ["$default", "/^beta$/"],
   "labels": [
