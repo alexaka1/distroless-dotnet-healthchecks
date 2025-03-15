@@ -2,9 +2,10 @@
 ARG TARGET_FRAMEWORK="9.0"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
-FROM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-aot@sha256:7d2b6ef60f9c3711969a101fad228046f18378aeefad59088ee7351bb4186ed0 AS build
+FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble@sha256:591e3af2bf8c8a9192a5f5327ea8aad14ef62cfdbd48069b47a9525cc4d5d19f AS build
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
+RUN apt update && apt install clang zlib1g-dev -y
 WORKDIR /src
 COPY ["nuget.config", "./"]
 COPY ["test/Distroless.Sample.WebApp/Distroless.Sample.WebApp.csproj", "test/Distroless.Sample.WebApp/"]
