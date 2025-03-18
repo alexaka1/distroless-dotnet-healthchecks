@@ -15,9 +15,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
-    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.6.2" />
-    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.6.2" />
-    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="1.6.2" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.6.3" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.6.3" />
+    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="1.6.3" />
     <PackageReference Include="Testcontainers" Version="4.3.0"/>
     <PackageReference Include="xunit.v3" Version="2.0.0"/>
   </ItemGroup>
