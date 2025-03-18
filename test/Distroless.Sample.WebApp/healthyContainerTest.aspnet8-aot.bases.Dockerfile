@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:8757d38b7bef730a7723e28792b789c359fd24509a5cf6cb15143e4b44615fc0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:3a305bc84767bbb651bd035119fe319a91fe927155706f7296499ca0205c812a
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble@sha256:786e93c7fcfae597a20e2f5de77b7c9b250d95e0f6d860ba6662440d0e63a39d
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy@sha256:cf17c4278a8fd517206d4fb8ed30d864f186a38715ab3e54c94fd3cdbbfbf627
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
