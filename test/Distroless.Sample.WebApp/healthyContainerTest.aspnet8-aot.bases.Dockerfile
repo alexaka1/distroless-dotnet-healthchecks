@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:6adf1d5a74bceda87
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:bf7d5995ce7eaa7b2966fc74e1af8a01bf9b987c254b9384cfa84c7f9c5de39d
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:bb6443801214b1147bf3946c802b257d5f910c2779d054936803fe91df9db6e6
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0@sha256:6fc7a3884e4abcb3a73186656bf774b4050aa219d5eac8560417ad60c4126425
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:221c8631c234771a7915e4563d88cda8c96aa9faf184020aaf6fdb1a8023fd90
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:7728369d6bfb70507e07db73dd6cfe172ee4573843085d164ddd171656c31699
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:bad7ddbe5daa6da6a01eb3baa8c61a705ad94765b09fb026e2d289b930272e8e
 #FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-alpine@sha256:98a00b54d77483df498494d98895db03ce0a5d7b783c4a2930485547e49c7365
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble-chiseled@sha256:941d86463c4f563a939def1b9734ce2ce60596dbe3217e2ac3210d40dd5a6ba6
