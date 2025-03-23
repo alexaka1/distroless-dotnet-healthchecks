@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - uses: chainguard-dev/actions/setup-gitsign@a2ff80dd945a15cfcaff6c8f3bf48dbf499981d5
+      - uses: chainguard-dev/actions/setup-gitsign@19f50ca62fcb3e94c768f5fcffb4b14fcdc6c5ed
       - name: Get version of package
         id: version
         run: |
@@ -87,7 +87,7 @@ jobs:
           echo "should deploy" > ${{ matrix.artifact }}.md
       - name: "Upload if package should be released"
         if: ${{ ! fromJSON(steps.check-image.outputs.exists) }}
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: check-release-${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.md
@@ -106,7 +106,7 @@ jobs:
           disable-sudo: true
           egress-policy: audit
       - name: Download artifact
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: check-release-*
           path: /tmp/check-release
