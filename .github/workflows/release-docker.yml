@@ -153,6 +153,11 @@ jobs:
           subject-name: docker.io/${{ inputs.image }}
           subject-digest: ${{ steps.docker_build.outputs.digest }}
           push-to-registry: false
+      - name: Add docker tags and digest to release changelog
+        run: |
+          echo "### Digests" >> "${{ steps.changelog.outputs.changes }}"
+          echo "" >> "${{ steps.changelog.outputs.changes }}"
+          echo "${{ steps.meta.outputs.tags }}" | awk -v digest="${{ steps.docker_build.outputs.digest }}" '{print "- " $0 "@" digest}' >> "${{ steps.changelog.outputs.changes }}"
       - name: Tag release
         run: |
           git tag -s "${{ inputs.image }}-${{ inputs.semver }}" -m "Release ${{ inputs.image }}:${{ inputs.semver }}"
@@ -172,6 +177,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: ${{ inputs.image }}:${{ inputs.semver }}
       - name: Update repo description
+        if: ${{ ! fromJSON(steps.changelog.outputs.prerelease) }}
         uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
         with:
           username: ${{ github.repository_owner }}
