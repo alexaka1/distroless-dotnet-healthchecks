@@ -1,5 +1,15 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.1.0
+
+### Minor Changes
+
+- [#160](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/160) [`a11e7c0`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/a11e7c068fec0b5b024799471d67ff9f28a6957e) Thanks [@alexaka1](https://github.com/alexaka1)! - Add .Net 10 support
+
+### Patch Changes
+
+- [#160](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/160) [`a11e7c0`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/a11e7c068fec0b5b024799471d67ff9f28a6957e) Thanks [@alexaka1](https://github.com/alexaka1)! - This is a pre-release test. It is the same as 1.0.1
+
 ## 1.0.2
 
 ### Patch Changes
