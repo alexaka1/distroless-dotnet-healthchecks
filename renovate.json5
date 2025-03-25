@@ -39,8 +39,6 @@
         "docker"
       ]
     },
-{
-  "packageRules": [
     {
       "groupName": ".NET Core (Nightly) Docker containers",
       "matchDatasources": [
@@ -50,8 +48,6 @@
         "mcr.microsoft.com/nightly/dotnet/**"
       ]
     }
-  ]
-}
   ],
   "ignorePaths": [
     "**/node_modules/**",
