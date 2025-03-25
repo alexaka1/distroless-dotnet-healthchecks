@@ -2,7 +2,7 @@
 ARG TARGET_FRAMEWORK="9.0"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble@sha256:88d2a9eda4850855954714e531f7ceffaf322673bbf4eb7e486e4bb00ae41c7d AS build
+FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble@sha256:877fc37b98487158d68c389a04b97d586d604c6be9e2329194518e8c2261103d AS build
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
 RUN apt update && apt install clang zlib1g-dev -y
