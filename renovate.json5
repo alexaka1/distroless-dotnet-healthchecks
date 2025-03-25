@@ -45,7 +45,7 @@
         "docker"
       ],
       "matchPackageNames": [
-        "mcr.microsoft.com/nightly/dotnet/**"
+        "mcr.microsoft.com/dotnet/nightly/**"
       ]
     }
   ],
