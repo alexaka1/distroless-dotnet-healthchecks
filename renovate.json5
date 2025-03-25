@@ -38,7 +38,20 @@
       "addLabels": [
         "docker"
       ]
+    },
+{
+  "packageRules": [
+    {
+      "groupName": ".NET Core (Nightly) Docker containers",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "mcr.microsoft.com/nightly/dotnet/**"
+      ]
     }
+  ]
+}
   ],
   "ignorePaths": [
     "**/node_modules/**",
