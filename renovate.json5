@@ -1,66 +1,64 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    "security:openssf-scorecard",
-    ":automergePr",
-    ":automergePatch",
-    ":automergeDigest",
-    ":automergeRequireAllStatusChecks",
-    ":rebaseStalePrs",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    'security:openssf-scorecard',
+    ':automergePr',
+    ':automergePatch',
+    ':automergeDigest',
+    ':automergeRequireAllStatusChecks',
+    ':rebaseStalePrs',
   ],
-  "baseBranches": ["$default", "/^beta$/"],
-  "labels": [
-    "dependencies"
+  baseBranches: [
+    '$default',
+    '/^beta$/',
   ],
-  "packageRules": [
+  labels: [
+    'dependencies',
+  ],
+  packageRules: [
     {
-      "matchDatasources": [
-        "npm",
-        "node-version"
+      matchDatasources: [
+        'npm',
+        'node-version',
       ],
-      "addLabels": [
-        "javascript"
-      ]
+      addLabels: [
+        'javascript',
+      ],
     },
     {
-      "matchDatasources": [
-        "nuget"
+      matchDatasources: [
+        'nuget',
       ],
-      "addLabels": [
-        ".NET"
-      ]
+      addLabels: [
+        '.NET',
+      ],
     },
     {
-      "matchDatasources": [
-        "docker"
+      matchDatasources: [
+        'docker',
       ],
-      "addLabels": [
-        "docker"
-      ]
+      addLabels: [
+        'docker',
+      ],
     },
-{
-  "packageRules": [
     {
-      "groupName": ".NET Core (Nightly) Docker containers",
-      "matchDatasources": [
-        "docker"
+      groupName: '.NET Core (Nightly) Docker containers',
+      matchDatasources: [
+        'docker',
       ],
-      "matchPackageNames": [
-        "mcr.microsoft.com/nightly/dotnet/**"
-      ]
-    }
-  ]
-}
+      matchPackageNames: [
+        'mcr.microsoft.com/nightly/dotnet/**',
+      ],
+    },
   ],
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "**/vendor/**",
-    "**/examples/**",
-    "**/__tests__/**",
-    //"**/test/**",
-    "**/tests/**",
-    "**/__fixtures__/**"
-  ]
+  ignorePaths: [
+    '**/node_modules/**',
+    '**/bower_components/**',
+    '**/vendor/**',
+    '**/examples/**',
+    '**/__tests__/**',
+    '**/tests/**',
+    '**/__fixtures__/**',
+  ],
 }
