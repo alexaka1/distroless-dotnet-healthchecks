@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/runtime:9.0@sha256:ee983d3c1ecf618b8d101025748b8325f269cff288589485b918cb27d4cb9811
-FROM mcr.microsoft.com/dotnet/runtime:9.0-noble@sha256:a4f50a6556dab856a8e901d2dffa400ac5e066079caa7ddc50410ed8e72482fc
+FROM mcr.microsoft.com/dotnet/runtime:9.0@sha256:17de18d43822c0379f9779ecaf5e8886b73b413b5009251a277c08ff7be47027
+FROM mcr.microsoft.com/dotnet/runtime:9.0-noble@sha256:6cd88dcf3fe0be3286ca299d41ee922544cda02c6af9ebf4dd732270141be8e8
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine@sha256:6ec7c9a35965391c389c7c19fe5321d7f25b874cd5e792b93e1b4c89b6dc3140
-FROM mcr.microsoft.com/dotnet/runtime:9.0-noble-chiseled@sha256:0eb100b4135630b388acecf0b35c9d974a682fcf4c96d7ef731d814a4a8ea93b
-FROM mcr.microsoft.com/dotnet/runtime:9.0-azurelinux3.0-distroless@sha256:d91c6c6dea7a86c608a0610376a9508cf441a656cd8433b804e2ec538c9d32b3
+FROM mcr.microsoft.com/dotnet/runtime:9.0-noble-chiseled@sha256:bf2eb655f67f443eb3b2827ccedb1f936bdb34dbe9d716ed1ab28cb3b34bea6f
+FROM mcr.microsoft.com/dotnet/runtime:9.0-azurelinux3.0-distroless@sha256:31fca703a38ddde9f9cdc77c734c039885c5b0567c20ec03a38d67ce0d8a84b7
 FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0@sha256:a7e2e8efd3be22a8500ec332d084dc47ae872f4890dc303f5904d00dbbb4a5c7
 FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-noble@sha256:38c87cb9493c6a3388e48a50e3911aacf1cc7640412bc847fbffde001ded7d2c
 #FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-alpine@sha256:f61b524799b0a07d2429829c94535494eb78bcfd47c4e1765fce6252de6ff071
