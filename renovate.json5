@@ -78,7 +78,7 @@
       "description": "Update Qodana linter in CI/CD",
       "fileMatch": ["(^|/|\\.)code-quality.ya?ml$"],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s\\k<packageName>:(?<currentValue>.+?)\"\\s"
+        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s\\k<packageName>:(?<currentValue>.+?)(?:,|\\s)"
       ]
     }
   ]
