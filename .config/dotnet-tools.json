@@ -8,6 +8,13 @@
         "trx"
       ],
       "rollForward": false
+    },
+    "packageguard": {
+      "version": "1.0.1",
+      "commands": [
+        "PackageGuard"
+      ],
+      "rollForward": false
     }
   }
 }
