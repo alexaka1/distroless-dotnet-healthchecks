@@ -38,6 +38,7 @@ public class StatusResult
         /// </summary>
         public const byte UnHealthy = 1;
 
+        // ReSharper disable once UnusedMember.Global
         public const byte Degraded = 2;
     }
 }

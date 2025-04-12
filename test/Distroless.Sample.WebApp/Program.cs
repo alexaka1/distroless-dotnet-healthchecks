@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Distroless.Sample.WebApp;
 
 WebApplication app;
 try
@@ -9,7 +9,7 @@ try
 
     builder.Services.ConfigureHttpJsonOptions(options =>
     {
-        options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+        options.SerializerOptions.TypeInfoResolverChain.Insert(0, Distroless.Sample.WebApp.AppJsonSerializerContext.Default);
     });
 
     app = builder.Build();
@@ -42,9 +42,9 @@ try
     {
         null => Results.Ok(),
         0 => Results.Ok(new HealthStatus("Healthy")),
-        1 => Results.Json(new HealthStatus("Unhealthy"), AppJsonSerializerContext.Default.HealthStatus,
+        1 => Results.Json(new HealthStatus("Unhealthy"), Distroless.Sample.WebApp.AppJsonSerializerContext.Default.HealthStatus,
             statusCode: StatusCodes.Status500InternalServerError),
-        2 => Results.Json(new HealthStatus("Degraded"), AppJsonSerializerContext.Default.HealthStatus,
+        2 => Results.Json(new HealthStatus("Degraded"), Distroless.Sample.WebApp.AppJsonSerializerContext.Default.HealthStatus,
             statusCode: StatusCodes.Status500InternalServerError),
         _ => Results.BadRequest(),
     });
@@ -56,11 +56,3 @@ catch (Exception e)
     logger.LogCritical(e, "Application has crashed");
     throw;
 }
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-public record HealthStatus(string Status);
-
-[JsonSerializable(typeof(Todo[]))]
-[JsonSerializable(typeof(HealthStatus))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext;

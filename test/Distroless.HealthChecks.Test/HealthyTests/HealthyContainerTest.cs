@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -11,12 +13,14 @@ namespace Distroless.HealthChecks.Test.HealthyTests;
 public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITestContextAccessor testContext)
     : IAsyncLifetime where TData : ITestData
 {
-    private IContainer _container = null!;
-    private IFutureDockerImage _image = null!;
+    private IContainer? _container;
+    private IFutureDockerImage? _image;
     public static TheoryData<string, string, string, string> Data => TData.GetTheoryData();
 
     public async ValueTask DisposeAsync()
     {
+        Debug.Assert(_container is not null);
+        Debug.Assert(_image is not null);
         await _image.DisposeAsync();
         await _container.DisposeAsync();
     }
@@ -42,6 +46,11 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
         catch (Exception e)
         {
             output.WriteLine(e.ToString());
+            if (_container is null)
+            {
+                throw;
+            }
+
             var logs = await _container.GetLogsAsync(ct: testContext.Current.CancellationToken);
             output.WriteLine(logs.Stdout);
             output.WriteLine("Errors:");
@@ -60,6 +69,8 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
         }
     }
 
+    [MemberNotNull(nameof(_container))]
+    [MemberNotNull(nameof(_image))]
     private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
         _image = new ImageFromDockerfileBuilder()

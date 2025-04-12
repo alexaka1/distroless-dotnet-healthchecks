@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
@@ -9,8 +11,8 @@ namespace Distroless.HealthChecks.Test.ParameterTests;
 
 public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAccessor testContext) : IAsyncLifetime
 {
-    private IContainer _container = null!;
-    private IFutureDockerImage _image = null!;
+    private IContainer? _container;
+    private IFutureDockerImage? _image;
 
     public static TheoryData<string, string, string, string, string[], HealthStatus> Data
     {
@@ -59,6 +61,8 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
 
     public async ValueTask DisposeAsync()
     {
+        Debug.Assert(_container is not null);
+        Debug.Assert(_image is not null);
         await _image.DisposeAsync();
         await _container.DisposeAsync();
     }
@@ -94,24 +98,29 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
         catch (Exception e)
         {
             output.WriteLine(e.ToString());
-            var logs = await _container.GetLogsAsync(ct: testContext.Current.CancellationToken);
-            output.WriteLine(logs.Stdout);
-            output.WriteLine("Errors:");
-            output.WriteLine(logs.Stderr);
-            output.WriteLine("Health:");
-            (string @out, string error) =
-                await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
-            if (string.IsNullOrWhiteSpace(@out) is false)
+            if (_container is not null)
             {
-                output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
-                    new JsonSerializerOptions { WriteIndented = true }));
-            }
+                var logs = await _container.GetLogsAsync(ct: testContext.Current.CancellationToken);
+                output.WriteLine(logs.Stdout);
+                output.WriteLine("Errors:");
+                output.WriteLine(logs.Stderr);
+                output.WriteLine("Health:");
+                (string @out, string error) =
+                    await Utils.InspectContainer(_container.Id, testContext.Current.CancellationToken);
+                if (string.IsNullOrWhiteSpace(@out) is false)
+                {
+                    output.WriteLine(JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(@out),
+                        new JsonSerializerOptions { WriteIndented = true }));
+                }
 
-            output.WriteLine(error);
+                output.WriteLine(error);
+            }
             throw;
         }
     }
 
+    [MemberNotNull(nameof(_container))]
+    [MemberNotNull(nameof(_image))]
     private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
         _image = new ImageFromDockerfileBuilder()
