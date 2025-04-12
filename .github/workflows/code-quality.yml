@@ -42,7 +42,7 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2024.3
         with:
-          pr-mode: false
+          pr-mode: ${{ github.event.pull_request != null }}
           # renovate: datasource=docker packageName=jetbrains/qodana-cdnet
           args: --linter,jetbrains/qodana-cdnet:2024.3-eap,--configuration=Release
           upload-result: true
