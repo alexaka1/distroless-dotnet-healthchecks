@@ -45,6 +45,8 @@ jobs:
           persist-credentials: false
       - name: DotNet tools restore
         run: dotnet tool restore
+      - name: DotNet restore
+        run: dotnet restore
       - name: Check licenses
         run: >-
           dotnet packageguard 
