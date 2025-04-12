@@ -10,11 +10,8 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0@sha256:eeaed60d9666e32c737275e9bf2e1fb7204176419e86193e6feb27da9b0b7372
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble@sha256:be70e31e7df4c675618870837bb0efbd81b14fa98fc6b7673b3b842dc8750d99
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled@sha256:fe2070f33c445f33fc31b40bd841620d21d48554e3c9ab8e40da07eb6f69e739
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled-aot@sha256:fe2070f33c445f33fc31b40bd841620d21d48554e3c9ab8e40da07eb6f69e739
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-azurelinux3.0-distroless@sha256:17ffe10392a61f2dbf95b10e612761db4b6bdda4e99d6b6f68e6c5d6587dd3d1
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-azurelinux3.0-distroless-aot@sha256:17ffe10392a61f2dbf95b10e612761db4b6bdda4e99d6b6f68e6c5d6587dd3d1
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview@sha256:9a8aa245ebc3e73eaa5787049957d764e05fe0f8fc3ad6723c3042464488ad82
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble@sha256:9a8aa245ebc3e73eaa5787049957d764e05fe0f8fc3ad6723c3042464488ad82
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled@sha256:d089ac1c7a96166ec7a394564b9337934947c066b4f4dc02e41d9ee2555d7991
 #FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled-aot
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-azurelinux3.0-distroless@sha256:135c47f7f28b1416c3bf8e3b5ccdf8c1960174be08eae1e3323aced7a1bf5eaf
