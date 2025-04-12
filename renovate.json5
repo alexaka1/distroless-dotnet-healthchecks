@@ -8,8 +8,12 @@
     ":automergeDigest",
     ":automergeRequireAllStatusChecks",
     ":rebaseStalePrs",
+    ":pinDependencies",
   ],
-  "baseBranches": ["$default", "/^beta$/"],
+  "baseBranches": [
+    "$default",
+    "/^beta$/"
+  ],
   "labels": [
     "dependencies"
   ],
