@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
+using JetBrains.Annotations;
 
 namespace Distroless.HealthChecks.Test.ParameterTests;
 
@@ -69,6 +70,7 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
 
     [Theory]
     [MemberData(nameof(Data))]
+    [UsedImplicitly]
     public async Task Container_returns_expected_health_status(string image, string runtimeTag, string targetFramework,
         string dockerfile,
         string[] urls, HealthStatus expected)
@@ -149,10 +151,11 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
         };
     }
 
-    private record TestData(
+    private sealed record TestData(
         string Image,
         string RuntimeTag,
         string TargetFramework,
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         string Dockerfile,
         string[] Urls);
 

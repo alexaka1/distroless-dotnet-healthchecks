@@ -3,9 +3,11 @@ using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
+using JetBrains.Annotations;
 
 namespace Distroless.HealthChecks.Test.HealthyTests;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITestContextAccessor testContext)
     : IAsyncLifetime where TData : ITestData
 {
@@ -26,6 +28,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
 
     [Theory]
     [MemberData(nameof(Data))]
+    [UsedImplicitly]
     public async Task Container_is_healthy(string image, string runtimeTag, string targetFramework, string dockerfile)
     {
         try

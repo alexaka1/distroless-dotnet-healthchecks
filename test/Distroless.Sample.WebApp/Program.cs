@@ -63,6 +63,4 @@ public record HealthStatus(string Status);
 
 [JsonSerializable(typeof(Todo[]))]
 [JsonSerializable(typeof(HealthStatus))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-}
+internal partial class AppJsonSerializerContext : JsonSerializerContext;

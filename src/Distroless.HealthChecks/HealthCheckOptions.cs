@@ -81,12 +81,6 @@ public partial class HealthCheckOptionsValidator(
         return false;
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Invalid uri '{Uri}'", EventName = "InvalidUri")]
-    private partial void LogInvalidUri(string uri);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Urls: {Urls}", EventName = "Urls")]
-    private partial void LogUrls(string? urls);
-
     [LoggerMessage(Level = LogLevel.Error, Message = "Unable to determine host address of {Uri}",
         EventName = "UnableToDetermineHostAddress")]
     private partial void LogUnableToDetermineHostAddress(Exception ex, Uri uri);
