@@ -41,7 +41,7 @@ jobs:
         with:
           pr-mode: false
           # renovate: datasource=docker packageName=jetbrains/qodana-cdnet
-          args: --linter,jetbrains/qodana-cdnet:2024.3-eap
+          args: --linter,jetbrains/qodana-cdnet:2024.3-eap,--configuration=Release
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
