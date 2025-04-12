@@ -22,7 +22,7 @@ profile:
 #      - <path/where/not/run/inspection>
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
-#bootstrap: sh ./prepare-qodana.sh
+bootstrap: sh build/qodana.sh
 
 dotnet:
   solution: Distroless.sln
