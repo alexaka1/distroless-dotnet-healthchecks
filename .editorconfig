@@ -219,7 +219,7 @@ csharp_style_conditional_delegate_call = true:suggestion
 csharp_style_prefer_extended_property_pattern = true:suggestion
 
 # Space preferences
-csharp_space_around_declaration_statements = do_not_ignore
+csharp_space_around_declaration_statements = false
 
 # Blocks are allowed
 csharp_prefer_braces = true:suggestion

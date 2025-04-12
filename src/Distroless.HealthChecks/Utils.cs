@@ -1,6 +1,6 @@
 namespace Distroless.HealthChecks;
 
-public class Utils
+public static class Utils
 {
     /// <summary>
     ///     Sets the current directory to the location of the binary. This is required for,

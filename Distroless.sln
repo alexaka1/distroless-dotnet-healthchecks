@@ -10,11 +10,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 		package.json = package.json
 		pnpm-workspace.yaml = pnpm-workspace.yaml
+		allowed-licenses.json = allowed-licenses.json
+		nuget.config = nuget.config
+		qodana.yaml = qodana.yaml
+		renovate.json5 = renovate.json5
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{98C8D84E-175C-4D2C-9717-8AC13EBAF534}"
 	ProjectSection(SolutionItems) = preProject
-		.github\dependabot.yml = .github\dependabot.yml
 		.github\FUNDING.yml = .github\FUNDING.yml
 		.github\workflows\dependency-review.yml = .github\workflows\dependency-review.yml
 		.github\workflows\scorecards.yml = .github\workflows\scorecards.yml
@@ -24,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{98C8D8
 		.github\workflows\release.yml = .github\workflows\release.yml
 		.github\workflows\version.yml = .github\workflows\version.yml
 		.github\workflows\release-docker.yml = .github\workflows\release-docker.yml
+		.github\workflows\check-licenses.yml = .github\workflows\check-licenses.yml
+		.github\workflows\code-quality.yml = .github\workflows\code-quality.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2D6540E7-2AB7-4DB1-BD83-5ED16D7EA5BF}"

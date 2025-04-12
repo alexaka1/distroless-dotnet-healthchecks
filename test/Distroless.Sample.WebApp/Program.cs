@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Distroless.Sample.WebApp;
 
 WebApplication app;
 try
@@ -55,14 +55,4 @@ catch (Exception e)
 {
     logger.LogCritical(e, "Application has crashed");
     throw;
-}
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-public record HealthStatus(string Status);
-
-[JsonSerializable(typeof(Todo[]))]
-[JsonSerializable(typeof(HealthStatus))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
 }
