@@ -1,0 +1,69 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
+{
+	"name": "C# (.NET)",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": "."
+  },
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/node:1": {
+      "version": "22.14.0",
+      "pnpmVersion": "10.8.0"
+    }
+	},
+
+  "hostRequirements": {
+    "cpus": 8,
+    "memory": "32gb",
+    "storage": "64gb"
+  },
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [5000, 5001],
+	// "portsAttributes": {
+	//		"5001": {
+	//			"protocol": "https"
+	//		}
+	// }
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+
+	// Configure tool-specific properties.
+  "customizations": {
+    "jetbrains": {
+      "settings": {
+        "com.intellij:app:EditorSettings.is_ensure_newline_at_eof": true,
+        "com.intellij:app:EditorSettings.remove_trailing_blank_lines": true,
+        "com.intellij:app:GeneralSettings.autoSaveIfInactive": true,
+      },
+      "plugins": [],
+      "backend": "Rider"
+    },
+    "vscode": {
+      "extensions": [
+
+      ],
+      "settings": {
+        "remote.autoForwardPorts": true,
+        "remote.autoForwardPortsSource": "hybrid",
+        "remote.otherPortsAttributes": {
+          "onAutoForward": "ignore"
+        },
+        "dotnet.defaultSolution": "Distroless.sln"
+      }
+    }
+  },
+  // Use 'postCreateCommand' to run commands after the container is created.
+   "postCreateCommand": {
+     "dotnet": "dotnet workload restore && dotnet restore",
+     "tools": "dotnet tool restore",
+     "pnpm": "pnpm install"
+   },
+  "postStartCommand": "dotnet dev-certs https --trust"
+}

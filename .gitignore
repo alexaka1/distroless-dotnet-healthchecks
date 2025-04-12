@@ -363,3 +363,5 @@ FodyWeavers.xsd
 
 ### macOS
 .DS_Store
+
+.pnpm-store
