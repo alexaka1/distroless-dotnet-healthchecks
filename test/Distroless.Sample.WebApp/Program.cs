@@ -9,7 +9,7 @@ try
 
     builder.Services.ConfigureHttpJsonOptions(options =>
     {
-        options.SerializerOptions.TypeInfoResolverChain.Insert(0, Distroless.Sample.WebApp.AppJsonSerializerContext.Default);
+        options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
     });
 
     app = builder.Build();
@@ -42,9 +42,9 @@ try
     {
         null => Results.Ok(),
         0 => Results.Ok(new HealthStatus("Healthy")),
-        1 => Results.Json(new HealthStatus("Unhealthy"), Distroless.Sample.WebApp.AppJsonSerializerContext.Default.HealthStatus,
+        1 => Results.Json(new HealthStatus("Unhealthy"), AppJsonSerializerContext.Default.HealthStatus,
             statusCode: StatusCodes.Status500InternalServerError),
-        2 => Results.Json(new HealthStatus("Degraded"), Distroless.Sample.WebApp.AppJsonSerializerContext.Default.HealthStatus,
+        2 => Results.Json(new HealthStatus("Degraded"), AppJsonSerializerContext.Default.HealthStatus,
             statusCode: StatusCodes.Status500InternalServerError),
         _ => Results.BadRequest(),
     });
