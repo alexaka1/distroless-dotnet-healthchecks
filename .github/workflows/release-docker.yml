@@ -88,7 +88,7 @@ jobs:
         with:
           # we use credentials to push tags below
           persist-credentials: true
-      - uses: chainguard-dev/actions/setup-gitsign@87966c10ea9ee2c3a45da2dc41040ee57ab8376d
+      - uses: chainguard-dev/actions/setup-gitsign@be6c67b5b374ed43d908ac017ff9b04c271ad3d8
       - name: Create changelog for release
         id: changelog
         run: |
