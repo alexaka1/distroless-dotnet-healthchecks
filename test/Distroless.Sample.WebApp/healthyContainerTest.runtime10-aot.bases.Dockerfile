@@ -1,5 +1,5 @@
 # noble
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview@sha256:8bb9f083830817cfac32c1f5cb738bbfa90b3374d3e5f066eeb0effc989785d3
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview@sha256:6e85256218c8ccf37662a0e8b42039c3541afef0af0fe38b4222e11a3342ef60
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-trixie-slim@sha256:c14f1fe839025400ca1afd3a34c0c15a426d0841255c8ad9fd4a5018d30dd1ad
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-noble-chiseled@sha256:3dcb10edd0d9f55e8fef355a4d0314c1e4216388056da878eee62fffca3feff9
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-azurelinux3.0-distroless@sha256:89630237b46b5b905d5ed57d056c8895aa1b0f708194bfce608cf88310a720f7
