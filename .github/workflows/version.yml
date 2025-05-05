@@ -34,7 +34,7 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - uses: chainguard-dev/actions/setup-gitsign@dd4524afd480a43ead9543a08be1c5004ee8b0a7
+      - uses: chainguard-dev/actions/setup-gitsign@9c0be1ee0103db886d1887d114ec97f8766b7ef8
       - name: Create Release Pull Request or Prepare release
         id: changesets
         uses: changesets/action@06245a4e0a36c064a573d4150030f5ec548e4fcc # v1.4.10

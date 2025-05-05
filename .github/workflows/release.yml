@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - uses: chainguard-dev/actions/setup-gitsign@dd4524afd480a43ead9543a08be1c5004ee8b0a7
+      - uses: chainguard-dev/actions/setup-gitsign@9c0be1ee0103db886d1887d114ec97f8766b7ef8
       - name: Get version of package
         id: version
         run: |
