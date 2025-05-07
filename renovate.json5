@@ -1,85 +1,88 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    "security:openssf-scorecard",
-    ":automergePr",
-    ":automergePatch",
-    ":automergeDigest",
-    ":automergeRequireAllStatusChecks",
-    ":rebaseStalePrs",
-    ":pinDependencies",
-    "npm:unpublishSafe",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    'security:openssf-scorecard',
+    ':automergePr',
+    ':automergePatch',
+    ':automergeDigest',
+    ':automergeRequireAllStatusChecks',
+    ':rebaseStalePrs',
+    ':pinDependencies',
+    'npm:unpublishSafe',
   ],
-  "baseBranches": [
-    "$default",
-    "/^beta$/"
+  baseBranches: [
+    '$default',
+    '/^beta$/',
   ],
-  "labels": [
-    "dependencies"
+  labels: [
+    'dependencies',
   ],
-  "packageRules": [
+  packageRules: [
     {
-      "matchDatasources": [
-        "npm",
-        "node-version"
+      matchDatasources: [
+        'npm',
+        'node-version',
       ],
-      "addLabels": [
-        "javascript"
-      ]
+      addLabels: [
+        'javascript',
+      ],
     },
     {
-      "matchDatasources": [
-        "nuget"
+      matchDatasources: [
+        'nuget',
       ],
-      "addLabels": [
-        ".NET"
-      ]
+      addLabels: [
+        '.NET',
+      ],
     },
     {
-      "matchDatasources": [
-        "docker"
+      matchDatasources: [
+        'docker',
       ],
-      "addLabels": [
-        "docker"
-      ]
+      addLabels: [
+        'docker',
+      ],
     },
     {
-      "groupName": ".NET Core (Nightly) Docker containers",
-      "matchDatasources": [
-        "docker"
+      groupName: '.NET Core (Nightly) Docker containers',
+      matchDatasources: [
+        'docker',
       ],
-      "matchPackageNames": [
-        "mcr.microsoft.com/dotnet/nightly/**"
-      ]
-    }
+      matchPackageNames: [
+        'mcr.microsoft.com/dotnet/nightly/**',
+      ],
+    },
   ],
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "**/vendor/**",
-    "**/examples/**",
-    "**/__tests__/**",
-    //"**/test/**",
-    "**/tests/**",
-    "**/__fixtures__/**"
+  ignorePaths: [
+    '**/node_modules/**',
+    '**/bower_components/**',
+    '**/vendor/**',
+    '**/examples/**',
+    '**/__tests__/**',
+    '**/tests/**',
+    '**/__fixtures__/**',
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "regex",
-      "description": "Update pnpm in devcontainer",
-      "fileMatch": ["(^|/|\\.)devcontainer.json$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+\"(?:.*)\": \"(?<currentValue>.+?)\"\\s"
-      ]
+      customType: 'regex',
+      description: 'Update pnpm in devcontainer',
+      managerFilePatterns: [
+        '/(^|/|\\.)devcontainer.json$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+"(?:.*)": "(?<currentValue>.+?)"\\s',
+      ],
     },
     {
-      "customType": "regex",
-      "description": "Update Qodana linter in CI/CD",
-      "fileMatch": ["(^|/|\\.)code-quality.ya?ml$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+.*jetbrains/qodana-cdnet:(?<currentValue>[\\w][\\w.-]{0,127})(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:,|\\s)"
-      ]
-    }
-  ]
+      customType: 'regex',
+      description: 'Update Qodana linter in CI/CD',
+      managerFilePatterns: [
+        '/(^|/|\\.)code-quality.ya?ml$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+.*jetbrains/qodana-cdnet:(?<currentValue>[\\w][\\w.-]{0,127})(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:,|\\s)',
+      ],
+    },
+  ],
 }
