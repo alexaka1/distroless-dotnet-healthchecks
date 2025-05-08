@@ -1,5 +1,5 @@
 # noble
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview@sha256:ab32d9bf7db430cb80670bf6a88ee7e7fef7acf33c37483d1a17462c93fc43ac
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-trixie-slim@sha256:361fb80bc667e9c4bbd0e05cf92f99f569e772f86f780ffe5ede5bbfff380172
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-noble-chiseled@sha256:74b0f0c56bbb1f2ec638e42d67422a73e758b3821ddd757241cc12951e92ab63
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-azurelinux3.0-distroless@sha256:ab87081bb3f779214b4f04ddac06df6f41d3ab9fd1cab88fa8d06c903b9185c4
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview@sha256:b102d45c3445ab7040db06381a15d0e131b2e4d8dd182ab48ce60c649f6899fd
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-trixie-slim@sha256:d131110ef969c30be3ec63d938f938c52a82efa71db457a229518bb24aa1a719
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-noble-chiseled@sha256:b150f8421320ec1bc37ddfc3d3f881151bc07dc816b365b085b8730406cd97c2
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-azurelinux3.0-distroless@sha256:fc99817f84de162681195d3a2faa16c4c907777fb35189d0de4271aaa39988da
