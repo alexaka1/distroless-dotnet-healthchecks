@@ -34,12 +34,11 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - uses: chainguard-dev/actions/setup-gitsign@9c0be1ee0103db886d1887d114ec97f8766b7ef8
       - name: Create Release Pull Request or Prepare release
         id: changesets
         uses: changesets/action@001cd79f0a536e733315164543a727bdf2d70aff # v1.5.1
         with:
           version: pnpm run version
-          setupGitUser: false
+          commitMode: 'github-api'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
