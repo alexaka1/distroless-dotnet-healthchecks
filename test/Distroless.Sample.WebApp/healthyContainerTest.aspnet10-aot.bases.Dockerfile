@@ -2,4 +2,4 @@
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview@sha256:d68853c5835cc3f898b18a4be378bc3ecc994299b8bfeb8d5666b28cf86ed765
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-trixie-slim@sha256:10ef341d6efb0015021296f919c36c107aba7dc8d3247dab2a43342c68e3705b
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-noble-chiseled@sha256:525cd265410d698dbaeb047ee7d4404cc11fb19cf5b8bf1ade941616b3cc42a4
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-azurelinux3.0-distroless@sha256:6b0e276dd0f7f0178e4e45fbc9409f6a65857fcfb9bf640e202a2ba7ad468f70
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-azurelinux3.0-distroless@sha256:c1d74af355e1a778da925ca9b453e30fab6db8e13954b305e9a368fd80f3e41d
