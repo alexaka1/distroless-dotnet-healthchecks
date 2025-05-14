@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:6159cf66274cf52730d7a0c7bb05cf0af94b79370176886ac58286ab6cbb7faf
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble@sha256:88f0b54c4bcd92352bb205c0292e851634b65e7a538940cb952e7d46654e32d6
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy@sha256:47039d0924f72736d02561e064e051ffdd975d78b3b6126d7d8640798c9daf6e
+FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:2d386e5e5099095e7dd8f0a884e60a2ac50d42005a8783e842b3af67a2320f72
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble@sha256:5d5abe42f74ba1d91ec1ede78a6a430473691117689c7c84fb40beb76a4bf2cb
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy@sha256:d1eb1d7fe1687372fd4e420fb6cb1f51ff85aabee7a172281690fb05cb3452db
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine@sha256:f0b22dfc7126bc600db137678d88e848075a8ab87ab0808764633fb86f6398d5
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:4031241cecfb3ebd7b3734c383b0e2ce0c8aa8b349d6888ad1e2c3030eeaa6ae
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:09d88164bedd70b05f12ecd463ddc7c9a5ebe12e4c2bb2bf50ce224049738d9f
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:853baf2b8167204b1a14b044b96f4251b4a0e2f973593009abaeefe0de5c5e51
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:7a8363a3602a64fb20ea8b9863ca02bf624d5e67a81898d1213f3b44c02408f7
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:8cec93e3d983c62590c97306e4d258f754f23277ef2eba774d7c9aecfdf02b92
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:fc42dd491e000d12c86ffc7587ce4577cd381aeda6c4db623f2f83de9a5949f9
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0@sha256:fd083a40222d9eb28065a1df83ecdc0c9f95501dfc972f4bca209a49c3dafb9c
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:91145faea866fa35641b4d584d2210445058810d7b941b11b33191a3c3f22da1
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:5456f760abbdf11f02de93f0751d9e145378d52aef8a2c219bd73c271ca57caa

@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:8226744060124b043c4d44f69e13c339c4a59d208bf5dd1a0e50931c03d684e3
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:b04185779b0884be4a5be689ff39a0aa40b0ff705ad243a0c378bdd1c139389e
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy@sha256:2e1d9ae04eb69a3c3ad7e694e62ce53da1c11641766ad64a623568b8e0d62d56
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:2520917a9c827a581b38ada1e99198bbd6309d4b4f88e61b2424d035ae56b2e1
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:2be936c3a419f3f25bad102215254c2e9cad31d4f6098284ba886c31e20e1d62
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy@sha256:39bd7a1495e587532262d4fdfcb95e22ede7a4a948a94a27749ab38d610f91f1
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:511ea6fd479d4de4f142244f58a0cf7d5561196069ca365d3f32b35cfbaddcd0
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled@sha256:c1104b535ba71b3b1e7662741f68cdbeda37a06485e1c320bf33b752a3b7a879
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy-chiseled@sha256:6f3cc382ee84beb898331f8c641eb8e63bfb2032288ffaf1beae1fd7e8b3ee12
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-azurelinux3.0-distroless@sha256:6b5831a2a691e7229f89002a4882bad69d8aa3c0efdbf2a575ae2f52b648a395
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled@sha256:2e4b019171b70fdebd2a5cc44f493ccf6515f4d15c6a6382fb30252185365a80
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy-chiseled@sha256:184d1ad32b41a16cde0a93cd7a836f34d65cbc484e3ce03a50bbdae95c933446
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-azurelinux3.0-distroless@sha256:db3e2a28a8b09f64a3c0f7f016bb5c453e301c1f78b9cc903bb2d69192927e6b
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:50ada20a42469a740b4c89c091767df06ee6cfb057fbdba61a8d28e439d1d758
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble@sha256:b4a09abe1ebd08d090f4ae9cf62927c418d6c3b02b1d806f2d14af89a74cd88f
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy@sha256:ca9d484440ffcc1081de4b0053553d9e481250c41699f1f3bb582d8e1b293626
