@@ -1,5 +1,13 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.1.1
+
+### Patch Changes
+
+- [#485](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/485) [`f928ae2`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/f928ae21032e7255c93180afa5d7d636d79c1163) Thanks [@alexaka1](https://github.com/alexaka1)! - Recompile with newer sdk
+
+  Bump dependencies
+
 ## 1.1.0
 
 ### Minor Changes
