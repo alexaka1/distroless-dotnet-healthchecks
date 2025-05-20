@@ -1,5 +1,5 @@
 # noble
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview@sha256:eaf4c0265226d317861fbda5bde776a878051237581184cf8eb57bad11e608ea
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-trixie-slim@sha256:8102e6699a0063b0c7bc7c9dd700d5ab970f55b95e8826ccc85e11bc02ff66b3
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-noble-chiseled@sha256:75d7aed36c22519455997a92ce4f184907f02b909c7561bbd21a100db30dad60
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-azurelinux3.0-distroless@sha256:74af0b85d0cd5d1bfba547dd37ac5c20a4d36bb72f8a2b23edb373d673b0b1c0
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview@sha256:6e177d485cae495562b09187234cd56f71ff95da3b190d7ae8992abacea1d7e0
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-trixie-slim@sha256:5d8d31eb596983e929846a308328ca06437e95ef6ccac4aecca9be4dce2f5392
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-noble-chiseled@sha256:5aca00517c19d39d884b2b62fa4b0483cdbe99207deb11af3ea37f49928920fd
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-azurelinux3.0-distroless@sha256:44e87f8e4584400116e2e473e45e5d46bcb984903a4d7e7c04a2a1c2f96a30c9
