@@ -10,7 +10,7 @@
       "rollForward": false
     },
     "packageguard": {
-      "version": "1.0.1",
+      "version": "1.1.0",
       "commands": [
         "PackageGuard"
       ],
