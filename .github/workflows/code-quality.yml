@@ -37,7 +37,7 @@ jobs:
         with:
           pr-mode: ${{ github.event.pull_request != null }}
           # renovate: datasource=docker packageName=jetbrains/qodana-cdnet
-          args: --linter,jetbrains/qodana-cdnet:2025.1-eap@sha256:cca47b71e99d7b124c5d26d19a119a19e0cb0a99648d6a43ddda7082d83aef24,--configuration=Release
+          args: --linter,jetbrains/qodana-cdnet:2025.1-eap@sha256:bb2929722c58d2efaf402008ede7f7ab79068717cd50586baeba9990004e12d0,--configuration=Release
           upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
