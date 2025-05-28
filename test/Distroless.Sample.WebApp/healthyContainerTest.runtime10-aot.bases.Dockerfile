@@ -2,4 +2,4 @@
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview@sha256:6e177d485cae495562b09187234cd56f71ff95da3b190d7ae8992abacea1d7e0
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-trixie-slim@sha256:5c3c208f5bf48b71d19d4711a1773983f514a09bb7bbe8fc452d495157f1b959
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-noble-chiseled@sha256:5aca00517c19d39d884b2b62fa4b0483cdbe99207deb11af3ea37f49928920fd
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-azurelinux3.0-distroless@sha256:44e87f8e4584400116e2e473e45e5d46bcb984903a4d7e7c04a2a1c2f96a30c9
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-azurelinux3.0-distroless@sha256:df56dc07679c249113c83e3d6755f268e35515755c94f047fb3954e1db1617be
