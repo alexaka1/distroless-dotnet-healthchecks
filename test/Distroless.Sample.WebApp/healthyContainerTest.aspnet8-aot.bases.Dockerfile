@@ -12,4 +12,4 @@ FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:682d8ee3f6a57329d4
 #FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-alpine@sha256:98a00b54d77483df498494d98895db03ce0a5d7b783c4a2930485547e49c7365
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble-chiseled@sha256:3bf2493dd0ba370989b0c5354be47e83a09c31fdc43fea5917cdea590f8309f2
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy-chiseled@sha256:6ccf450a3119f9dafcc9762e439391420a5c8814296fd03919fa3d80b28c9c45
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-azurelinux3.0-distroless@sha256:18130beb126b3afe78f99dda195598871f646793763d8aa94d7021478dd910c6
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-azurelinux3.0-distroless@sha256:5bc9cabd574323403528806fdddfa83ab1d9352eafc75077ac19c4d4ddbdd528
