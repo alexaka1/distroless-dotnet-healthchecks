@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:d5507d8292fb2469ec0b9913f3cd4bb8d5a014bd6dc00c33fd4c4e7310229f07
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:d4aa91d901161760053ec547e218fac1c7e325101b1e190879fe2369f2e2fed5
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:a7ff823a72da2de53feb6e6146938926b0dbf55219a3bd355bd492057dadd2b7
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine@sha256:73c64859278d20ed7a90046c1eaa5c750d9f053cd8760781209540f452e92bcb
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled@sha256:363d11f5c5979e7894c2eaaa878aed13946d52de68f5bef98d5bae11d2f242b1
