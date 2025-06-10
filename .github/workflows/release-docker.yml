@@ -163,7 +163,7 @@ jobs:
           git tag -s "${{ inputs.image }}-${{ inputs.semver }}" -m "Release ${{ inputs.image }}:${{ inputs.semver }}"
           git push origin ${{ inputs.image }}-${{ inputs.semver }}
       - name: Create GitHub release
-        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        uses: softprops/action-gh-release@d5382d3e6f2fa7bd53cb749d33091853d4985daf # v2.3.0
         with:
           # files: |
           body_path: ${{ steps.changelog.outputs.changes }}
