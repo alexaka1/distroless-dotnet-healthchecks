@@ -16,9 +16,9 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
-    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.7.1" />
-    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.7.1" />
-    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="1.7.1" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.7.2" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.7.2" />
+    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="1.7.2" />
     <PackageReference Include="Testcontainers" Version="4.5.0"/>
     <PackageReference Include="xunit.v3" Version="2.0.3"/>
   </ItemGroup>
