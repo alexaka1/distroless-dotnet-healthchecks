@@ -51,4 +51,5 @@ jobs:
         run: >-
           dotnet packageguard 
           --configPath allowed-licenses.json
+          -a ${{ secrets.GITHUB_TOKEN }}
           ./Distroless.sln
