@@ -11,7 +11,7 @@
     ':pinDependencies',
     'npm:unpublishSafe',
   ],
-  baseBranches: [
+  baseBranchPatterns: [
     '$default',
     '/^beta$/',
   ],
