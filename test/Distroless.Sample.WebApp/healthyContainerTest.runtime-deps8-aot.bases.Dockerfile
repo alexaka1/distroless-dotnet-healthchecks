@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:56cb22a358efc6f57848c65291a986007ff030ace5742f69c54bb80d5fccc1ee
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:92ef2d1850745dcfbda3c580393882e3db1bc0fa6ddf0cc1e52a0272fc1b4740
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy@sha256:cbde878ce765234bff7dedca0544e6884dc212535bc8c14a37c81c986ef80d00
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble@sha256:b6346f8b22d08199efee44681b5506849fd7d6e612fe1d9c07241441edc5d853
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy@sha256:df97e9d77bfec263c7f8bd7ca14f47009f95d3c9b3f20536b9234ea0312eca2d
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:511ea6fd479d4de4f142244f58a0cf7d5561196069ca365d3f32b35cfbaddcd0
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled@sha256:22a51299a4ac824425c905acc5e392c3076c9841ce4f3f2085b62eb6466b4e71
