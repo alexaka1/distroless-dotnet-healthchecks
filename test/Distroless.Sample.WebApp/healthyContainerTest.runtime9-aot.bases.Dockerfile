@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/runtime:9.0@sha256:c4093cabaece5ace4a1c8fd240fa821b99a91c477c7b7dfe1dbf4678d09c57c4
-FROM mcr.microsoft.com/dotnet/runtime:9.0-noble@sha256:354191f2eb46df6424213005ef1f20f984ea8d585aff8b2eef2f8898f85c8119
+FROM mcr.microsoft.com/dotnet/runtime:9.0-noble@sha256:62978f92a63956d56af511fbaf19910af48893cba5370564b75fae17746dc1d0
 # this is failing, however the purpose of the project is to support distroless images, of which there is no alpine variant
 #FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine@sha256:6ec7c9a35965391c389c7c19fe5321d7f25b874cd5e792b93e1b4c89b6dc3140
 FROM mcr.microsoft.com/dotnet/runtime:9.0-noble-chiseled@sha256:50c77c03cc6f0b56c435b14e4337f3be7c2be61ed7720dd487dc37e200a2791a
