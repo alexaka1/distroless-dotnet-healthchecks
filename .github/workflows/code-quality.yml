@@ -27,6 +27,17 @@ jobs:
         with:
           disable-sudo: true
           egress-policy: audit
+      - name: Setup Dotnet
+        id: dotnet-setup
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: |
+            9.0.x
+      - name: Setup Dotnet 10 preview
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
@@ -36,8 +47,7 @@ jobs:
         uses: JetBrains/qodana-action@e14351bdf4707c4cecc25a86a9190745b7b40de8 # v2025.1.1
         with:
           pr-mode: ${{ github.event.pull_request != null }}
-          # renovate: datasource=docker packageName=jetbrains/qodana-cdnet
-          args: --linter,jetbrains/qodana-cdnet:2025.1-eap@sha256:afa68b07be28b05ab0c385ed2e8e9f23bb983203694c441a2c3e7d009bf2a796,--configuration=Release
+          args: --configuration=Release,--no-statistics=true
           upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
