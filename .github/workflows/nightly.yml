@@ -21,6 +21,7 @@ jobs:
       should-run: ${{ steps.check_commit.outputs.should-run }}
     permissions:
       contents: read
+      packages: read
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -37,16 +38,30 @@ jobs:
         id: check_commit
         continue-on-error: true
         run: |
-          last_commit=$(git rev-parse HEAD)
-          if gh run list --branch ${{ env.branch }} --json conclusion,headSha -q '[.[] | select(.headSha=="'$last_commit'")][0].conclusion' | grep -q 'success'; then
-            echo "::notice::This commit has already been processed. Skipping."
+          set -euo pipefail
+          CURRENT_HASH=$(git rev-parse HEAD)
+          if ! docker pull -q "$IMAGE_NAME" >/dev/null 2>&1; then
+            echo "::notice::Image $IMAGE_NAME not found in registry."
+            exit 0
+          fi
+          IMAGE_HASH=$(docker inspect \
+          --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+          "$IMAGE_NAME" 2>/dev/null || echo "")
+          
+          if [[ -z "$IMAGE_HASH" ]]; then
+            echo "Image $IMAGE_NAME has no org.opencontainers.image.revision label."
+            exit 0
+          fi  
+          echo "Current Git hash: $CURRENT_HASH"
+          echo "Image hash:       $IMAGE_HASH"
+            
+          if [[ "$IMAGE_HASH" == "$CURRENT_HASH" ]]; then
+            echo "::notice::This commit ($CURRENT_HASH) has already been published. Skipping."
             echo "should-run=false" >> $GITHUB_OUTPUT
           else
-            echo "This commit has not been processed yet. Continuing."
+            echo "Image does not match current commit. Safe to build/push."
             echo "should-run=true" >> $GITHUB_OUTPUT
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build:
     needs: [ check-run ]
     if: needs.check-run.outputs.should-run == 'true'
