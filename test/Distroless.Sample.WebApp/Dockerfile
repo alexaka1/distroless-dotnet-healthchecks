@@ -2,7 +2,7 @@
 ARG TARGET_FRAMEWORK="9.0"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble-aot@sha256:9c0ec547b72328f6e0cfe8b4596658b0bcaef03a211bec41a13994930b8bdf6d AS build
+FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble-aot@sha256:71da6cef49113900e7ec74c9c712ee1f9237cd9bc2166881785230e72141ec28 AS build
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
 WORKDIR /src
