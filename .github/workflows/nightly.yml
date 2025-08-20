@@ -40,6 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           CURRENT_HASH=$(git rev-parse HEAD)
+          IMAGE_NAME=ghcr.io/${{ env.IMAGE_NAME }}
           if ! docker pull -q "$IMAGE_NAME" >/dev/null 2>&1; then
             echo "::notice::Image $IMAGE_NAME not found in registry."
             exit 0
