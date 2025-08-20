@@ -8,11 +8,11 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:2
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:91b9b6aedfb1a0d3592938d280cb85ed4239dc1059667bd0c597be5557416e59
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:a851adbee5172e83300290b13cdf855f0c28064c550189baf01196c916a1a200
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0@sha256:2ad2eddf3155fc9e4c5467b5116d5af7a52bcc55d4fe03a8ce6a92cdcb8c0a99
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble@sha256:7cc02a114c3329d4d6f27ea5ecfcb2723a96c207389f5b86d0182edbd973bfe5
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble@sha256:ce47d344a65c24af874c39b06c9d699ad584b9bab747bb99e24adc444352ccef
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled@sha256:2a4bbcf1c4b5a49fc04d47c54457b8af418db505d0aa7cd8f62723d5e642fa70
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-azurelinux3.0-distroless@sha256:b5505a0d7399463b292f2d896915e3c989f100d9dfd153ec0396fd7b7b5f1cf2
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview@sha256:360fe5aac547e9982bc2a8b866b9262bf84a90b3db513fcdf4d3178a88ae7cf6
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled@sha256:189b7094786620dbb3a0253e67751ffaeadb7b4a2d6d0c6cc16c16e10e425b94
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview@sha256:d34be9f61b1a7d107bb5daaaf494303c8dac2c66d4a1e0b17212bdc8e35919e2
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled@sha256:7b05b4770ddbe51fa93ff9f5e3dbc94f298271df91cda3353a212d722043bc4e
 #FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-noble-chiseled-aot
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-azurelinux3.0-distroless@sha256:61a4da353fe60ebc464325cd359d9f4a9314a97f62c842937a91c77646e559d2
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-azurelinux3.0-distroless@sha256:61964ad925c241da9b9a3651a6d6a76916548a53c82bc4b5f36bbe089c618002
 #FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-azurelinux3.0-distroless-aot
