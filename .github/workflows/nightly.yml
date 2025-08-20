@@ -106,6 +106,8 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Get Git commit timestamps
+        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         id: docker_build
@@ -120,6 +122,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
+        env:
+          SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
       - name: Attest GitHub Container Registry
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
