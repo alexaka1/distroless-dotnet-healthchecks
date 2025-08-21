@@ -159,9 +159,13 @@ jobs:
           push-to-registry: false
       - name: Add docker tags and digest to release changelog
         run: |
-          echo "### Digests" >> "${{ steps.changelog.outputs.changes }}"
+          echo "### Digest" >> "${{ steps.changelog.outputs.changes }}"
           echo "" >> "${{ steps.changelog.outputs.changes }}"
-          echo "${{ steps.meta.outputs.tags }}" | awk -v digest="${{ steps.docker_build.outputs.digest }}" '{print "- " $0 "@" digest}' >> "${{ steps.changelog.outputs.changes }}"
+          echo "\`${{ steps.docker_build.outputs.digest }}\`" >> "${{ steps.changelog.outputs.changes }}"
+          echo "" >> "${{ steps.changelog.outputs.changes }}"
+          echo "### Tags" >> "${{ steps.changelog.outputs.changes }}"
+          echo "" >> "${{ steps.changelog.outputs.changes }}"
+          echo "${{ steps.meta.outputs.tags }}" | awk '{print "- " $0 }' >> "${{ steps.changelog.outputs.changes }}"
       - name: Tag release
         run: |
           git tag -s "${{ inputs.image }}-${{ inputs.semver }}" -m "Release ${{ inputs.image }}:${{ inputs.semver }}"
