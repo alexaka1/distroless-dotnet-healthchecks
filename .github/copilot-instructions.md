@@ -47,7 +47,11 @@ Install the following tools and SDKs in order:
 
 ### License and Quality Commands
 - Check licenses: `pnpm check-licenses:dotnet` -- requires .NET tools restore first, takes 30-60 seconds. NEVER CANCEL. Set timeout to 120+ seconds.
-- Version update: `pnpm version` -- takes 5 seconds. NEVER CANCEL. Set timeout to 30+ seconds.
+
+### Changeset Commands for Release Management
+- Create changeset for user-visible changes: `pnpm changeset` -- takes 5-10 seconds. NEVER CANCEL. Set timeout to 30+ seconds.
+
+**IMPORTANT**: Versioning is fully automated by CI. NEVER run `pnpm version` manually. Instead, create changesets using `pnpm changeset` to document changes that warrant a new release.
 
 ## Manual Validation
 
@@ -120,7 +124,16 @@ Always validate changes pass CI requirements:
 2. Run tests: `dotnet test` (after building Docker test image)  
 3. Check licenses: `pnpm check-licenses:dotnet`
 4. Manual validation: Complete health check scenarios as documented above
-5. Add changeset for user-visible changes: `pnpm changeset`
+5. Create changeset for user-visible changes: `pnpm changeset`
+
+### Changesets for Release Management
+
+This repository uses [Changesets](https://github.com/changesets/changesets) to manage releases and changelogs:
+
+- **Create changeset**: `pnpm changeset` - Creates a markdown file describing your changes and their impact level (patch/minor/major)
+- **Changeset workflow**: For any user-visible changes (bug fixes, new features, breaking changes), create a changeset that will be used to generate release notes
+- **Automated versioning**: CI automatically handles version bumps and publishing based on merged changesets
+- **Empty changesets**: Use `pnpm changeset --empty` for changes that don't affect the published package (documentation, tests, build changes)
 
 ### GitHub Actions Workflow Best Practices
 
@@ -148,5 +161,5 @@ pkill -f "python3 -m http.server"
 # Before committing
 dotnet build Distroless.sln -c Release  # if .NET 10 available
 pnpm check-licenses:dotnet  # if .NET 10 available
-# Add changeset for user-visible changes: pnpm changeset
+# Create changeset for user-visible changes: pnpm changeset
 ```
