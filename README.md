@@ -87,3 +87,10 @@ Then run the tests (it can take a long time):
 ```bash
 dotnet test
 ```
+
+#### For alpine:
+
+```bash
+docker build -f src/Distroless.HealthChecks/Dockerfile -t distroless-dotnet-healthchecks:test-alpine --target binary --build-arg BASE_IMAGE_TYPE=alpine .
+BASE_IMAGE_TYPE=alpine dotnet test
+```
