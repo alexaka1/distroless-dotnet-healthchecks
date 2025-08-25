@@ -49,7 +49,6 @@ RUN . /tmp/rid.env && \
     dotnet publish "Distroless.HealthChecks.csproj" \
       -c $BUILD_CONFIGURATION \
       -r $RID \
-      --self-contained false \
       -o /app/publish
 
 FROM scratch AS binary
