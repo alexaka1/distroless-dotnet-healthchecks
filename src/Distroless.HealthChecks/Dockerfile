@@ -14,7 +14,7 @@ WORKDIR /app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:9.0-noble-aot@sha256:65b53e8f0d98e925c607237f65f2eda197b0cc11cf68b7a7a83e30dee5e25114 AS build-ubuntu
 # alpine does not use cross compilation, because https://github.com/dotnet/runtime/issues/92294, also see https://github.com/dotnet/aspire/pull/10275 for more context
 # TL;DR you need QEMU or native builder to build for a specific `arch`
-FROM mcr.microsoft.com/dotnet/nightly/sdk:9.0-alpine-aot AS build-alpine
+FROM mcr.microsoft.com/dotnet/nightly/sdk:9.0-alpine-aot@sha256:3c8a0578bed5331986d0ae422738e107eee9fc68cdebdcf9c872f0548bd620bc AS build-alpine
 
 #RUN apk update && apk add --no-cache \
 #  clang \
