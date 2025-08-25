@@ -4,6 +4,27 @@
 
 Distroless .NET HealthChecks is an AOT (Ahead-of-Time) compiled .NET application that provides health checking capabilities for containerized applications running on minimal distroless/chiseled container images.
 
+## Context7 Integration
+
+When the user requests code examples, setup or configuration steps, or library/API documentation, use the Context7 tools to provide up-to-date information:
+
+1. **Use `context7-resolve-library-id`** first to find the appropriate library ID for .NET-related queries
+2. **Use `context7-get-library-docs`** to fetch current documentation and code examples
+
+### Context7 Usage Guidelines
+
+- **For .NET framework questions**: Resolve "microsoft/dotnet" or specific framework components
+- **For ASP.NET Core health checks**: Resolve "microsoft/aspnetcore" and focus on health check topics
+- **For Docker/container questions**: Resolve "docker/docs" or relevant container platform documentation
+- **For NuGet packages**: Resolve the specific package name (e.g., "Microsoft.Extensions.Diagnostics.HealthChecks")
+
+Always prefer Context7 documentation over general web searches when users need current API references, setup instructions, or code examples related to:
+- .NET 9.0/.NET 10.0 framework features
+- ASP.NET Core health check implementation
+- Docker container best practices
+- NuGet package usage patterns
+- AOT compilation guidance
+
 ## Working Effectively
 
 ### Essential Requirements
