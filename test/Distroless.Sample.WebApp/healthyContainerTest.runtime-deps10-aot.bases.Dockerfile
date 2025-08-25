@@ -7,4 +7,4 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-azurelinux3.0-di
 #FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-azurelinux3.0-distroless-aot
 
 # alpine
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine@sha256:c2f0ae7bb6ede95e30c6049055fb338d95b6983f872d06b652e9d6f62eae2f6f

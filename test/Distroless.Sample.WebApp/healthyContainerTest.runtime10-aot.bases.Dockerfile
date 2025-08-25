@@ -5,4 +5,4 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-noble-chiseled@sha256
 FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-azurelinux3.0-distroless@sha256:2779fa276bf1822d56cb9ff338e8fcdfd8c41d1a611541ead7effdfd8bcf5bcc
 
 # alpine
-FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-alpine
+FROM mcr.microsoft.com/dotnet/nightly/runtime:10.0-preview-alpine@sha256:803b09f15e20bbd838b4dd02d223296ab7771fa6795be1894cbf68444db61c57

@@ -5,4 +5,4 @@ FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-noble-chiseled@sha256:
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-azurelinux3.0-distroless@sha256:a70255db06e2d1f3888cb518269ee20fcd4a38ff4ce8b5c49151d2c43fb040e3
 
 # alpine
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-alpine
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-preview-alpine@sha256:1d92f05bc4bc815bfab335723595c9044bcdc97f639906d29dbcb8738f5abfff
