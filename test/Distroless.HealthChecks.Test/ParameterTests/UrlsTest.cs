@@ -38,7 +38,8 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
                 (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string[], HealthStatus>();
-            foreach (var image in images)
+            var baseImageType = Utils.CurrentBaseImageType();
+            foreach (var image in Utils.FilterByBaseImageType(images, baseImageType))
             {
                 foreach (var url in urls)
                 {

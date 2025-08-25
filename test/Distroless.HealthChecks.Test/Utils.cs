@@ -5,6 +5,32 @@ namespace Distroless.HealthChecks.Test;
 
 public static class Utils
 {
+    public static string CurrentBaseImageType()
+    {
+        return Environment.GetEnvironmentVariable("BASE_IMAGE_TYPE") ?? "ubuntu-chiseled";
+    }
+
+    public static IEnumerable<DockerImage> FilterByBaseImageType(IEnumerable<DockerImage> images, string baseImageType)
+    {
+        foreach (var image in images)
+        {
+            if (ShouldIncludeImage(image, baseImageType))
+            {
+                yield return image;
+            }
+        }
+    }
+
+    public static bool ShouldIncludeImage(DockerImage image, string baseImageType)
+    {
+        return baseImageType switch
+        {
+            "alpine" => image.Tag.Contains("alpine", StringComparison.OrdinalIgnoreCase),
+            // Default: exclude alpine-specific tags for glibc-based runs
+            _ => !image.Tag.Contains("alpine", StringComparison.OrdinalIgnoreCase),
+        };
+    }
+
     public static async Task<(string output, string error)> InspectContainer(string containerId,
         CancellationToken cancellationToken = default)
     {
