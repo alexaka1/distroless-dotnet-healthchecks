@@ -30,6 +30,7 @@ WORKDIR "/src/src/Distroless.HealthChecks"
 FROM build AS publish
 ARG BUILD_CONFIGURATION
 ARG TARGETARCH
+ARG BASE_IMAGE_TYPE
 RUN echo "$BASE_IMAGE_TYPE"
 RUN case "$TARGETARCH" in \
       amd64) ARCH_SUFFIX="x64" ;; \
