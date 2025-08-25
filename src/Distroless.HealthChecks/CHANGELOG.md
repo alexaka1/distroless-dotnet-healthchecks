@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.2.0-beta.1
+
+### Minor Changes
+
+- [#680](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/680) [`4ac4bf2`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/4ac4bf218f8222cac4a77a81da4f7235c6af1289) Thanks [@alexaka1](https://github.com/alexaka1)! - Remove extra cpu instruction platforms as they are not used anyway
+
 ## 1.2.0-beta.0
 
 ### Minor Changes
