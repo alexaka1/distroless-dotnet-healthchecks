@@ -121,20 +121,19 @@ jobs:
             fi
           done
           echo "should-release=$should_release" >> "$GITHUB_OUTPUT"
-  release-docker-base:
-    name: Release docker images (base)
+  release-docker:
+    name: Release docker images
     if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
     uses: ./.github/workflows/release-docker.yml
     with:
-      package: src/Distroless.HealthChecks
-      image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
-      target: binary
-      platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64
-      base-image-type: ubuntu-chiseled
-      readme: ./README.md
-      context: "."
-      tag-suffix: ""
-      create-release: true
+      package: ${{ matrix.package }}
+      image: ${{ matrix.image }}
+      target: ${{ matrix.target }}
+      platforms: ${{ matrix.platforms }}
+      base-image-type: ${{ matrix.base-image-type }}
+      readme: ${{ matrix.readme }}
+      context: ${{ matrix.context }}
+      create-release: ${{ matrix.create-release }}
       run: ${{ fromJSON(needs.check-release.outputs.can-release) }}
       semver: ${{ needs.check-release.outputs.semver }}
       major: ${{ needs.check-release.outputs.major }}
@@ -151,7 +150,20 @@ jobs:
       packages: write # for ghcr.io
       attestations: write # for attestations
       id-token: write # for tag signing
-
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - src/Distroless.HealthChecks
+        include:
+          - package: src/Distroless.HealthChecks
+            image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+            target: binary
+            platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64
+            base-image-type: ubuntu-chiseled
+            readme: ./README.md
+            context: "."
+            create-release: true
   release-docker-alpine:
     name: Release docker images (alpine)
     if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
@@ -177,7 +189,7 @@ jobs:
     needs:
       - check-release
       - should-release
-      - release-docker-base
+      - release-docker
     permissions:
       contents: write
       packages: write
