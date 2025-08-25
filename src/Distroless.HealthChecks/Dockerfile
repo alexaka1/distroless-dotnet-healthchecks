@@ -27,27 +27,24 @@ RUN dotnet restore "src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" 
 COPY ["src/", "./src/"]
 WORKDIR "/src/src/Distroless.HealthChecks"
 
-# I hate cross compilation
+FROM build AS publish
+ARG BUILD_CONFIGURATION
+ARG TARGETARCH
 RUN case "$TARGETARCH" in \
       amd64) ARCH_SUFFIX="x64" ;; \
       arm64) ARCH_SUFFIX="arm64" ;; \
-      *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
-    esac; \
+      *) echo "Unsupported arch: $TARGETARCH" >&2 && exit 1 ;; \
+    esac && \
     if [ "$BASE_IMAGE_TYPE" = "alpine" ]; then \
       RID="linux-musl-$ARCH_SUFFIX"; \
     else \
       RID="linux-$ARCH_SUFFIX"; \
-    fi; \
-    echo "RID=$RID" > /tmp/rid.env
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION
-ARG TARGETARCH
-RUN . /tmp/rid.env && \
+    fi && \
     dotnet publish "Distroless.HealthChecks.csproj" \
-      -c $BUILD_CONFIGURATION \
-      -r $RID \
+      -c "$BUILD_CONFIGURATION" \
+      -r "$RID" \
       -o /app/publish
+
 
 FROM scratch AS binary
 COPY --from=publish /app/publish .
