@@ -47,7 +47,7 @@ jobs:
         uses: JetBrains/qodana-action@27de2a744479d1d731934eeaf79287575ebc5dd3 # v2025.2.1
         with:
           pr-mode: ${{ github.event.pull_request != null }}
-          args: --configuration=Release,--no-statistics=true
+          args: --configuration=Release,--no-statistics=true,--linter=qodana-dotnet
           upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
