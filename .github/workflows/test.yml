@@ -33,7 +33,7 @@ jobs:
           - ubuntu-latest
         platform:
           - amd64
-#          - arm64
+          - arm64
         base-image-type:
           - ubuntu-chiseled
           - alpine
@@ -71,6 +71,7 @@ jobs:
         with:
           name: ${{ env.HEALTHCHECK_IMAGE_NAME }}-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
           path: /tmp/image.tar
+
   test:
     needs: build-healthcheck
     runs-on: ${{ matrix.os }}
