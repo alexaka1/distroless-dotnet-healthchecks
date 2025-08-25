@@ -186,6 +186,20 @@ jobs:
           echo "### Tags" >> "${{ steps.changelog.outputs.changes }}"
           echo "" >> "${{ steps.changelog.outputs.changes }}"
           echo "${{ steps.meta.outputs.tags }}" | awk '{print "- " $0 }' >> "${{ steps.changelog.outputs.changes }}"
+      - name: Prepare variant release notes
+        if: ${{ ! inputs.create-release }}
+        id: variant_notes
+        run: |
+          output_file="/tmp/variant-changes.md"
+          variant_name="${{ inputs.base-image-type }}"
+          echo "### Digest (${variant_name})" > "$output_file"
+          echo "" >> "$output_file"
+          echo "\`${{ steps.docker_build.outputs.digest }}\`" >> "$output_file"
+          echo "" >> "$output_file"
+          echo "### Tags (${variant_name})" >> "$output_file"
+          echo "" >> "$output_file"
+          echo "${{ steps.meta.outputs.tags }}" | awk '{print "- " $0 }' >> "$output_file"
+          echo "changes=$output_file" >> "$GITHUB_OUTPUT"
       - name: Tag release
         if: ${{ inputs.create-release }}
         run: |
@@ -206,6 +220,16 @@ jobs:
           tag_name: "${{ inputs.image }}-${{ inputs.semver }}"
           target_commitish: ${{ github.sha }}
           name: ${{ inputs.image }}:${{ inputs.semver }}
+      - name: Append to existing GitHub release (variant)
+        if: ${{ ! inputs.create-release }}
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        with:
+          body_path: ${{ steps.variant_notes.outputs.changes }}
+          draft: false
+          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
+          generate_release_notes: false
+          append_body: true
+          tag_name: "${{ inputs.image }}-${{ inputs.semver }}"
       - name: Update repo description
         if: ${{ inputs.create-release && ! fromJSON(steps.changelog.outputs.prerelease) }}
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
