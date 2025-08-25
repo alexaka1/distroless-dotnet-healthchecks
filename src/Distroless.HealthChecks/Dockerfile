@@ -28,19 +28,17 @@ COPY ["src/", "./src/"]
 WORKDIR "/src/src/Distroless.HealthChecks"
 
 # I hate cross compilation
-RUN if [ "$BASE_IMAGE_TYPE" = "alpine" ]; then \
-      case "$TARGETARCH" in \
-        amd64) echo "RID=linux-musl-x64" ;; \
-        arm64) echo "RID=linux-musl-arm64" ;; \
-        *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
-      esac; \
+RUN case "$TARGETARCH" in \
+      amd64) ARCH_SUFFIX="x64" ;; \
+      arm64) ARCH_SUFFIX="arm64" ;; \
+      *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
+    esac; \
+    if [ "$BASE_IMAGE_TYPE" = "alpine" ]; then \
+      RID="linux-musl-$ARCH_SUFFIX"; \
     else \
-      case "$TARGETARCH" in \
-        amd64) echo "RID=linux-x64" ;; \
-        arm64) echo "RID=linux-arm64" ;; \
-        *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
-      esac; \
-    fi > /tmp/rid.env
+      RID="linux-$ARCH_SUFFIX"; \
+    fi; \
+    echo "RID=$RID" > /tmp/rid.env
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION
