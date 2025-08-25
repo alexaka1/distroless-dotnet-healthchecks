@@ -123,11 +123,17 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
     [MemberNotNull(nameof(_image))]
     private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
+        // Select SDK base matching the runtime OS (musl vs glibc)
+        var baseImageType = data.RuntimeTag.Contains("alpine", StringComparison.OrdinalIgnoreCase)
+            ? "alpine"
+            : "ubuntu-chiseled";
+
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
+            .WithBuildArgument("BASE_IMAGE_TYPE", baseImageType)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(cancellationToken)

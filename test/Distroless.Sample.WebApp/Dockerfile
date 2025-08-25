@@ -2,7 +2,17 @@
 ARG TARGET_FRAMEWORK="9.0"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble-aot@sha256:71da6cef49113900e7ec74c9c712ee1f9237cd9bc2166881785230e72141ec28 AS build
+ARG BASE_IMAGE_TYPE=ubuntu-chiseled
+
+# Build SDK stages for glibc and musl targets
+FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble-aot@sha256:71da6cef49113900e7ec74c9c712ee1f9237cd9bc2166881785230e72141ec28 AS build-ubuntu
+FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-alpine-aot AS build-alpine
+
+# Map ubuntu-chiseled to ubuntu build SDK
+FROM build-ubuntu AS build-ubuntu-chiseled
+
+# Select build stage based on BASE_IMAGE_TYPE
+FROM build-${BASE_IMAGE_TYPE} AS build
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
 WORKDIR /src
