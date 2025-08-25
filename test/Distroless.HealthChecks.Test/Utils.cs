@@ -12,13 +12,7 @@ public static class Utils
 
     public static IEnumerable<DockerImage> FilterByBaseImageType(IEnumerable<DockerImage> images, string baseImageType)
     {
-        foreach (var image in images)
-        {
-            if (ShouldIncludeImage(image, baseImageType))
-            {
-                yield return image;
-            }
-        }
+        return images.Where(image => ShouldIncludeImage(image, baseImageType));
     }
 
     public static bool ShouldIncludeImage(DockerImage image, string baseImageType)

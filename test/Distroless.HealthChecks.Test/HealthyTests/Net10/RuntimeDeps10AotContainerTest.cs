@@ -12,7 +12,7 @@ public abstract class RuntimeDeps10AotData : ITestData
                 "test/Distroless.Sample.WebApp/healthyContainerTest.runtime-deps10-aot.bases.Dockerfile");
         var data = new TheoryData<string, string, string, string>();
 
-        var baseImageType = Utils.CurrentBaseImageType();
+        string baseImageType = Utils.CurrentBaseImageType();
         foreach (var image in Utils.FilterByBaseImageType(images, baseImageType))
         {
             data.Add(image.Image, image.Tag, "10.0", "test/Distroless.Sample.WebApp/Dockerfile");

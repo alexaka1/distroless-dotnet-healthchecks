@@ -22,6 +22,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
         {
             await _image.DisposeAsync();
         }
+
         if (_container is not null)
         {
             await _container.DisposeAsync();
@@ -46,6 +47,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
             {
                 throw new InvalidOperationException("Container was not initialized");
             }
+
             await _container.StartAsync(testContext.Current.CancellationToken);
             Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
                 $"Container was {_container.Health:G}");
@@ -80,7 +82,7 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
     [MemberNotNull(nameof(_image))]
     private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
-        var baseImageType = Environment.GetEnvironmentVariable("BASE_IMAGE_TYPE") ?? "ubuntu-chiseled";
+        string baseImageType = Environment.GetEnvironmentVariable("BASE_IMAGE_TYPE") ?? "ubuntu-chiseled";
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
