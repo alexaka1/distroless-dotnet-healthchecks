@@ -122,6 +122,14 @@ Always validate changes pass CI requirements:
 4. Manual validation: Complete health check scenarios as documented above
 5. Add changeset for user-visible changes: `pnpm changeset`
 
+### GitHub Actions Workflow Best Practices
+
+When working with GitHub Actions workflows in this repository:
+
+- **NEVER use `if: always()`** - This can create deadlocked jobs that cannot be cancelled
+- **Use `if: ${{ !cancelled() }}` instead** - This allows proper job cancellation while still running cleanup steps
+- This applies to all workflow steps that should run regardless of previous step failures
+
 ## Quick Reference Commands
 
 ```bash
