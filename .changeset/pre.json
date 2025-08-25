@@ -4,5 +4,7 @@
   "initialVersions": {
     "alexaka1/distroless-dotnet-healthchecks": "1.1.3"
   },
-  "changesets": []
+  "changesets": [
+    "thirty-flies-prove"
+  ]
 }
