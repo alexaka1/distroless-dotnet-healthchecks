@@ -15,6 +15,11 @@ on:
         type: string
         required: false
         default: linux/amd64
+      base-image-type:
+        description: Base image type used by Dockerfile (e.g., ubuntu-chiseled, alpine)
+        type: string
+        required: false
+        default: ubuntu-chiseled
       readme:
         type: string
         required: false
@@ -23,6 +28,16 @@ on:
         type: string
         required: false
         default: "."
+      tag-suffix:
+        description: Optional suffix applied to all Docker tags (e.g., -alpine)
+        type: string
+        required: false
+        default: ""
+      create-release:
+        description: Create GitHub release, tag repo, and update descriptions
+        type: boolean
+        required: false
+        default: true
       run:
         type: boolean
         required: false
@@ -119,6 +134,8 @@ jobs:
           images: |
             name=ghcr.io/${{ inputs.image }}
             name=docker.io/${{ inputs.image }}
+          flavor: |
+            suffix=${{ inputs.tag-suffix }},onlatest=true
           tags: |
             type=raw,value=latest,enable={{is_default_branch}},priority=1001
             type=raw,value=${{ inputs.major }},enable=${{ inputs.major != '' && inputs.tag == '' && inputs.major != '0'  }},priority=902
@@ -137,6 +154,8 @@ jobs:
           file: ${{ inputs.package }}/Dockerfile
           target: ${{ inputs.target }}
           platforms: ${{ inputs.platforms }}
+          build-args: |
+            BASE_IMAGE_TYPE=${{ inputs.base-image-type }}
           provenance: mode=max
           sbom: true
           push: true
@@ -158,6 +177,7 @@ jobs:
           subject-digest: ${{ steps.docker_build.outputs.digest }}
           push-to-registry: false
       - name: Add docker tags and digest to release changelog
+        if: ${{ inputs.create-release }}
         run: |
           echo "### Digest" >> "${{ steps.changelog.outputs.changes }}"
           echo "" >> "${{ steps.changelog.outputs.changes }}"
@@ -167,10 +187,12 @@ jobs:
           echo "" >> "${{ steps.changelog.outputs.changes }}"
           echo "${{ steps.meta.outputs.tags }}" | awk '{print "- " $0 }' >> "${{ steps.changelog.outputs.changes }}"
       - name: Tag release
+        if: ${{ inputs.create-release }}
         run: |
           git tag -s "${{ inputs.image }}-${{ inputs.semver }}" -m "Release ${{ inputs.image }}:${{ inputs.semver }}"
           git push origin ${{ inputs.image }}-${{ inputs.semver }}
       - name: Create GitHub release
+        if: ${{ inputs.create-release }}
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
           # files: |
@@ -185,7 +207,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: ${{ inputs.image }}:${{ inputs.semver }}
       - name: Update repo description
-        if: ${{ ! fromJSON(steps.changelog.outputs.prerelease) }}
+        if: ${{ inputs.create-release && ! fromJSON(steps.changelog.outputs.prerelease) }}
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
         with:
           username: ${{ github.repository_owner }}
