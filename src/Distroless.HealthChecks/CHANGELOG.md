@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.2.0-beta.0
+
+### Minor Changes
+
+- [`0e799a0`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/0e799a08da1a62502c0e57916d029ad91874e046) Thanks [@alexaka1](https://github.com/alexaka1)! - Add support for alpine based healthchecks under the `-alpine` suffix tags
+
 ## 1.1.3
 
 ### Patch Changes
