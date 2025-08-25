@@ -19,6 +19,7 @@ jobs:
         github.event.comment.author_association == 'COLLABORATOR'
       )
     runs-on: ubuntu-latest
+    environment: Dev
     permissions:
       contents: read
       id-token: write
@@ -30,5 +31,6 @@ jobs:
         uses: sst/opencode/github@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
-          model: github-copilot/gpt-5-mini
+          model: openai/gpt-5-mini
