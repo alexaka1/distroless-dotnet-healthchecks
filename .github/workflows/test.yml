@@ -39,6 +39,10 @@ jobs:
           - alpine
         include:
           - target-os: linux
+        # arm64 alpine is not supported yet see issue #6
+        exclude:
+          - platform: arm64
+            base-image-type: alpine
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
