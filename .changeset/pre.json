@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "alexaka1/distroless-dotnet-healthchecks": "1.1.3"
+  },
+  "changesets": [
+    "new-frogs-ask",
+    "thirty-flies-prove"
+  ]
+}

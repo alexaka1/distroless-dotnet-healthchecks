@@ -5,8 +5,8 @@ ARG BUILD_CONFIGURATION=Release
 ARG BASE_IMAGE_TYPE=ubuntu-chiseled
 
 # Build SDK stages for glibc and musl targets
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-noble-aot@sha256:71da6cef49113900e7ec74c9c712ee1f9237cd9bc2166881785230e72141ec28 AS build-ubuntu
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview-alpine-aot AS build-alpine
+FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-noble-aot AS build-ubuntu
+FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-alpine-aot AS build-alpine
 
 # Map ubuntu-chiseled to ubuntu build SDK
 FROM build-ubuntu AS build-ubuntu-chiseled

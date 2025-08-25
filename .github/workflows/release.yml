@@ -130,8 +130,10 @@ jobs:
       image: ${{ matrix.image }}
       target: ${{ matrix.target }}
       platforms: ${{ matrix.platforms }}
+      base-image-type: ${{ matrix.base-image-type }}
       readme: ${{ matrix.readme }}
       context: ${{ matrix.context }}
+      create-release: ${{ matrix.create-release }}
       run: ${{ fromJSON(needs.check-release.outputs.can-release) }}
       semver: ${{ needs.check-release.outputs.semver }}
       major: ${{ needs.check-release.outputs.major }}
@@ -157,6 +159,39 @@ jobs:
           - package: src/Distroless.HealthChecks
             image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
             target: binary
-            platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64
+            platforms: linux/amd64,linux/arm64
+            base-image-type: ubuntu-chiseled
             readme: ./README.md
             context: "."
+            create-release: true
+  release-docker-alpine:
+    name: Release docker images (alpine)
+    if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
+    uses: ./.github/workflows/release-docker.yml
+    with:
+      package: src/Distroless.HealthChecks
+      image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+      target: binary
+      platforms: linux/amd64,linux/arm64
+      base-image-type: alpine
+      readme: ./README.md
+      context: "."
+      tag-suffix: -alpine
+      create-release: false
+      run: ${{ fromJSON(needs.check-release.outputs.can-release) }}
+      semver: ${{ needs.check-release.outputs.semver }}
+      major: ${{ needs.check-release.outputs.major }}
+      minor: ${{ needs.check-release.outputs.minor }}
+      tag: ${{ needs.check-release.outputs.tag }}
+      environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    needs:
+      - check-release
+      - should-release
+      - release-docker
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
