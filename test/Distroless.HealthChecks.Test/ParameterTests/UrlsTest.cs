@@ -38,7 +38,8 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
                 (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
             ];
             var data = new TheoryData<string, string, string, string, string[], HealthStatus>();
-            foreach (var image in images)
+            string baseImageType = Utils.CurrentBaseImageType();
+            foreach (var image in Utils.FilterByBaseImageType(images, baseImageType))
             {
                 foreach (var url in urls)
                 {
@@ -115,6 +116,7 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
 
                 output.WriteLine(error);
             }
+
             throw;
         }
     }
@@ -123,11 +125,17 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
     [MemberNotNull(nameof(_image))]
     private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
+        // Select SDK base matching the runtime OS (musl vs glibc)
+        string baseImageType = data.RuntimeTag.Contains("alpine", StringComparison.OrdinalIgnoreCase) ?
+            "alpine" :
+            "ubuntu-chiseled";
+
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
+            .WithBuildArgument("BASE_IMAGE_TYPE", baseImageType)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(cancellationToken)
@@ -160,6 +168,14 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
         };
     }
 
+    /// <summary>
+    ///     Gets the major version of dotnet from a docker image tag. For example, `10.0.0-preview.1-alpine3.21` would return
+    ///     `10`.
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"^(\d+)\.\d+")]
+    private static partial Regex DotnetMajorVersion();
+
     private sealed record TestData(
         string Image,
         string RuntimeTag,
@@ -167,11 +183,4 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
         // ReSharper disable once MemberHidesStaticFromOuterClass
         string Dockerfile,
         string[] Urls);
-
-    /// <summary>
-    /// Gets the major version of dotnet from a docker image tag. For example, `10.0.0-preview.1-alpine3.21` would return `10`.
-    /// </summary>
-    /// <returns></returns>
-    [GeneratedRegex(@"^(\d+)\.\d+")]
-    private static partial Regex DotnetMajorVersion();
 }

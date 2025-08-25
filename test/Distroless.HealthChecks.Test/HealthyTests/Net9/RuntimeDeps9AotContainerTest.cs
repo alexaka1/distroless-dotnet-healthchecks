@@ -11,7 +11,9 @@ public abstract class RuntimeDeps9AotData : ITestData
             Utils.GetImageTagsFromDockerfile(
                 "test/Distroless.Sample.WebApp/healthyContainerTest.runtime-deps9-aot.bases.Dockerfile");
         var data = new TheoryData<string, string, string, string>();
-        foreach (var image in images)
+
+        string baseImageType = Utils.CurrentBaseImageType();
+        foreach (var image in Utils.FilterByBaseImageType(images, baseImageType))
         {
             data.Add(image.Image, image.Tag, "9.0", "test/Distroless.Sample.WebApp/Dockerfile");
         }
