@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -19,10 +19,14 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
 
     public async ValueTask DisposeAsync()
     {
-        Debug.Assert(_container is not null);
-        Debug.Assert(_image is not null);
-        await _image.DisposeAsync();
-        await _container.DisposeAsync();
+        if (_image is not null)
+        {
+            await _image.DisposeAsync();
+        }
+        if (_container is not null)
+        {
+            await _container.DisposeAsync();
+        }
     }
 
     public ValueTask InitializeAsync()
@@ -39,6 +43,10 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
         {
             await Init(new TestData(image, runtimeTag, targetFramework, dockerfile),
                 testContext.Current.CancellationToken);
+            if (_container is null)
+            {
+                throw new InvalidOperationException("Container was not initialized");
+            }
             await _container.StartAsync(testContext.Current.CancellationToken);
             Assert.True(_container.Health.HasFlag(TestcontainersHealthStatus.Healthy),
                 $"Container was {_container.Health:G}");
