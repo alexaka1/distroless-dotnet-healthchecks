@@ -101,10 +101,8 @@ jobs:
         include:
           - platform: linux/amd64
             runner: ubuntu-24.04
-            build_alpine: true
           - platform: linux/arm64
             runner: ubuntu-24.04-arm64
-            build_alpine: true
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Harden Runner
@@ -177,7 +175,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Docker meta (alpine)
-        if: matrix.build_alpine
         id: meta_alpine
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -192,7 +189,6 @@ jobs:
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Build and push by digest (alpine)
-        if: matrix.build_alpine
         id: build_alpine
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
@@ -210,25 +206,21 @@ jobs:
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
       - name: Attest GHCR (alpine)
-        if: matrix.build_alpine
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: ghcr.io/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build_alpine.outputs.digest }}
           push-to-registry: false
       - name: Inspect attestations (alpine)
-        if: matrix.build_alpine
         run: |
           echo "Inspecting SBOM and provenance for alpine image digest: ${{ steps.build_alpine.outputs.digest }}"
           docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build_alpine.outputs.digest }}
       - name: Export alpine digest
-        if: matrix.build_alpine
         run: |
           mkdir -p ${{ runner.temp }}/digests-alpine
           digest="${{ steps.build_alpine.outputs.digest }}"
           touch "${{ runner.temp }}/digests-alpine/${digest#sha256:}"
       - name: Upload alpine digest
-        if: matrix.build_alpine
         uses: actions/upload-artifact@v4
         with:
           name: digests-alpine-${{ env.PLATFORM_PAIR }}
