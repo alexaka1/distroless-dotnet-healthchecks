@@ -160,6 +160,10 @@ jobs:
           subject-name: ghcr.io/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build_base.outputs.digest }}
           push-to-registry: false
+      - name: Inspect attestations (base)
+        run: |
+          echo "Inspecting SBOM and provenance for base image digest: ${{ steps.build_base.outputs.digest }}"
+          docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build_base.outputs.digest }}
       - name: Export base digest
         run: |
           mkdir -p ${{ runner.temp }}/digests-base
@@ -212,6 +216,11 @@ jobs:
           subject-name: ghcr.io/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build_alpine.outputs.digest }}
           push-to-registry: false
+      - name: Inspect attestations (alpine)
+        if: matrix.build_alpine
+        run: |
+          echo "Inspecting SBOM and provenance for alpine image digest: ${{ steps.build_alpine.outputs.digest }}"
+          docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build_alpine.outputs.digest }}
       - name: Export alpine digest
         if: matrix.build_alpine
         run: |
