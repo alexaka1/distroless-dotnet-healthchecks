@@ -231,6 +231,7 @@ jobs:
     name: Merge manifests and tag
     needs: [ build-native ]
     runs-on: ubuntu-24.04
+    environment: Nightly
     permissions:
       contents: read
       packages: write
