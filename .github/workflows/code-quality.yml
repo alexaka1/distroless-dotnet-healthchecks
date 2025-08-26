@@ -58,3 +58,4 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+          category: 'qodana'
