@@ -1,7 +1,9 @@
 name: Nightly build
 on:
+  # Nightly via cron
   schedule:
     - cron: '0 0 * * *'
+  # Allow running on-demand from the GitHub UI
   workflow_dispatch:
     inputs:
       force:
@@ -46,10 +48,17 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
+          # Always allow manual runs from the UI for testing
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch detected; allowing run."
+            echo "should-run=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           CURRENT_HASH=$(git rev-parse HEAD)
           IMAGE_NAME=ghcr.io/${{ env.IMAGE_NAME }}:nightly
           if ! docker pull -q "$IMAGE_NAME" >/dev/null 2>&1; then
-            echo "::notice::Image $IMAGE_NAME not found in registry."
+            echo "::notice::Image $IMAGE_NAME not found in registry. Triggering build."
+            echo "should-run=true" >> $GITHUB_OUTPUT
             exit 0
           fi
           IMAGE_HASH=$(docker inspect \
@@ -57,7 +66,8 @@ jobs:
           "$IMAGE_NAME" 2>/dev/null || echo "")
           
           if [[ -z "$IMAGE_HASH" ]]; then
-            echo "Image $IMAGE_NAME has no org.opencontainers.image.revision label."
+            echo "Image $IMAGE_NAME has no org.opencontainers.image.revision label. Triggering build."
+            echo "should-run=true" >> $GITHUB_OUTPUT
             exit 0
           fi  
           echo "Current Git hash: $CURRENT_HASH"
@@ -70,8 +80,10 @@ jobs:
             echo "Image does not match current commit. Safe to build/push."
             echo "should-run=true" >> $GITHUB_OUTPUT
           fi
-  build:
+  build-native:
+    name: Build native (${{ matrix.platform }})
     needs: [ check-run ]
+    # Run when check-run allows, or always for manual dispatch
     if: needs.check-run.outputs.should-run == 'true'
     environment: Nightly
     permissions:
@@ -79,7 +91,17 @@ jobs:
       packages: write
       attestations: write
       id-token: write
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            build_alpine: true
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm64
+            build_alpine: true
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
@@ -91,8 +113,6 @@ jobs:
         with:
           ref: ${{ env.branch }}
           persist-credentials: false
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
       - name: Login to GitHub Container Registry
@@ -101,7 +121,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker meta
+      - name: Docker meta (base)
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -113,7 +133,43 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Get Git commit timestamp
+        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+      - name: Build and push by digest (base)
+        id: build_base
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: src/Distroless.HealthChecks/Dockerfile
+          target: final
+          platforms: ${{ matrix.platform }}
+          provenance: mode=max
+          sbom: true
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          tags: ghcr.io/${{ env.IMAGE_NAME }}
+          labels: ${{ steps.meta.outputs.labels }}
+        env:
+          SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
+      - name: Attest GHCR (base)
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+        with:
+          subject-name: ghcr.io/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build_base.outputs.digest }}
+          push-to-registry: false
+      - name: Export base digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests-base
+          digest="${{ steps.build_base.outputs.digest }}"
+          touch "${{ runner.temp }}/digests-base/${digest#sha256:}"
+      - name: Upload base digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-base-${{ replace(matrix.platform, '/', '-') }}
+          path: ${{ runner.temp }}/digests-base/*
+          if-no-files-found: error
+          retention-days: 1
       - name: Docker meta (alpine)
+        if: matrix.build_alpine
         id: meta_alpine
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -127,51 +183,127 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-      - name: Get Git commit timestamps
-        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
-      - name: Build and push
+      - name: Build and push by digest (alpine)
+        if: matrix.build_alpine
+        id: build_alpine
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-        id: docker_build
         with:
           context: .
           file: src/Distroless.HealthChecks/Dockerfile
           target: final
-          platforms: linux/amd64,linux/arm64
-          provenance: mode=max
-          sbom: true
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
-        env:
-          SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
-      - name: Build and push (alpine)
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-        id: docker_build_alpine
-        with:
-          context: .
-          file: src/Distroless.HealthChecks/Dockerfile
-          target: final
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           build-args: |
             BASE_IMAGE_TYPE=alpine
           provenance: mode=max
           sbom: true
-          push: true
-          tags: ${{ steps.meta_alpine.outputs.tags }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          tags: ghcr.io/${{ env.IMAGE_NAME }}
           labels: ${{ steps.meta_alpine.outputs.labels }}
-          annotations: ${{ steps.meta_alpine.outputs.annotations }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
-      - name: Attest GitHub Container Registry
+      - name: Attest GHCR (alpine)
+        if: matrix.build_alpine
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: ghcr.io/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.docker_build.outputs.digest }}
+          subject-digest: ${{ steps.build_alpine.outputs.digest }}
           push-to-registry: false
-      - name: Attest GitHub Container Registry (alpine)
-        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      - name: Export alpine digest
+        if: matrix.build_alpine
+        run: |
+          mkdir -p ${{ runner.temp }}/digests-alpine
+          digest="${{ steps.build_alpine.outputs.digest }}"
+          touch "${{ runner.temp }}/digests-alpine/${digest#sha256:}"
+      - name: Upload alpine digest
+        if: matrix.build_alpine
+        uses: actions/upload-artifact@v4
         with:
-          subject-name: ghcr.io/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.docker_build_alpine.outputs.digest }}
-          push-to-registry: false
+          name: digests-alpine-${{ replace(matrix.platform, '/', '-') }}
+          path: ${{ runner.temp }}/digests-alpine/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Merge manifests and tag
+    needs: [ build-native ]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ env.branch }}
+          persist-credentials: false
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      - name: Docker meta (base)
+        id: meta
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        with:
+          images: |
+            name=ghcr.io/${{ env.IMAGE_NAME }}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=edge
+      - name: Docker meta (alpine)
+        id: meta_alpine
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        with:
+          images: |
+            name=ghcr.io/${{ env.IMAGE_NAME }}
+          flavor: |
+            suffix=-alpine,onlatest=true
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=edge
+      - name: Download base digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests-base
+          pattern: digests-base-*
+          merge-multiple: true
+      - name: Create manifest list and push (base)
+        working-directory: ${{ runner.temp }}/digests-base
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< '${{ steps.meta.outputs.json }}') \
+            $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+      - name: Inspect image (base)
+        run: |
+          docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+      - name: Download alpine digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests-alpine
+          pattern: digests-alpine-*
+          merge-multiple: true
+      - name: Create manifest list and push (alpine)
+        if: success() && steps.meta_alpine.outputs.tags != ''
+        working-directory: ${{ runner.temp }}/digests-alpine
+        run: |
+          if [ -n "$(ls -A)" ]; then
+            docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< '${{ steps.meta_alpine.outputs.json }}') \
+              $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+          else
+            echo "No alpine digests to merge (expected when arm64-only)."
+          fi
+      - name: Inspect image (alpine)
+        if: success()
+        run: |
+          if [ -n "${{ steps.meta_alpine.outputs.version }}" ]; then
+            docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta_alpine.outputs.version }}
+          fi
