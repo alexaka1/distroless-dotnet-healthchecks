@@ -265,6 +265,8 @@ jobs:
             type=schedule
             type=ref,event=branch
             type=edge
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Docker meta (alpine)
         id: meta_alpine
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
@@ -277,6 +279,8 @@ jobs:
             type=schedule
             type=ref,event=branch
             type=edge
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Download base digests
         uses: actions/download-artifact@v4
         with:
