@@ -156,14 +156,6 @@ This repository uses [Changesets](https://github.com/changesets/changesets) to m
 - **Automated versioning**: CI automatically handles version bumps and publishing based on merged changesets
 - **Empty changesets**: Use `pnpm changeset --empty` for changes that don't affect the published package (documentation, tests, build changes)
 
-### GitHub Actions Workflow Best Practices
-
-When working with GitHub Actions workflows in this repository:
-
-- **NEVER use `if: always()`** - This can create deadlocked jobs that cannot be cancelled
-- **Use `if: ${{ !cancelled() }}` instead** - This allows proper job cancellation while still running cleanup steps
-- This applies to all workflow steps that should run regardless of previous step failures
-
 ## Quick Reference Commands
 
 ```bash
