@@ -48,7 +48,6 @@ jobs:
         run: |
           platform="${{ matrix.platform }}"
           platform_pair=$(printf '%s' "$platform" | tr '/' '-')
-          echo "PLATFORM_PAIR=$platform_pair" >> $GITHUB_ENV
           echo "platform_pair=$platform_pair" >> $GITHUB_OUTPUT
       - name: Check if last commit had a run
         id: check_commit
