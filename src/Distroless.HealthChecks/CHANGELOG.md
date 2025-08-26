@@ -1,5 +1,19 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.2.0
+
+### Minor Changes
+
+- [#686](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/686) [`3a583e6`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/3a583e690a5a8dbdcae2f6963d29102ec86522b3) Thanks [@alexaka1](https://github.com/alexaka1)! - Only allow amd64 alpine build, as cross compilation is not working with musl
+
+- [#683](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/683) [`f1d838b`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/f1d838bf37c9f1b774234969d810d83f1c407548) Thanks [@alexaka1](https://github.com/alexaka1)! - Remove extra cpu instruction platforms as they are not used anyway
+
+- [#683](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/683) [`f1d838b`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/f1d838bf37c9f1b774234969d810d83f1c407548) Thanks [@alexaka1](https://github.com/alexaka1)! - Add support for alpine based healthchecks under the `-alpine` suffix tags
+
+### Patch Changes
+
+- [#696](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/696) [`4d513be`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/4d513be4216519f78a54269edb93b97f294bfc7f) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Remove --platform=$BUILDPLATFORM from base runtime layers that should use target platform
+
 ## 1.2.0-beta.2
 
 ### Minor Changes
