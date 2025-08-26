@@ -43,12 +43,6 @@ jobs:
         with:
           ref: ${{ env.branch }}
           persist-credentials: false
-      - name: Prepare platform pair
-        id: prep
-        run: |
-          platform="${{ matrix.platform }}"
-          platform_pair=$(printf '%s' "$platform" | tr '/' '-')
-          echo "platform_pair=$platform_pair" >> $GITHUB_OUTPUT
       - name: Check if last commit had a run
         id: check_commit
         continue-on-error: true
@@ -112,6 +106,12 @@ jobs:
         with:
           disable-sudo: true
           egress-policy: audit
+      - name: Prepare platform pair
+        id: prep
+        run: |
+          platform="${{ matrix.platform }}"
+          platform_pair=$(printf '%s' "$platform" | tr '/' '-')
+          echo "platform_pair=$platform_pair" >> $GITHUB_OUTPUT
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
