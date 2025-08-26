@@ -44,9 +44,12 @@ jobs:
           ref: ${{ env.branch }}
           persist-credentials: false
       - name: Prepare platform pair
+        id: prep
         run: |
           platform="${{ matrix.platform }}"
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+          platform_pair=$(printf '%s' "$platform" | tr '/' '-')
+          echo "PLATFORM_PAIR=$platform_pair" >> $GITHUB_ENV
+          echo "platform_pair=$platform_pair" >> $GITHUB_OUTPUT
       - name: Check if last commit had a run
         id: check_commit
         continue-on-error: true
@@ -170,7 +173,7 @@ jobs:
       - name: Upload base digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-base-${{ env.PLATFORM_PAIR }}
+          name: digests-base-${{ steps.prep.outputs.platform_pair }}
           path: ${{ runner.temp }}/digests-base/*
           if-no-files-found: error
           retention-days: 1
@@ -223,7 +226,7 @@ jobs:
       - name: Upload alpine digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-alpine-${{ env.PLATFORM_PAIR }}
+          name: digests-alpine-${{ steps.prep.outputs.platform_pair }}
           path: ${{ runner.temp }}/digests-alpine/*
           if-no-files-found: error
           retention-days: 1
