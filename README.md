@@ -97,4 +97,4 @@ BASE_IMAGE_TYPE=alpine dotnet test
 
 # Contributing
 
-The `beta` should be used for releasing `beta` versions. Because the main branch also tags the release with `latest`, which is not desirable.
+The `beta` branch should be used for releasing `beta` versions. Because the main branch also tags the release with `latest`, which is not desirable.
