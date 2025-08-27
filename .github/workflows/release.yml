@@ -176,6 +176,7 @@ jobs:
       - release-docker
     # fails on ubuntu-latest-arm as of 2025-08-27
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
     permissions:
       contents: write # tag + release
       id-token: write  # for tag signing (gitsign)
