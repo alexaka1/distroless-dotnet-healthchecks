@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.3.0-beta.8
+
+### Minor Changes
+
+- [`5cc84d4`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/5cc84d49c682e95b47c4649f679857640c17d4ce) Thanks [@alexaka1](https://github.com/alexaka1)! - Test sbom
+
 ## 1.3.0-beta.7
 
 ### Minor Changes
