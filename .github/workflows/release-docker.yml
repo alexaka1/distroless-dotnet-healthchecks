@@ -34,6 +34,7 @@ on:
         required: false
         default: ""
       run:
+        description: Whether to run the release job or not.
         type: boolean
         required: false
         default: true

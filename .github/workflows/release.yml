@@ -138,6 +138,7 @@ jobs:
       major: ${{ needs.check-release.outputs.major }}
       minor: ${{ needs.check-release.outputs.minor }}
       tag: ${{ needs.check-release.outputs.tag }}
+      tag-suffix: ${{ matrix.tag-suffix }}
       environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -159,7 +160,7 @@ jobs:
           - alpine
         include:
           - base-image-type: alpine
-            tag-suffix: -alpine
+            tag-suffix: '-alpine'
           - package: src/Distroless.HealthChecks
             image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
             target: binary
