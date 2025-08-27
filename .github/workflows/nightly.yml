@@ -291,8 +291,10 @@ jobs:
           merge-multiple: true
       - name: Create manifest list and push (base)
         working-directory: ${{ runner.temp }}/digests-base
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "${{ steps.meta.outputs.json }}") \
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
       - name: Inspect image (base)
         run: |
@@ -306,9 +308,11 @@ jobs:
       - name: Create manifest list and push (alpine)
         if: success() && steps.meta_alpine.outputs.tags != ''
         working-directory: ${{ runner.temp }}/digests-alpine
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta_alpine.outputs.json }}
         run: |
           if [ -n "$(ls -A)" ]; then
-            docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "${{ steps.meta_alpine.outputs.json }}") \
+            docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
               $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
           else
             echo "No alpine digests to merge (expected when arm64-only)."
