@@ -140,11 +140,18 @@ jobs:
             exit 1
           fi
           touch "$dir/$fname"
+      - name: Sanitize platform for artifact name
+        if: steps.docker_build.outputs.digest != ''
+        run: |
+          set -euo pipefail
+          platform='${{ matrix.platform }}'
+          safe=${platform//\//-}
+          echo "PLATFORM_SAFE=$safe" >> "$GITHUB_ENV"
       - name: Upload digest
         if: steps.docker_build.outputs.digest != ''
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ inputs.base-image-type }}-${{ matrix.platform }}
+          name: digests-${{ inputs.base-image-type }}-${{ env.PLATFORM_SAFE }}
           path: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}/*
           if-no-files-found: error
           retention-days: 2
