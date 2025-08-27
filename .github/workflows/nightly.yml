@@ -160,11 +160,6 @@ jobs:
         with:
           images: |
             name=${{ matrix.image }}
-          flavor: ${{ matrix.variant == 'alpine' && 'suffix=-alpine,onlatest=true' || '' }}
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Get Git commit timestamp
