@@ -60,8 +60,8 @@ on:
 permissions: { }
 
 jobs:
-  build-native:
-    name: Build native (${{ matrix.platform }}) - ${{ inputs.base-image-type }}${{ inputs.tag-suffix }}
+  publish-digest:
+    name: Build & Push image digest (${{ matrix.platform }}) - ${{ inputs.base-image-type }}${{ inputs.tag-suffix }}
     if: ${{ inputs.run }}
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     environment: ${{ inputs.environment }}
@@ -159,9 +159,9 @@ jobs:
           retention-days: 2
 
   merge-and-publish:
-    name: Merge and publish (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
+    name: Merge digest under tags (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
     if: ${{ inputs.run }}
-    needs: build-native
+    needs: publish-digest
     runs-on: ubuntu-24.04-arm
     environment: ${{ inputs.environment }}
     permissions:
