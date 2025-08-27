@@ -7,7 +7,7 @@ permissions:
 jobs:
   check-release:
     name: Prepare release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         shell: bash
