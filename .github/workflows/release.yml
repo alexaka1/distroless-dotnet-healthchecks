@@ -122,7 +122,7 @@ jobs:
           done
           echo "should-release=$should_release" >> "$GITHUB_OUTPUT"
   release-docker:
-    name: Publish docker images (ubuntu-chiseled + alpine)
+    name: Publish docker images
     if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
     uses: ./.github/workflows/release-docker.yml
     with:
@@ -219,7 +219,7 @@ jobs:
           if [ -f ".changeset/pre.json" ]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           fi
-      - name: Download merged artifacts (ubuntu + alpine)
+      - name: Download merged artifacts
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           pattern: merged-*
