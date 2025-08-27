@@ -224,7 +224,8 @@ jobs:
         with:
           pattern: merged-*
           path: /tmp/merged
-          merge-multiple: true
+          # Keep artifacts in separate subfolders named by artifact
+          merge-multiple: false
       - name: Append digests and tags to changelog
         run: |
           set -euo pipefail
