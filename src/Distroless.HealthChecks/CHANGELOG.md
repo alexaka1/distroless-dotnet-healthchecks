@@ -1,5 +1,29 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.3.0
+
+### Minor Changes
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - Test sbom
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
+- [#705](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/705) [`8481c8d`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/8481c8df1c73da46b6a501e674fb909255d4cebd) Thanks [@alexaka1](https://github.com/alexaka1)! - Add alpine arm64 image.
+
+  Alter tests to test alpine arm64 image too.
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
+- [#723](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/723) [`12bf475`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/12bf475ff1a1f072c1ff8079a6622b9e032fcc08) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
 ## 1.3.0-beta.8
 
 ### Minor Changes
