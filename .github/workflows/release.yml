@@ -148,7 +148,7 @@ jobs:
       contents: read # no tagging/release here; handled in fan-in job
       packages: write # for ghcr.io
       attestations: write # for attestations
-      id-token: write # for tag signing
+      id-token: write # for attestations
     strategy:
       fail-fast: false
       matrix:

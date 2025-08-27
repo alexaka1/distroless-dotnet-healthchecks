@@ -71,6 +71,7 @@ jobs:
         platform: [ linux/amd64, linux/arm64 ]
     permissions:
       contents: read
+      # docker push
       packages: write
     defaults:
       run:
@@ -164,7 +165,10 @@ jobs:
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
+      # docker push
       packages: write
+      # attestation
+      id-token: write
       attestations: write
     defaults:
       run:
