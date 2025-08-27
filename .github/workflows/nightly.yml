@@ -104,7 +104,7 @@ jobs:
       id-token: write
     strategy:
       fail-fast: false
-    # Explicit include to attach image + dockerfile to each combo
+      # Explicit include to attach image + dockerfile to each combo
       matrix:
         variant: [ ubuntu-chiseled, alpine ]
         platform: [ linux/amd64, linux/arm64 ]
