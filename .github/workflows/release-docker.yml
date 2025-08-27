@@ -65,26 +65,106 @@ on:
 permissions: { }
 
 jobs:
-  release-docker:
-    name: Release docker images
-    if: ${{ inputs.run }} # this is a github limitation https://github.com/orgs/community/discussions/37883
-    runs-on: ubuntu-latest
+  build-native:
+    name: Build native (${{ matrix.platform }}) - ${{ inputs.base-image-type }}${{ inputs.tag-suffix }}
+    if: ${{ inputs.run }}
+    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    environment: ${{ inputs.environment }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ linux/amd64, linux/arm64 ]
+    permissions:
+      contents: read
+      packages: write
     defaults:
       run:
         shell: bash
-    environment: ${{ inputs.environment }}
-    permissions:
-      contents: write # for tagging and gh release
-      packages: write # for ghcr.io
-      attestations: write # for attestations
-      id-token: write # for tag signing
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: true
+      - uses: chainguard-dev/actions/setup-gitsign@be7b31a01af8ce7228fe901326f1d223fb788e14
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta (labels)
+        id: meta_labels
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        with:
+          images: |
+            name=ghcr.io/${{ inputs.image }}
+          flavor: |
+            suffix=${{ inputs.tag-suffix }},onlatest=true
+          tags: |
+            type=edge
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Get Git commit timestamp
+        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+      - name: Build and push by digest
+        id: docker_build
+        if: contains(inputs.platforms, matrix.platform)
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.package }}/Dockerfile
+          target: ${{ inputs.target }}
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            BASE_IMAGE_TYPE=${{ inputs.base-image-type }}
+          provenance: mode=max
+          sbom: true
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          # tags used to select repository path for push-by-digest
+          tags: ghcr.io/${{ inputs.image }}
+          labels: ${{ steps.meta_labels.outputs.labels }}
+        env:
+          SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
+      - name: Export digest
+        if: steps.docker_build.outputs.digest != ''
+        run: |
+          mkdir -p ${{ runner.temp }}/digests-${{ inputs.base-image-type }}
+          digest='${{ steps.docker_build.outputs.digest }}'
+          touch "${{ runner.temp }}/digests-${{ inputs.base-image-type }}/${digest#sha256:}"
+      - name: Upload digest
+        if: steps.docker_build.outputs.digest != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ inputs.base-image-type }}-${{ matrix.platform }}
+          path: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}/*
+          if-no-files-found: error
+          retention-days: 2
+
+  merge-and-publish:
+    name: Merge and publish (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
+    if: ${{ inputs.run }}
+    needs: build-native
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
       - name: Login to GitHub Container Registry
@@ -127,7 +207,7 @@ jobs:
           if [ -f ".changeset/pre.json" ]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           fi
-      - name: Docker meta
+      - name: Docker meta (tags)
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -144,44 +224,66 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-      - name: Get Git commit timestamps
-        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
-      - name: Build and push
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-        id: docker_build
+      - name: Download digests
+        uses: actions/download-artifact@v4
         with:
-          context: ${{ inputs.context }}
-          file: ${{ inputs.package }}/Dockerfile
-          target: ${{ inputs.target }}
-          platforms: ${{ inputs.platforms }}
-          build-args: |
-            BASE_IMAGE_TYPE=${{ inputs.base-image-type }}
-          provenance: mode=max
-          sbom: true
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
+          path: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}
+          pattern: digests-${{ inputs.base-image-type }}-*
+          merge-multiple: true
+      - name: Create GHCR manifest list and push
+        working-directory: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}
         env:
-          SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
-      - name: Attest GitHub Container Registry
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          if [ -z "$(ls -A)" ]; then
+            echo "No digests found for base-image-type '${{ inputs.base-image-type }}'" >&2
+            exit 1
+          fi
+          TAG_ARGS=$(jq -cr '.tags | map(select(startswith("ghcr.io/")) | "-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          docker buildx imagetools create ${TAG_ARGS} \
+            $(printf 'ghcr.io/${{ inputs.image }}@sha256:%s ' *)
+      - name: Inspect GHCR image
+        id: inspect_ghcr
+        run: |
+          set -euo pipefail
+          OUT=$(docker buildx imagetools inspect ghcr.io/${{ inputs.image }}:${{ steps.meta.outputs.version }})
+          echo "$OUT"
+          DIGEST=$(printf "%s\n" "$OUT" | sed -n 's/^Digest:\s*//p' | head -n1)
+          if [ -z "$DIGEST" ]; then echo "Failed to detect manifest digest" >&2; exit 1; fi
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+      - name: Copy manifest to Docker Hub
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          TAGS=$(jq -cr '.tags | map(select(startswith("docker.io/"))) | join("\n")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          if [ -n "$TAGS" ]; then
+            SRC="ghcr.io/${{ inputs.image }}:${{ steps.meta.outputs.version }}"
+            # Build tag args for docker.io
+            TAG_ARGS=$(printf -- '-t %s ' $TAGS)
+            docker buildx imagetools create ${TAG_ARGS} "$SRC"
+          else
+            echo "No Docker Hub tags to publish."
+          fi
+      - name: Attest GHCR manifest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: ghcr.io/${{ inputs.image }}
-          subject-digest: ${{ steps.docker_build.outputs.digest }}
+          subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
           push-to-registry: false
-      - name: Attest Docker Hub
+      - name: Attest Docker Hub manifest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: docker.io/${{ inputs.image }}
-          subject-digest: ${{ steps.docker_build.outputs.digest }}
+          subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
           push-to-registry: false
       - name: Add docker tags and digest to release changelog
         if: ${{ inputs.create-release }}
         run: |
           echo "### Digest" >> "${{ steps.changelog.outputs.changes }}"
           echo "" >> "${{ steps.changelog.outputs.changes }}"
-          echo "\`${{ steps.docker_build.outputs.digest }}\`" >> "${{ steps.changelog.outputs.changes }}"
+          echo "\`${{ steps.inspect_ghcr.outputs.digest }}\`" >> "${{ steps.changelog.outputs.changes }}"
           echo "" >> "${{ steps.changelog.outputs.changes }}"
           echo "### Tags" >> "${{ steps.changelog.outputs.changes }}"
           echo "" >> "${{ steps.changelog.outputs.changes }}"
@@ -194,7 +296,7 @@ jobs:
           variant_name="${{ inputs.base-image-type }}"
           echo "### Digest (${variant_name})" > "$output_file"
           echo "" >> "$output_file"
-          echo "\`${{ steps.docker_build.outputs.digest }}\`" >> "$output_file"
+          echo "\`${{ steps.inspect_ghcr.outputs.digest }}\`" >> "$output_file"
           echo "" >> "$output_file"
           echo "### Tags (${variant_name})" >> "$output_file"
           echo "" >> "$output_file"
