@@ -162,7 +162,7 @@ jobs:
     name: Merge and publish (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
     if: ${{ inputs.run }}
     needs: build-native
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     environment: ${{ inputs.environment }}
     permissions:
       # docker push
