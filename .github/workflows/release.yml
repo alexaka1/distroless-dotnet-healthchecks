@@ -154,21 +154,16 @@ jobs:
       matrix:
         package:
           - src/Distroless.HealthChecks
+        base-image-type:
+          - ubuntu-chiseled
+          - alpine
         include:
-          # ubuntu-chiseled variant
+          - base-image-type: alpine
+            tag-suffix: -alpine
           - package: src/Distroless.HealthChecks
             image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
             target: binary
             platforms: linux/amd64,linux/arm64
-            base-image-type: ubuntu-chiseled
-            readme: ./README.md
-            context: "."
-          # alpine variant
-          - package: src/Distroless.HealthChecks
-            image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
-            target: binary
-            platforms: linux/amd64,linux/arm64
-            base-image-type: alpine
             readme: ./README.md
             context: "."
   release-github:
