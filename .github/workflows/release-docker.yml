@@ -128,9 +128,17 @@ jobs:
       - name: Export digest
         if: steps.docker_build.outputs.digest != ''
         run: |
-          mkdir -p ${{ runner.temp }}/digests-${{ inputs.base-image-type }}
+          set -euo pipefail
+          dir='${{ runner.temp }}/digests-${{ inputs.base-image-type }}'
+          mkdir -p "$dir"
           digest='${{ steps.docker_build.outputs.digest }}'
-          touch "${{ runner.temp }}/digests-${{ inputs.base-image-type }}/${digest#sha256:}"
+          if [[ "$digest" =~ ^sha256:([A-Fa-f0-9]{64})$ ]]; then
+            fname="${BASH_REMATCH[1]}"
+          else
+            echo "Unexpected digest format: '$digest'" >&2
+            exit 1
+          fi
+          touch "$dir/$fname"
       - name: Upload digest
         if: steps.docker_build.outputs.digest != ''
         uses: actions/upload-artifact@v4
@@ -205,9 +213,18 @@ jobs:
             echo "No digests found for base-image-type '${{ inputs.base-image-type }}'" >&2
             exit 1
           fi
-          TAG_ARGS=$(jq -cr '.tags | map(select(startswith("ghcr.io/")) | "-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-          docker buildx imagetools create ${TAG_ARGS} \
-            $(printf 'ghcr.io/${{ inputs.image }}@sha256:%s ' *)
+          # Build tag args safely using arrays
+          readarray -t ghcr_tags < <(jq -r '.tags[] | select(startswith("ghcr.io/"))' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          args=()
+          for t in "${ghcr_tags[@]}"; do
+            args+=( -t "$t" )
+          done
+          # Build source refs from digest files
+          sources=()
+          for f in *; do
+            sources+=( "ghcr.io/${{ inputs.image }}@sha256:$f" )
+          done
+          docker buildx imagetools create "${args[@]}" "${sources[@]}"
       - name: Inspect GHCR image
         id: inspect_ghcr
         run: |
@@ -222,12 +239,14 @@ jobs:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
           set -euo pipefail
-          TAGS=$(jq -cr '.tags | map(select(startswith("docker.io/"))) | join("\n")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-          if [ -n "$TAGS" ]; then
+          mapfile -t docker_tags < <(jq -r '.tags[] | select(startswith("docker.io/"))' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          if [ "${#docker_tags[@]}" -gt 0 ]; then
             SRC="ghcr.io/${{ inputs.image }}:${{ steps.meta.outputs.version }}"
-            # Build tag args for docker.io
-            TAG_ARGS=$(printf -- '-t %s ' $TAGS)
-            docker buildx imagetools create ${TAG_ARGS} "$SRC"
+            args=()
+            for t in "${docker_tags[@]}"; do
+              args+=( -t "$t" )
+            done
+            docker buildx imagetools create "${args[@]}" "$SRC"
           else
             echo "No Docker Hub tags to publish."
           fi
