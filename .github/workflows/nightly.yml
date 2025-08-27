@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [ base, alpine ]
+        variant: [ ubuntu-chiseled, alpine ]
         platform: [ linux/amd64, linux/arm64 ]
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
@@ -122,13 +122,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker meta (base)
-        if: matrix.variant == 'base'
-        id: meta_base
+      - name: Docker meta
+        id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
           images: |
             name=ghcr.io/${{ env.IMAGE_NAME }}
+          flavor: ${{ matrix.variant == 'alpine' && 'suffix=-alpine,onlatest=true' || '' }}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -137,21 +137,13 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Get Git commit timestamp
         run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
-      - name: Docker meta (alpine)
-        if: matrix.variant == 'alpine'
-        id: meta_alpine
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
-        with:
-          images: |
-            name=ghcr.io/${{ env.IMAGE_NAME }}
-          flavor: |
-            suffix=-alpine,onlatest=true
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=edge
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Set variant build args
+        run: |
+          if [ "${{ matrix.variant }}" = "alpine" ]; then
+            echo "BASE_IMAGE_TYPE=alpine" >> $GITHUB_ENV
+          else
+            echo "BASE_IMAGE_TYPE=ubuntu-chiseled" >> $GITHUB_ENV
+          fi
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -160,12 +152,13 @@ jobs:
           file: src/Distroless.HealthChecks/Dockerfile
           target: final
           platforms: ${{ matrix.platform }}
-          build-args: ${{ matrix.variant == 'alpine' && 'BASE_IMAGE_TYPE=alpine' || '' }}
+          build-args: |
+            BASE_IMAGE_TYPE=${{ env.BASE_IMAGE_TYPE }}
           provenance: mode=max
           sbom: true
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
           tags: ghcr.io/${{ env.IMAGE_NAME }}
-          labels: ${{ matrix.variant == 'alpine' && steps.meta_alpine.outputs.labels || steps.meta_base.outputs.labels }}
+          labels: ${{ steps.meta.outputs.labels }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
       - name: Attest GHCR
@@ -219,7 +212,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
-      - name: Docker meta (base)
+      - name: Docker meta (ubuntu-chiseled)
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -231,34 +224,21 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-      - name: Docker meta (alpine)
-        id: meta_alpine
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
-        with:
-          images: |
-            name=ghcr.io/${{ env.IMAGE_NAME }}
-          flavor: |
-            suffix=-alpine,onlatest=true
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=edge
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-      - name: Download base digests
+      
+      - name: Download ubuntu-chiseled digests
         uses: actions/download-artifact@v4
         with:
-          path: ${{ runner.temp }}/digests-base
-          pattern: digests-base-*
+          path: ${{ runner.temp }}/digests-ubuntu-chiseled
+          pattern: digests-ubuntu-chiseled-*
           merge-multiple: true
-      - name: Create manifest list and push (base)
-        working-directory: ${{ runner.temp }}/digests-base
+      - name: Create manifest list and push (ubuntu-chiseled)
+        working-directory: ${{ runner.temp }}/digests-ubuntu-chiseled
         env:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
-      - name: Inspect image (base)
+      - name: Inspect image (ubuntu-chiseled)
         run: |
           docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
       - name: Download alpine digests
