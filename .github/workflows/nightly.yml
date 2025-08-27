@@ -24,10 +24,11 @@ env:
   
 
 jobs:
-  check-run:
+  plan-publish:
+    name: Plan publish set
     if: ${{ github.event_name != 'schedule' || github.ref_name == 'main' }}
     outputs:
-      should-run: ${{ steps.check_commit.outputs.should-run }}
+      should-run: ${{ steps.result.outputs.should-run }}
     permissions:
       contents: read
       packages: read
@@ -42,55 +43,52 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - name: Check if last commit had a run
-        id: check_commit
-        continue-on-error: true
+      - name: Compute publish list
+        id: compute
         run: |
           set -euo pipefail
-          # Always allow manual runs from the UI for testing
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual dispatch detected; allowing run."
-            echo "should-run=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          CURRENT_HASH=$(git rev-parse HEAD)
-          # Determine tag to probe: nightly for schedule, else branch name
           if [ "${{ github.event_name }}" = "schedule" ]; then
             PUBLISH_TAG=nightly
           else
             PUBLISH_TAG='${{ github.ref_name }}'
           fi
-          IMAGE_REPO="ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks"
-          IMAGE_NAME="$IMAGE_REPO:$PUBLISH_TAG"
-          if ! docker pull -q "$IMAGE_NAME" >/dev/null 2>&1; then
-            echo "::notice::Image $IMAGE_NAME not found in registry. Triggering build."
-            echo "should-run=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          IMAGE_HASH=$(docker inspect \
-          --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
-          "$IMAGE_NAME" 2>/dev/null || echo "")
-          
-          if [[ -z "$IMAGE_HASH" ]]; then
-            echo "Image $IMAGE_NAME has no org.opencontainers.image.revision label. Triggering build."
-            echo "should-run=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi  
-          echo "Current Git hash: $CURRENT_HASH"
-          echo "Image hash:       $IMAGE_HASH"
-            
-          if [[ "$IMAGE_HASH" == "$CURRENT_HASH" ]]; then
-            echo "::notice::This commit ($CURRENT_HASH) has already been published. Skipping."
-            echo "should-run=false" >> $GITHUB_OUTPUT
+          IMAGES=(
+            "ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks"
+          )
+          mkdir -p "$RUNNER_TEMP/publish-plan"
+          : > "$RUNNER_TEMP/publish-plan/images.txt"
+          CURRENT_HASH=$(git rev-parse HEAD)
+          for repo in "${IMAGES[@]}"; do
+            name="$repo:$PUBLISH_TAG"
+            if ! docker pull -q "$name" >/dev/null 2>&1; then
+              echo "$repo" >> "$RUNNER_TEMP/publish-plan/images.txt"
+              continue
+            fi
+            rev=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$name" 2>/dev/null || true)
+            if [ -z "$rev" ] || [ "$rev" != "$CURRENT_HASH" ]; then
+              echo "$repo" >> "$RUNNER_TEMP/publish-plan/images.txt"
+            fi
+          done
+          echo "Plan:"; cat "$RUNNER_TEMP/publish-plan/images.txt" || true
+      - name: Upload publish plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-plan
+          path: ${{ runner.temp }}/publish-plan/images.txt
+          if-no-files-found: warn
+          retention-days: 1
+      - name: Set output
+        id: result
+        run: |
+          if [ -s "$RUNNER_TEMP/publish-plan/images.txt" ]; then
+            echo "should-run=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Image does not match current commit. Safe to build/push."
-            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "should-run=false" >> "$GITHUB_OUTPUT"
           fi
   build-native:
     name: Build native (${{ matrix.variant }} / ${{ matrix.platform }})
-    needs: [ check-run ]
-    # Run when check-run allows, or always for manual dispatch
-    if: needs.check-run.outputs.should-run == 'true'
+    needs: [ plan-publish ]
+    if: needs.plan-publish.outputs.should-run == 'true'
     environment: Nightly
     permissions:
       contents: read
@@ -134,7 +132,22 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download publish plan
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-plan
+          path: ${{ runner.temp }}/publish-plan
+      - name: Filter by publish plan
+        id: plan
+        run: |
+          set -euo pipefail
+          if grep -Fxq '${{ matrix.image }}' '${{ runner.temp }}/publish-plan/images.txt'; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Docker meta
+        if: steps.plan.outputs.publish == 'true'
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -157,6 +170,7 @@ jobs:
             echo "BASE_IMAGE_TYPE=ubuntu-chiseled" >> $GITHUB_ENV
           fi
       - name: Build and push by digest
+        if: steps.plan.outputs.publish == 'true'
         id: build
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
@@ -174,21 +188,25 @@ jobs:
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
       - name: Attest GHCR
+        if: steps.plan.outputs.publish == 'true'
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: ${{ matrix.image }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: false
       - name: Inspect attestations
+        if: steps.plan.outputs.publish == 'true'
         run: |
           echo "Inspecting SBOM and provenance for ${{ matrix.variant }} image digest: ${{ steps.build.outputs.digest }}"
           docker buildx imagetools inspect ${{ matrix.image }}@${{ steps.build.outputs.digest }}
       - name: Export digest
+        if: steps.plan.outputs.publish == 'true'
         run: |
           mkdir -p ${{ runner.temp }}/digests-${{ matrix.variant }}
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests-${{ matrix.variant }}/${digest#sha256:}"
       - name: Upload digest
+        if: steps.plan.outputs.publish == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ matrix.variant }}-${{ steps.prep.outputs.platform_pair }}
@@ -199,7 +217,8 @@ jobs:
 
   merge:
     name: Merge manifests and tag (${{ matrix.variant }})
-    needs: [ build-native ]
+    needs: [ plan-publish, build-native ]
+    if: needs.plan-publish.outputs.should-run == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -229,7 +248,22 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      - name: Download publish plan
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-plan
+          path: ${{ runner.temp }}/publish-plan
+      - name: Filter by publish plan
+        id: plan
+        run: |
+          set -euo pipefail
+          if grep -Fxq '${{ matrix.image }}' '${{ runner.temp }}/publish-plan/images.txt'; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Docker meta
+        if: steps.plan.outputs.publish == 'true'
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
@@ -242,14 +276,15 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-
       - name: Download digests
+        if: steps.plan.outputs.publish == 'true'
         uses: actions/download-artifact@v4
         with:
           path: ${{ runner.temp }}/digests-${{ matrix.variant }}
           pattern: digests-${{ matrix.variant }}-*
           merge-multiple: true
       - name: Create manifest list and push
+        if: steps.plan.outputs.publish == 'true'
         working-directory: ${{ runner.temp }}/digests-${{ matrix.variant }}
         env:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
@@ -261,6 +296,7 @@ jobs:
             echo "No digests found for variant '${{ matrix.variant }}'; skipping manifest create."
           fi
       - name: Inspect image
+        if: steps.plan.outputs.publish == 'true'
         run: |
           if [ -n "$(ls -A \"${{ runner.temp }}/digests-${{ matrix.variant }}\")" ]; then
             docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.meta.outputs.version }}
