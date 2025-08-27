@@ -5,6 +5,7 @@
     "alexaka1/distroless-dotnet-healthchecks": "1.2.0"
   },
   "changesets": [
-    "some-years-sip"
+    "some-years-sip",
+    "two-experts-tie"
   ]
 }

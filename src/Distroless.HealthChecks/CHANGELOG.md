@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.3.0-beta.1
+
+### Minor Changes
+
+- [`3b44307`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/3b4430780bf02f6513aa96879a9bf5454c5060c6) Thanks [@alexaka1](https://github.com/alexaka1)! - .
+
 ## 1.3.0-beta.0
 
 ### Minor Changes
