@@ -1,0 +1,18 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "alexaka1/distroless-dotnet-healthchecks": "1.2.0"
+  },
+  "changesets": [
+    "common-mails-glow",
+    "gold-groups-chew",
+    "major-parents-write",
+    "old-apes-shop",
+    "ready-corners-spend",
+    "some-years-sip",
+    "two-experts-tie",
+    "two-seals-strive",
+    "wicked-buses-crash"
+  ]
+}

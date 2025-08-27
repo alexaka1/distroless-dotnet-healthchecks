@@ -1,0 +1,64 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distroless.HealthChecks", "src\Distroless.HealthChecks\Distroless.HealthChecks.csproj", "{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{91C28071-6001-4B75-B2E3-8B3E85D8ABA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2EED11D-C97C-4702-A11F-CC5F565A539D}"
+	ProjectSection(SolutionItems) = preProject
+		editorconfig = .editorconfig
+		README.md = README.md
+		package.json = package.json
+		pnpm-workspace.yaml = pnpm-workspace.yaml
+		allowed-licenses.json = allowed-licenses.json
+		nuget.config = nuget.config
+		qodana.yaml = qodana.yaml
+		renovate.json5 = renovate.json5
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{98C8D84E-175C-4D2C-9717-8AC13EBAF534}"
+	ProjectSection(SolutionItems) = preProject
+		.github\FUNDING.yml = .github\FUNDING.yml
+		.github\workflows\dependency-review.yml = .github\workflows\dependency-review.yml
+		.github\workflows\scorecards.yml = .github\workflows\scorecards.yml
+		.github\workflows\codeql.yml = .github\workflows\codeql.yml
+		.github\workflows\nightly.yml = .github\workflows\nightly.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\version.yml = .github\workflows\version.yml
+		.github\workflows\release-docker.yml = .github\workflows\release-docker.yml
+		.github\workflows\check-licenses.yml = .github\workflows\check-licenses.yml
+		.github\workflows\code-quality.yml = .github\workflows\code-quality.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2D6540E7-2AB7-4DB1-BD83-5ED16D7EA5BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distroless.Sample.WebApp", "test\Distroless.Sample.WebApp\Distroless.Sample.WebApp.csproj", "{B94EC5F1-6BA0-4A0C-A3A1-6AF1C6547F01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distroless.HealthChecks.Test", "test\Distroless.HealthChecks.Test\Distroless.HealthChecks.Test.csproj", "{60AE5568-5982-46D7-AEEB-42F592EA515F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B94EC5F1-6BA0-4A0C-A3A1-6AF1C6547F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B94EC5F1-6BA0-4A0C-A3A1-6AF1C6547F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B94EC5F1-6BA0-4A0C-A3A1-6AF1C6547F01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B94EC5F1-6BA0-4A0C-A3A1-6AF1C6547F01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60AE5568-5982-46D7-AEEB-42F592EA515F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60AE5568-5982-46D7-AEEB-42F592EA515F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60AE5568-5982-46D7-AEEB-42F592EA515F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60AE5568-5982-46D7-AEEB-42F592EA515F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FCE56143-02AD-41F4-ABC0-B60DDCA36E95} = {91C28071-6001-4B75-B2E3-8B3E85D8ABA1}
+		{B94EC5F1-6BA0-4A0C-A3A1-6AF1C6547F01} = {2D6540E7-2AB7-4DB1-BD83-5ED16D7EA5BF}
+		{60AE5568-5982-46D7-AEEB-42F592EA515F} = {2D6540E7-2AB7-4DB1-BD83-5ED16D7EA5BF}
+	EndGlobalSection
+EndGlobal
