@@ -5,6 +5,7 @@
     "alexaka1/distroless-dotnet-healthchecks": "1.2.0"
   },
   "changesets": [
+    "common-mails-glow",
     "major-parents-write",
     "ready-corners-spend",
     "some-years-sip",
