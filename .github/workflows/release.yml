@@ -167,7 +167,7 @@ jobs:
             readme: ./README.md
             context: "."
   release-github:
-    name: Create GitHub release (fan-in)
+    name: Create GitHub release
     if: ${{ needs.should-release.outputs.should-release }}
     needs:
       - check-release
