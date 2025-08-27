@@ -305,6 +305,9 @@ jobs:
       - name: Inspect image
         if: steps.plan.outputs.publish == 'true'
         run: |
-          if [ -n "$(ls -A \"${{ runner.temp }}/digests-${{ matrix.variant }}\")" ]; then
+          DIR="${{ runner.temp }}/digests-${{ matrix.variant }}"
+          if [ -d "$DIR" ] && [ "$(ls -A "$DIR" 2>/dev/null | wc -l)" -gt 0 ]; then
             docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.meta.outputs.version }}
+          else
+            echo "No digests directory or empty for variant '${{ matrix.variant }}'; skipping inspect."
           fi
