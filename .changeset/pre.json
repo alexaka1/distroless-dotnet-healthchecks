@@ -4,5 +4,7 @@
   "initialVersions": {
     "alexaka1/distroless-dotnet-healthchecks": "1.2.0"
   },
-  "changesets": []
+  "changesets": [
+    "some-years-sip"
+  ]
 }
