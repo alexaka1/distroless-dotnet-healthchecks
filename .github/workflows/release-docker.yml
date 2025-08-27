@@ -132,6 +132,7 @@ jobs:
           dir='${{ runner.temp }}/digests-${{ inputs.base-image-type }}'
           mkdir -p "$dir"
           digest='${{ steps.docker_build.outputs.digest }}'
+          # SHA-256 digests have exactly 64 hexadecimal characters after the 'sha256:' prefix
           if [[ "$digest" =~ ^sha256:([A-Fa-f0-9]{64})$ ]]; then
             fname="${BASH_REMATCH[1]}"
           else
@@ -197,6 +198,17 @@ jobs:
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Compute tag lists (GHCR + Docker Hub)
+        id: taglists
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          # Extract tags for each registry once to avoid repeating jq filters
+          ghcr_tags=$(jq -c '[.tags[] | select(startswith("ghcr.io/"))]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          docker_tags=$(jq -c '[.tags[] | select(startswith("docker.io/"))]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          echo "ghcr=$ghcr_tags" >> "$GITHUB_OUTPUT"
+          echo "docker=$docker_tags" >> "$GITHUB_OUTPUT"
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
@@ -206,7 +218,7 @@ jobs:
       - name: Create GHCR manifest list and push
         working-directory: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}
         env:
-          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+          GHCR_TAGS_JSON: ${{ steps.taglists.outputs.ghcr }}
         run: |
           set -euo pipefail
           if [ -z "$(ls -A)" ]; then
@@ -214,7 +226,7 @@ jobs:
             exit 1
           fi
           # Build tag args safely using arrays
-          readarray -t ghcr_tags < <(jq -r '.tags[] | select(startswith("ghcr.io/"))' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          readarray -t ghcr_tags < <(jq -r '.[]' <<< "$GHCR_TAGS_JSON")
           args=()
           for t in "${ghcr_tags[@]}"; do
             args+=( -t "$t" )
@@ -236,10 +248,10 @@ jobs:
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
       - name: Copy manifest to Docker Hub
         env:
-          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+          DOCKER_TAGS_JSON: ${{ steps.taglists.outputs.docker }}
         run: |
           set -euo pipefail
-          mapfile -t docker_tags < <(jq -r '.tags[] | select(startswith("docker.io/"))' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          mapfile -t docker_tags < <(jq -r '.[]' <<< "$DOCKER_TAGS_JSON")
           if [ "${#docker_tags[@]}" -gt 0 ]; then
             SRC="ghcr.io/${{ inputs.image }}:${{ steps.meta.outputs.version }}"
             args=()
