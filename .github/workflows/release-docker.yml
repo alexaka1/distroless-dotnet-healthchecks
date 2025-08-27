@@ -286,11 +286,16 @@ jobs:
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
           push-to-registry: false
       - name: Persist merge metadata for release job
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
-          set -euo pipefail
-          echo "${{ steps.inspect_ghcr.outputs.digest }}" > manifest-digest.txt
-          jq -c '.' <<< "${{ steps.meta.outputs.json }}" > metadata.json
-          printf "%s\n" "${{ inputs.base-image-type }}" > variant.txt
+            set -euo pipefail
+            digest='${{ steps.inspect_ghcr.outputs.digest }}'
+            printf '%s\n' "$digest" > manifest-digest.txt
+            # Avoid inlining JSON into the script; read from env safely
+            printf '%s' "$DOCKER_METADATA_OUTPUT_JSON" | jq -c '.' > metadata.json
+            variant='${{ inputs.base-image-type }}'
+            printf '%s\n' "$variant" > variant.txt
       - name: Upload merged artifact (digest + metadata)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
