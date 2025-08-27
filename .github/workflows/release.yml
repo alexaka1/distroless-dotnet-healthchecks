@@ -173,7 +173,8 @@ jobs:
       - check-release
       - should-release
       - release-docker
-    runs-on: ubuntu-24.04
+    # fails on ubuntu-latest-arm as of 2025-08-27
+    runs-on: ubuntu-latest
     permissions:
       contents: write # tag + release
       id-token: write  # for tag signing (gitsign)
