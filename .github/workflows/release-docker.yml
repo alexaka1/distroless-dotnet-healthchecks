@@ -33,11 +33,6 @@ on:
         type: string
         required: false
         default: ""
-      create-release:
-        description: Create GitHub release, tag repo, and update descriptions
-        type: boolean
-        required: false
-        default: true
       run:
         type: boolean
         required: false
@@ -89,7 +84,6 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: true
-      - uses: chainguard-dev/actions/setup-gitsign@be7b31a01af8ce7228fe901326f1d223fb788e14
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
       - name: Login to GitHub Container Registry
@@ -153,10 +147,9 @@ jobs:
     runs-on: ubuntu-24.04
     environment: ${{ inputs.environment }}
     permissions:
-      contents: write
+      contents: read
       packages: write
       attestations: write
-      id-token: write
     defaults:
       run:
         shell: bash
@@ -178,35 +171,7 @@ jobs:
         with:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          # we use credentials to push tags below
-          persist-credentials: true
-      - uses: chainguard-dev/actions/setup-gitsign@be7b31a01af8ce7228fe901326f1d223fb788e14
-      - name: Create changelog for release
-        id: changelog
-        run: |
-          input_file="${{ inputs.package }}/CHANGELOG.md"
-          output_file="/tmp/changes.md"
-          # Find the line number of the first version heading
-          start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
-
-          # Find the line number of the next version heading, if it exists
-          end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
-
-          if [ -z "$end_line" ]; then
-            # If there is no next version, extract till the end of the file
-            sed -n "${start_line},\$p" "$input_file" > "$output_file"
-          else
-            # Extract only the section for the uppermost version
-            sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
-          fi
-          echo "changes=$output_file" >> "$GITHUB_OUTPUT"
-          echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          if [ -f ".changeset/pre.json" ]; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          fi
+      # Release notes and tagging now happen in a separate job
       - name: Docker meta (tags)
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
@@ -278,65 +243,19 @@ jobs:
           subject-name: docker.io/${{ inputs.image }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
           push-to-registry: false
-      - name: Add docker tags and digest to release changelog
-        if: ${{ inputs.create-release }}
+      - name: Persist merge metadata for release job
         run: |
-          echo "### Digest" >> "${{ steps.changelog.outputs.changes }}"
-          echo "" >> "${{ steps.changelog.outputs.changes }}"
-          echo "\`${{ steps.inspect_ghcr.outputs.digest }}\`" >> "${{ steps.changelog.outputs.changes }}"
-          echo "" >> "${{ steps.changelog.outputs.changes }}"
-          echo "### Tags" >> "${{ steps.changelog.outputs.changes }}"
-          echo "" >> "${{ steps.changelog.outputs.changes }}"
-          echo "${{ steps.meta.outputs.tags }}" | awk '{print "- " $0 }' >> "${{ steps.changelog.outputs.changes }}"
-      - name: Prepare variant release notes
-        if: ${{ ! inputs.create-release }}
-        id: variant_notes
-        run: |
-          output_file="/tmp/variant-changes.md"
-          variant_name="${{ inputs.base-image-type }}"
-          echo "### Digest (${variant_name})" > "$output_file"
-          echo "" >> "$output_file"
-          echo "\`${{ steps.inspect_ghcr.outputs.digest }}\`" >> "$output_file"
-          echo "" >> "$output_file"
-          echo "### Tags (${variant_name})" >> "$output_file"
-          echo "" >> "$output_file"
-          echo "${{ steps.meta.outputs.tags }}" | awk '{print "- " $0 }' >> "$output_file"
-          echo "changes=$output_file" >> "$GITHUB_OUTPUT"
-      - name: Tag release
-        if: ${{ inputs.create-release }}
-        run: |
-          git tag -s "${{ inputs.image }}-${{ inputs.semver }}" -m "Release ${{ inputs.image }}:${{ inputs.semver }}"
-          git push origin ${{ inputs.image }}-${{ inputs.semver }}
-      - name: Create GitHub release
-        if: ${{ inputs.create-release }}
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+          set -euo pipefail
+          echo "${{ steps.inspect_ghcr.outputs.digest }}" > manifest-digest.txt
+          jq -c '.' <<< "${{ steps.meta.outputs.json }}" > metadata.json
+          printf "%s\n" "${{ inputs.base-image-type }}" > variant.txt
+      - name: Upload merged artifact (digest + metadata)
+        uses: actions/upload-artifact@v4
         with:
-          # files: |
-          body_path: ${{ steps.changelog.outputs.changes }}
-          body: Oh no, it looks like the change-notes were not generated correctly by the action.
-          draft: false
-          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
-          generate_release_notes: true
-          # fail_on_unmatched_files: true
-          append_body: true
-          tag_name: "${{ inputs.image }}-${{ inputs.semver }}"
-          target_commitish: ${{ github.sha }}
-          name: ${{ inputs.image }}:${{ inputs.semver }}
-      - name: Append to existing GitHub release (variant)
-        if: ${{ ! inputs.create-release }}
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
-        with:
-          body_path: ${{ steps.variant_notes.outputs.changes }}
-          draft: false
-          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
-          generate_release_notes: false
-          append_body: true
-          tag_name: "${{ inputs.image }}-${{ inputs.semver }}"
-      - name: Update repo description
-        if: ${{ inputs.create-release && ! fromJSON(steps.changelog.outputs.prerelease) }}
-        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
-        with:
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ inputs.image }}
-          readme-filepath: ${{ inputs.readme }}
+          # Use a slash-free name for artifacts to avoid issues
+          name: merged-${{ inputs.base-image-type }}
+          path: |
+            manifest-digest.txt
+            metadata.json
+            variant.txt
+          retention-days: 3
