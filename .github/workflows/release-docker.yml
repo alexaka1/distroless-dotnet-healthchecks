@@ -150,7 +150,7 @@ jobs:
           echo "PLATFORM_SAFE=$safe" >> "$GITHUB_ENV"
       - name: Upload digest
         if: steps.docker_build.outputs.digest != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: digests-${{ inputs.base-image-type }}-${{ env.PLATFORM_SAFE }}
           path: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}/*
@@ -221,7 +221,7 @@ jobs:
           echo "ghcr=$ghcr_tags" >> "$GITHUB_OUTPUT"
           echo "docker=$docker_tags" >> "$GITHUB_OUTPUT"
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: ${{ runner.temp }}/digests-${{ inputs.base-image-type }}
           pattern: digests-${{ inputs.base-image-type }}-*
@@ -292,7 +292,7 @@ jobs:
           jq -c '.' <<< "${{ steps.meta.outputs.json }}" > metadata.json
           printf "%s\n" "${{ inputs.base-image-type }}" > variant.txt
       - name: Upload merged artifact (digest + metadata)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           # Use a slash-free name for artifacts to avoid issues
           name: merged-${{ inputs.base-image-type }}
