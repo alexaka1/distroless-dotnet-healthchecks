@@ -45,6 +45,8 @@ jobs:
           persist-credentials: false
       - name: Compute publish list
         id: compute
+        env:
+          FORCE: ${{ inputs.force }}
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "schedule" ]; then
@@ -57,6 +59,11 @@ jobs:
           )
           mkdir -p "$RUNNER_TEMP/publish-plan"
           : > "$RUNNER_TEMP/publish-plan/images.txt"
+          if [ "${FORCE}" = "true" ]; then
+            printf "%s\n" "${IMAGES[@]}" > "$RUNNER_TEMP/publish-plan/images.txt"
+            echo "Force publish requested; marking all images."
+            exit 0
+          fi
           CURRENT_HASH=$(git rev-parse HEAD)
           for repo in "${IMAGES[@]}"; do
             name="$repo:$PUBLISH_TAG"
