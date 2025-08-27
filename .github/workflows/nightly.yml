@@ -186,9 +186,13 @@ jobs:
 
 
   merge:
-    name: Merge manifests and tag
+    name: Merge manifests and tag (${{ matrix.variant }})
     needs: [ build-native ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [ ubuntu-chiseled, alpine ]
     environment: Nightly
     permissions:
       contents: read
@@ -212,56 +216,39 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
-      - name: Docker meta (ubuntu-chiseled)
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
           images: |
             name=ghcr.io/${{ env.IMAGE_NAME }}
+          flavor: ${{ matrix.variant == 'alpine' && 'suffix=-alpine,onlatest=true' || '' }}
           tags: |
             type=schedule
             type=ref,event=branch
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-      
-      - name: Download ubuntu-chiseled digests
+
+      - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          path: ${{ runner.temp }}/digests-ubuntu-chiseled
-          pattern: digests-ubuntu-chiseled-*
+          path: ${{ runner.temp }}/digests-${{ matrix.variant }}
+          pattern: digests-${{ matrix.variant }}-*
           merge-multiple: true
-      - name: Create manifest list and push (ubuntu-chiseled)
-        working-directory: ${{ runner.temp }}/digests-ubuntu-chiseled
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests-${{ matrix.variant }}
         env:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
-        run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
-      - name: Inspect image (ubuntu-chiseled)
-        run: |
-          docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
-      - name: Download alpine digests
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ runner.temp }}/digests-alpine
-          pattern: digests-alpine-*
-          merge-multiple: true
-      - name: Create manifest list and push (alpine)
-        if: success() && steps.meta_alpine.outputs.tags != ''
-        working-directory: ${{ runner.temp }}/digests-alpine
-        env:
-          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta_alpine.outputs.json }}
         run: |
           if [ -n "$(ls -A)" ]; then
             docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
               $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
           else
-            echo "No alpine digests to merge (expected when arm64-only)."
+            echo "No digests found for variant '${{ matrix.variant }}'; skipping manifest create."
           fi
-      - name: Inspect image (alpine)
-        if: success()
+      - name: Inspect image
         run: |
-          if [ -n "${{ steps.meta_alpine.outputs.version }}" ]; then
-            docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta_alpine.outputs.version }}
+          if [ -n "$(ls -A \"${{ runner.temp }}/digests-${{ matrix.variant }}\")" ]; then
+            docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
           fi
