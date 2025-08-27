@@ -109,7 +109,7 @@ jobs:
         variant: [ ubuntu-chiseled, alpine ]
         platform: [ linux/amd64, linux/arm64 ]
         image: 
-          - ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks     
+          - ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks
         include:
           - image: ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks
             dockerfile: src/Distroless.HealthChecks/Dockerfile
@@ -226,7 +226,7 @@ jobs:
     name: Merge manifests and tag (${{ matrix.variant }})
     needs: [ plan-publish, build-native ]
     if: needs.plan-publish.outputs.should-run == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     strategy:
       fail-fast: false
       matrix:
