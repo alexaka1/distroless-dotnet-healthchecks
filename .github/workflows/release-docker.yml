@@ -274,13 +274,13 @@ jobs:
         with:
           subject-name: ghcr.io/${{ inputs.image }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
-          push-to-registry: false
+          push-to-registry: true
       - name: Attest Docker Hub manifest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: docker.io/${{ inputs.image }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
-          push-to-registry: false
+          push-to-registry: true
       - name: Persist merge metadata for release job
         env:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
