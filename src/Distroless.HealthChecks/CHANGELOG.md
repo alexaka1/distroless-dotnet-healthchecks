@@ -1,5 +1,13 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.3.0
+
+### Minor Changes
+
+- [#705](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/705) [`8481c8d`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/8481c8df1c73da46b6a501e674fb909255d4cebd) Thanks [@alexaka1](https://github.com/alexaka1)! - Add alpine arm64 image.
+
+  Alter tests to test alpine arm64 image too.
+
 ## 1.3.0-beta.8
 
 ### Minor Changes
