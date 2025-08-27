@@ -99,11 +99,6 @@ jobs:
         with:
           images: |
             name=ghcr.io/${{ inputs.image }}
-          # maybe neither flavor, nor tags are needed in this step since we push the digest only
-#          flavor: |
-#            suffix=${{ inputs.tag-suffix }},onlatest=true
-#          tags: |
-#            type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Get Git commit timestamp
