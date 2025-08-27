@@ -185,7 +185,7 @@ jobs:
           provenance: mode=max
           sbom: true
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ matrix.image }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
