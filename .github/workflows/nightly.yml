@@ -78,7 +78,7 @@ jobs:
           done
           echo "Plan:"; cat "$RUNNER_TEMP/publish-plan/images.txt" || true
       - name: Upload publish plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: publish-plan
           path: ${{ runner.temp }}/publish-plan/images.txt
@@ -140,7 +140,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Download publish plan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: publish-plan
           path: ${{ runner.temp }}/publish-plan
@@ -160,11 +160,6 @@ jobs:
         with:
           images: |
             name=${{ matrix.image }}
-          flavor: ${{ matrix.variant == 'alpine' && 'suffix=-alpine,onlatest=true' || '' }}
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Get Git commit timestamp
@@ -214,7 +209,7 @@ jobs:
           touch "${{ runner.temp }}/digests-${{ matrix.variant }}/${digest#sha256:}"
       - name: Upload digest
         if: steps.plan.outputs.publish == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: digests-${{ matrix.variant }}-${{ steps.prep.outputs.platform_pair }}
           path: ${{ runner.temp }}/digests-${{ matrix.variant }}/*
@@ -256,7 +251,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
       - name: Download publish plan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: publish-plan
           path: ${{ runner.temp }}/publish-plan
@@ -285,7 +280,7 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Download digests
         if: steps.plan.outputs.publish == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           path: ${{ runner.temp }}/digests-${{ matrix.variant }}
           pattern: digests-${{ matrix.variant }}-*

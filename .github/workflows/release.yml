@@ -93,7 +93,7 @@ jobs:
           retention-days: 1
   should-release:
     name: Check if at least one package should be released
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs:
       - check-release
     outputs:
@@ -122,7 +122,7 @@ jobs:
           done
           echo "should-release=$should_release" >> "$GITHUB_OUTPUT"
   release-docker:
-    name: Release docker images
+    name: Publish docker images
     if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
     uses: ./.github/workflows/release-docker.yml
     with:
@@ -133,12 +133,12 @@ jobs:
       base-image-type: ${{ matrix.base-image-type }}
       readme: ${{ matrix.readme }}
       context: ${{ matrix.context }}
-      create-release: ${{ matrix.create-release }}
       run: ${{ fromJSON(needs.check-release.outputs.can-release) }}
       semver: ${{ needs.check-release.outputs.semver }}
       major: ${{ needs.check-release.outputs.major }}
       minor: ${{ needs.check-release.outputs.minor }}
       tag: ${{ needs.check-release.outputs.tag }}
+      tag-suffix: ${{ matrix.tag-suffix }}
       environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -146,10 +146,39 @@ jobs:
       - check-release
       - should-release
     permissions:
-      contents: write # for tagging and gh release
+      contents: read # no tagging/release here; handled in fan-in job
       packages: write # for ghcr.io
       attestations: write # for attestations
-      id-token: write # for tag signing
+      id-token: write # for attestations
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - src/Distroless.HealthChecks
+        base-image-type:
+          - ubuntu-chiseled
+          - alpine
+        include:
+          - base-image-type: alpine
+            tag-suffix: '-alpine'
+          - package: src/Distroless.HealthChecks
+            image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+            target: binary
+            platforms: linux/amd64,linux/arm64
+            readme: ./README.md
+            context: "."
+  release-github:
+    name: Create GitHub release
+    if: ${{ needs.should-release.outputs.should-release }}
+    needs:
+      - check-release
+      - should-release
+      - release-docker
+    # fails on ubuntu-latest-arm as of 2025-08-27
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # tag + release
+      id-token: write  # for tag signing (gitsign)
     strategy:
       fail-fast: false
       matrix:
@@ -158,40 +187,99 @@ jobs:
         include:
           - package: src/Distroless.HealthChecks
             image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
-            target: binary
-            platforms: linux/amd64,linux/arm64
-            base-image-type: ubuntu-chiseled
             readme: ./README.md
-            context: "."
-            create-release: true
-  release-docker-alpine:
-    name: Release docker images (alpine)
-    if: ${{ needs.should-release.outputs.should-release }} # this is a github limitation https://github.com/orgs/community/discussions/37883
-    uses: ./.github/workflows/release-docker.yml
-    with:
-      package: src/Distroless.HealthChecks
-      image: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
-      target: binary
-      platforms: linux/amd64
-      base-image-type: alpine
-      readme: ./README.md
-      context: "."
-      tag-suffix: -alpine
-      create-release: false
-      run: ${{ fromJSON(needs.check-release.outputs.can-release) }}
-      semver: ${{ needs.check-release.outputs.semver }}
-      major: ${{ needs.check-release.outputs.major }}
-      minor: ${{ needs.check-release.outputs.minor }}
-      tag: ${{ needs.check-release.outputs.tag }}
-      environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
-    secrets:
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-    needs:
-      - check-release
-      - should-release
-      - release-docker
-    permissions:
-      contents: write
-      packages: write
-      attestations: write
-      id-token: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: true
+      - uses: chainguard-dev/actions/setup-gitsign@be7b31a01af8ce7228fe901326f1d223fb788e14
+      - name: Create changelog for release
+        id: changelog
+        run: |
+          input_file="${{ matrix.package }}/CHANGELOG.md"
+          output_file="/tmp/changes.md"
+          # Find the line number of the first version heading
+          start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
+
+          # Find the line number of the next version heading, if it exists
+          end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
+
+          if [ -z "$end_line" ]; then
+            # If there is no next version, extract till the end of the file
+            sed -n "${start_line},\$p" "$input_file" > "$output_file"
+          else
+            # Extract only the section for the uppermost version
+            sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
+          fi
+          echo "changes=$output_file" >> "$GITHUB_OUTPUT"
+          echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          if [ -f ".changeset/pre.json" ]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download merged artifacts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          pattern: merged-*
+          path: /tmp/merged
+          # Keep artifacts in separate subfolders named by artifact
+          merge-multiple: false
+      - name: Append digests and tags to changelog
+        run: |
+          set -euo pipefail
+          changes="${{ steps.changelog.outputs.changes }}"
+          shopt -s nullglob
+          found_any=false
+          for dir in /tmp/merged/merged-*; do
+            [ -d "$dir" ] || continue
+            found_any=true
+            variant=$(cat "$dir/variant.txt" 2>/dev/null || echo "variant")
+            echo "" >> "$changes"
+            echo "### Digest ($variant)" >> "$changes"
+            echo "" >> "$changes"
+            if [ -f "$dir/manifest-digest.txt" ]; then
+              echo "\`$(cat "$dir/manifest-digest.txt")\`" >> "$changes"
+            else
+              echo "(missing)" >> "$changes"
+            fi
+            echo "" >> "$changes"
+            echo "### Tags ($variant)" >> "$changes"
+            echo "" >> "$changes"
+            if [ -f "$dir/metadata.json" ]; then
+              jq -r '.tags[]' "$dir/metadata.json" | awk '{print "- " $0 }' >> "$changes" || true
+            else
+              echo "(none)" >> "$changes"
+            fi
+          done
+          if [ "$found_any" = false ]; then
+            echo "No merged artifacts found for ${{ matrix.image }}" >&2
+            exit 1
+          fi
+      - name: Tag release
+        run: |
+          git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
+          git push origin "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        with:
+          body_path: ${{ steps.changelog.outputs.changes }}
+          body: Oh no, it looks like the change-notes were not generated correctly by the action.
+          draft: false
+          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
+          generate_release_notes: true
+          append_body: true
+          tag_name: "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}"
+          target_commitish: ${{ github.sha }}
+          name: ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}
+      - name: Update repo description
+        if: ${{ ! fromJSON(steps.changelog.outputs.prerelease) }}
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ matrix.image }}
+          readme-filepath: ${{ matrix.readme }}

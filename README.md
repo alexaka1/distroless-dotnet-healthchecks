@@ -98,3 +98,14 @@ BASE_IMAGE_TYPE=alpine dotnet test
 # Contributing
 
 The `beta` branch should be used for releasing `beta` versions. Because the main branch also tags the release with `latest`, which is not desirable.
+
+# Security
+
+To verify attestation, you could use the GitHub CLI:  
+i.e.:
+
+```shell
+gh attestation verify \
+  oci://ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 \           
+  --repo alexaka1/distroless-dotnet-healthchecks
+```
