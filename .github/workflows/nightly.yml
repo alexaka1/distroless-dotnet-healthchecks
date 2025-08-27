@@ -21,11 +21,11 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  IMAGE_NAME: ${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks
-  branch: main
+  
 
 jobs:
   check-run:
+    if: ${{ github.event_name != 'schedule' || github.ref_name == 'main' }}
     outputs:
       should-run: ${{ steps.check_commit.outputs.should-run }}
     permissions:
@@ -41,7 +41,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          ref: ${{ env.branch }}
           persist-credentials: false
       - name: Check if last commit had a run
         id: check_commit
@@ -55,7 +54,14 @@ jobs:
             exit 0
           fi
           CURRENT_HASH=$(git rev-parse HEAD)
-          IMAGE_NAME=ghcr.io/${{ env.IMAGE_NAME }}:nightly
+          # Determine tag to probe: nightly for schedule, else branch name
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            PUBLISH_TAG=nightly
+          else
+            PUBLISH_TAG='${{ github.ref_name }}'
+          fi
+          IMAGE_REPO="ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks"
+          IMAGE_NAME="$IMAGE_REPO:$PUBLISH_TAG"
           if ! docker pull -q "$IMAGE_NAME" >/dev/null 2>&1; then
             echo "::notice::Image $IMAGE_NAME not found in registry. Triggering build."
             echo "should-run=true" >> $GITHUB_OUTPUT
@@ -93,9 +99,16 @@ jobs:
       id-token: write
     strategy:
       fail-fast: false
+    # Explicit include to attach image + dockerfile to each combo
       matrix:
         variant: [ ubuntu-chiseled, alpine ]
         platform: [ linux/amd64, linux/arm64 ]
+        image: 
+          - ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks     
+        include:
+          - image: ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks
+            dockerfile: src/Distroless.HealthChecks/Dockerfile
+            target: final
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
       - name: Harden Runner
@@ -112,7 +125,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          ref: ${{ env.branch }}
           persist-credentials: false
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
@@ -127,7 +139,7 @@ jobs:
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
           images: |
-            name=ghcr.io/${{ env.IMAGE_NAME }}
+            name=${{ matrix.image }}
           flavor: ${{ matrix.variant == 'alpine' && 'suffix=-alpine,onlatest=true' || '' }}
           tags: |
             type=schedule
@@ -149,28 +161,28 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
-          file: src/Distroless.HealthChecks/Dockerfile
-          target: final
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
           platforms: ${{ matrix.platform }}
           build-args: |
             BASE_IMAGE_TYPE=${{ env.BASE_IMAGE_TYPE }}
           provenance: mode=max
           sbom: true
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          tags: ghcr.io/${{ env.IMAGE_NAME }}
+          tags: ${{ matrix.image }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
       - name: Attest GHCR
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
-          subject-name: ghcr.io/${{ env.IMAGE_NAME }}
+          subject-name: ${{ matrix.image }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: false
       - name: Inspect attestations
         run: |
           echo "Inspecting SBOM and provenance for ${{ matrix.variant }} image digest: ${{ steps.build.outputs.digest }}"
-          docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          docker buildx imagetools inspect ${{ matrix.image }}@${{ steps.build.outputs.digest }}
       - name: Export digest
         run: |
           mkdir -p ${{ runner.temp }}/digests-${{ matrix.variant }}
@@ -188,11 +200,13 @@ jobs:
   merge:
     name: Merge manifests and tag (${{ matrix.variant }})
     needs: [ build-native ]
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         variant: [ ubuntu-chiseled, alpine ]
+        include:
+          - image: ghcr.io/${{ github.repository_owner }}/nightly/distroless-dotnet-healthchecks
     environment: Nightly
     permissions:
       contents: read
@@ -206,7 +220,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          ref: ${{ env.branch }}
           persist-credentials: false
       - name: Login to GitHub Container Registry
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
@@ -221,7 +234,7 @@ jobs:
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
           images: |
-            name=ghcr.io/${{ env.IMAGE_NAME }}
+            name=${{ matrix.image }}
           flavor: ${{ matrix.variant == 'alpine' && 'suffix=-alpine,onlatest=true' || '' }}
           tags: |
             type=schedule
@@ -243,12 +256,12 @@ jobs:
         run: |
           if [ -n "$(ls -A)" ]; then
             docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-              $(printf 'ghcr.io/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+              $(printf '${{ matrix.image }}@sha256:%s ' *)
           else
             echo "No digests found for variant '${{ matrix.variant }}'; skipping manifest create."
           fi
       - name: Inspect image
         run: |
           if [ -n "$(ls -A \"${{ runner.temp }}/digests-${{ matrix.variant }}\")" ]; then
-            docker buildx imagetools inspect ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+            docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.meta.outputs.version }}
           fi
