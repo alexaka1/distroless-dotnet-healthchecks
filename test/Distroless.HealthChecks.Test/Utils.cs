@@ -10,6 +10,12 @@ public static class Utils
         return Environment.GetEnvironmentVariable("BASE_IMAGE_TYPE") ?? "ubuntu-chiseled";
     }
 
+    public static string HealthCheckImage()
+    {
+        string healthCheckImage = Environment.GetEnvironmentVariable("HEALTHCHECK_IMAGE") ?? "distroless-dotnet-healthchecks:test";
+        return healthCheckImage;
+    }
+
     public static IEnumerable<DockerImage> FilterByBaseImageType(IEnumerable<DockerImage> images, string baseImageType)
     {
         return images.Where(image => ShouldIncludeImage(image, baseImageType));

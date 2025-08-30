@@ -136,6 +136,7 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
             .WithBuildArgument("BASE_IMAGE_TYPE", baseImageType)
+            .WithBuildArgument("HEALTHCHECK_IMAGE", Utils.HealthCheckImage())
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(cancellationToken)

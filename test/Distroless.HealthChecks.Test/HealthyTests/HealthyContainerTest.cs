@@ -82,13 +82,15 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
     [MemberNotNull(nameof(_image))]
     private async Task Init(TestData data, CancellationToken cancellationToken = default)
     {
-        string baseImageType = Environment.GetEnvironmentVariable("BASE_IMAGE_TYPE") ?? "ubuntu-chiseled";
+        string baseImageType = Utils.CurrentBaseImageType();
+        string healthCheckImage = Utils.HealthCheckImage();
         _image = new ImageFromDockerfileBuilder()
             .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
             .WithBuildArgument("BASE_IMAGE_TYPE", baseImageType)
+            .WithBuildArgument("HEALTHCHECK_IMAGE", healthCheckImage)
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
             .Build();
         await _image.CreateAsync(cancellationToken)
