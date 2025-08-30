@@ -150,6 +150,7 @@ jobs:
       packages: write # for ghcr.io
       attestations: write # for attestations
       id-token: write # for attestations
+      pull-requests: write # for test reports
     strategy:
       fail-fast: false
       matrix:
