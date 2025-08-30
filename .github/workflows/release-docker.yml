@@ -175,7 +175,7 @@ jobs:
     uses: ./.github/workflows/test-workflow.yml
     with:
       runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs[format('digest-{0}', replace(matrix.platform, '/', '-'))]}}
+      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs[matrix.platform == 'linux/amd64' && 'digest-linux-amd64' || 'digest-linux-arm64'] }}
       base-image-type: ${{ inputs.base-image-type }}
 
   merge-and-publish:
