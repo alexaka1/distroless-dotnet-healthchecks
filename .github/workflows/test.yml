@@ -94,6 +94,6 @@ jobs:
     uses: ./.github/workflows/test-workflow.yml
     with:
       runs-on: ${{ matrix.os }}
-      healthcheck_image: ${{ env.HEALTHCHECK_IMAGE_NAME }}:${{ env.HEALTHCHECK_IMAGE_TAG }}
+      healthcheck_image: distroless-dotnet-healthchecks:test
       base-image-type: ${{ matrix.base-image-type }}
-      healthcheck_artifact: ${{ env.HEALTHCHECK_IMAGE_NAME }}-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
+      healthcheck_artifact: distroless-dotnet-healthchecks-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
