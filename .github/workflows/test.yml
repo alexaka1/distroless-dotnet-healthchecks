@@ -97,3 +97,4 @@ jobs:
       healthcheck_image: distroless-dotnet-healthchecks:test
       base-image-type: ${{ matrix.base-image-type }}
       healthcheck_artifact: distroless-dotnet-healthchecks-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
+      enable-pr-comments: true
