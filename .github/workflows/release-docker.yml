@@ -121,6 +121,7 @@ jobs:
           # tags used to select repository path for push-by-digest
           tags: ghcr.io/${{ inputs.image }}
           labels: ${{ steps.meta_labels.outputs.labels }}
+          annotations: ${{ steps.meta_labels.outputs.annotations }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
       - name: Export digest
