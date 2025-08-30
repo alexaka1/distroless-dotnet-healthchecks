@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.4.0
+
+### Minor Changes
+
+- [#734](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/734) [`61806c1`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/61806c1538a5372be1b13a78b00d8d630018beb6) Thanks [@alexaka1](https://github.com/alexaka1)! - Add annotations to `docker buildx imagetools create` steps, pass annotations through `docker/build-push-action`, and split annotation levels between manifest and index in nightly and release workflows.
+
 ## 1.3.0
 
 ### Minor Changes
