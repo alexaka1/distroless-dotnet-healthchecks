@@ -49,11 +49,11 @@ jobs:
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ inputs.healthcheck_artifact }}
-          path: ${{ runner.temp }}/image
+          path: ${{ runner.temp }}
       - name: Load image
         if: ${{ inputs.healthcheck_artifact != '' }}
         run: |
-          docker load --input ${{ runner.temp }}/image/image.tar
+          docker load --input ${{ runner.temp }}/image.tar
       - name: Setup Dotnet
         id: dotnet-setup
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
