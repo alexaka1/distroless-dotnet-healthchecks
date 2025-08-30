@@ -12,8 +12,7 @@ public static class Utils
 
     public static string HealthCheckImage()
     {
-        string healthCheckImage = Environment.GetEnvironmentVariable("HEALTHCHECK_IMAGE") ?? "distroless-dotnet-healthchecks:test";
-        return healthCheckImage;
+        return Environment.GetEnvironmentVariable("HEALTHCHECK_IMAGE") ?? "distroless-dotnet-healthchecks:test";
     }
 
     public static IEnumerable<DockerImage> FilterByBaseImageType(IEnumerable<DockerImage> images, string baseImageType)
