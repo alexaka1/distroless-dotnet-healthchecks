@@ -1,0 +1,104 @@
+name: Tests workflow
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: "Runner to use for tests"
+        type: string
+        required: true
+      base-image-type:
+        description: "Base image type to use for healthcheck"
+        type: string
+        required: false
+        default: ubuntu-chiseled
+      healthcheck_image:
+        description: "Full image reference to use for healthcheck (e.g., foo/bar:tag@sha256:...)"
+        type: string
+        required: true
+      healthcheck_artifact:
+        description: "Artifact name to download for healthcheck image"
+        type: string
+        required: false
+
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  HEALTHCHECK_IMAGE_NAME: distroless-dotnet-healthchecks
+  HEALTHCHECK_IMAGE_TAG: test
+  CI: true
+
+jobs:
+  test:
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Download artifact
+        if: ${{ inputs.healthcheck_artifact != '' }}
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: ${{ inputs.healthcheck_artifact }}
+          path: ${{ runner.temp }}/image
+      - name: Load image
+        if: ${{ inputs.healthcheck_artifact != '' }}
+        run: |
+          docker load --input ${{ runner.temp }}/image/image.tar
+      - name: Setup Dotnet
+        id: dotnet-setup
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: |
+            9.0.x
+      - name: Setup Dotnet 10 preview
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+      - name: DotNet tools restore
+        run: dotnet tool restore
+      - name: Run tests
+        run: >-
+          dotnet test
+          --configuration Release
+          --
+          --crashdump
+          --hangdump
+          --hangdump-timeout 30m
+          --retry-failed-tests 2
+          --retry-failed-tests-max-tests 5
+          --report-xunit-trx
+          --max-threads 2
+        env:
+          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
+          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
+      - name: TRX report
+        if: ${{ !cancelled() }}
+        run: dotnet trx --gh-summary False --gh-comment True
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: TRX report upload
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: trx-reports
+          path: "./**/*.trx"
+      - name: Error log
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: error-log
+          path: "./**/TestResults/Distroless.*.log"
