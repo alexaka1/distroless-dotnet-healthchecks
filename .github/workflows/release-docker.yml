@@ -66,6 +66,9 @@ jobs:
     if: ${{ inputs.run }}
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     environment: ${{ inputs.environment }}
+    outputs: 
+      digest: ${{ steps.docker_build.outputs.digest }}
+      
     strategy:
       fail-fast: false
       matrix:
@@ -155,10 +158,24 @@ jobs:
           if-no-files-found: error
           retention-days: 2
 
+  test:
+    name: Run tests against built digests
+    if: ${{ inputs.run }}
+    needs: publish-digest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ linux/amd64, linux/arm64 ]
+    uses: ./.github/workflows/test-workflow.yml
+    with:
+      runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs.digest }}
+      base-image-type: ${{ inputs.base-image-type }}
+    
   merge-and-publish:
     name: Merge digest under tags (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
     if: ${{ inputs.run }}
-    needs: publish-digest
+    needs: test
     runs-on: ubuntu-24.04-arm
     environment: ${{ inputs.environment }}
     permissions:

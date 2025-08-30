@@ -82,6 +82,15 @@ jobs:
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
+      - name: Attest test results
+        if: ${{ inputs.healthcheck_artifact == '' && success() && !cancelled() }}
+        run: |
+          echo '{"predicateType":"https://example.com/test-results/v1","predicate":{"status":"passed","commit":"${{ github.sha }}"}}' > test-att.json
+          cosign attest \
+            --keyless \
+            --predicate test-att.json \
+            --type custom-test-results \
+            ${{ inputs.healthcheck_image }}
       - name: TRX report
         if: ${{ !cancelled() }}
         run: dotnet trx --gh-summary False --gh-comment True
