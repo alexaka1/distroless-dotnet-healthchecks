@@ -66,9 +66,10 @@ jobs:
     if: ${{ inputs.run }}
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     environment: ${{ inputs.environment }}
-    outputs: 
-      digest: ${{ steps.docker_build.outputs.digest }}
-      
+    outputs:
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#using-job-outputs-in-a-matrix-job
+      digest-linux-amd64: ${{ steps.sanitize_platform.outputs.digest-linux-amd64 }}
+      digest-linux-arm64: ${{ steps.sanitize_platform.outputs.digest-linux-arm64 }}
     strategy:
       fail-fast: false
       matrix:
@@ -144,11 +145,13 @@ jobs:
           touch "$dir/$fname"
       - name: Sanitize platform for artifact name
         if: steps.docker_build.outputs.digest != ''
+        id: sanitize_platform
         run: |
           set -euo pipefail
           platform='${{ matrix.platform }}'
           safe=${platform//\//-}
           echo "PLATFORM_SAFE=$safe" >> "$GITHUB_ENV"
+          echo "digest-$safe=${{ steps.docker_build.outputs.digest }}" >> "$GITHUB_OUTPUT"
       - name: Upload digest
         if: steps.docker_build.outputs.digest != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -172,9 +175,9 @@ jobs:
     uses: ./.github/workflows/test-workflow.yml
     with:
       runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs.digest }}
+      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs[format('digest-{0}', replace(matrix.platform, '/', '-'))]}}
       base-image-type: ${{ inputs.base-image-type }}
-    
+
   merge-and-publish:
     name: Merge digest under tags (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
     if: ${{ inputs.run }}
@@ -316,13 +319,13 @@ jobs:
         env:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
-            set -euo pipefail
-            digest='${{ steps.inspect_ghcr.outputs.digest }}'
-            printf '%s\n' "$digest" > manifest-digest.txt
-            # Avoid inlining JSON into the script; read from env safely
-            printf '%s' "$DOCKER_METADATA_OUTPUT_JSON" | jq -c '.' > metadata.json
-            variant='${{ inputs.base-image-type }}'
-            printf '%s\n' "$variant" > variant.txt
+          set -euo pipefail
+          digest='${{ steps.inspect_ghcr.outputs.digest }}'
+          printf '%s\n' "$digest" > manifest-digest.txt
+          # Avoid inlining JSON into the script; read from env safely
+          printf '%s' "$DOCKER_METADATA_OUTPUT_JSON" | jq -c '.' > metadata.json
+          variant='${{ inputs.base-image-type }}'
+          printf '%s\n' "$variant" > variant.txt
       - name: Upload merged artifact (digest + metadata)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

@@ -28,7 +28,7 @@ jobs:
       - name: Run opencode
         uses: sst/opencode/github@2034fabc7d481b670363b4c8984241bd15505c76 # github-v1.0.5
         env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
           model: openai/gpt-5-mini
