@@ -161,7 +161,7 @@ jobs:
           images: |
             name=${{ matrix.image }}
         env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
       - name: Get Git commit timestamp
         run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
       - name: Set variant build args
@@ -277,7 +277,7 @@ jobs:
             type=ref,event=branch
             type=edge
         env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
       - name: Download digests
         if: steps.plan.outputs.publish == 'true'
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
@@ -292,8 +292,17 @@ jobs:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
           if [ -n "$(ls -A)" ]; then
-            docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-              $(printf '${{ matrix.image }}@sha256:%s ' *)
+            # Extract annotations from metadata and build annotation flags
+            annotations=$(jq -r 'if .annotations then [.annotations | to_entries[] | "--annotation \"index:" + .key + "=" + .value + "\""] | join(" ") else "" end' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+            
+            # Build the imagetools create command with annotations
+            cmd="docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")"
+            if [ -n "$annotations" ]; then
+              cmd="$cmd $annotations"
+            fi
+            cmd="$cmd $(printf '${{ matrix.image }}@sha256:%s ' *)"
+            
+            eval "$cmd"
           else
             echo "No digests found for variant '${{ matrix.variant }}'; skipping manifest create."
           fi
