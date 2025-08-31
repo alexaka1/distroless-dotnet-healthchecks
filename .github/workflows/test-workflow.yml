@@ -19,11 +19,6 @@ on:
         description: "Artifact name to download for healthcheck image"
         type: string
         required: false
-      enable-pr-comments:
-        description: "Whether to enable PR comments for test results"
-        type: boolean
-        required: false
-        default: false
     secrets:
       REPO_TOKEN:
         description: "GitHub token for posting PR comments"
@@ -99,7 +94,7 @@ jobs:
       #            ${{ inputs.healthcheck_image }}
       - name: TRX report
         if: ${{ !cancelled() }}
-        run: dotnet trx --gh-summary False --gh-comment ${{ inputs.enable-pr-comments && 'True' || 'False' }}
+        run: dotnet trx --gh-summary False --gh-comment True
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       - name: TRX report upload
