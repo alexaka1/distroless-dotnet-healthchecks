@@ -24,6 +24,10 @@ on:
         type: boolean
         required: false
         default: false
+    secrets:
+      GITHUB_TOKEN:
+        description: "GitHub token for posting PR comments"
+        required: false
 
 
 permissions: { }
