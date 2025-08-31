@@ -176,7 +176,6 @@ jobs:
       runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
       healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs[matrix.platform == 'linux/amd64' && 'digest-linux-amd64' || 'digest-linux-arm64'] }}
       base-image-type: ${{ inputs.base-image-type }}
-      enable-pr-comments: false
 
   merge-and-publish:
     name: Merge digest under tags (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
