@@ -99,4 +99,4 @@ jobs:
       healthcheck_artifact: distroless-dotnet-healthchecks-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
       enable-pr-comments: true
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
