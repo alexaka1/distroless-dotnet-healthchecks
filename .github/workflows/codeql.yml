@@ -33,7 +33,7 @@ jobs:
       security-events: write
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         language: [ "csharp", "actions" ]
         # CodeQL supports [ $supported-codeql-languages ]
