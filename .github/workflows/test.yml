@@ -97,7 +97,7 @@ jobs:
         run: dotnet tool restore
       - name: List tests
         run: |
-          dotnet test test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
+          dotnet run --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
             --configuration Release \
             -- \
             -list full/json \
