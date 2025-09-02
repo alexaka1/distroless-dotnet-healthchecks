@@ -19,6 +19,16 @@ on:
         description: "Artifact name to download for healthcheck image"
         type: string
         required: false
+      chunk:
+        description: "Test chunk identifier (e.g., '1/3')"
+        type: string
+        required: false
+        default: 1/1
+      test-ids-artifact:
+        description: "Artifact name containing list of test IDs"
+        type: string
+        required: false
+        default: test-ids
 
 
 permissions: { }
@@ -67,18 +77,44 @@ jobs:
           dotnet-quality: 'preview'
       - name: DotNet tools restore
         run: dotnet tool restore
+      - name: Download test ids
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: ${{ inputs.test-ids-artifact }}
+          path: ${{ runner.temp }}
+      - name: Select test ids for chunk
+        run: |
+          chunk="${{ inputs.chunk }}"
+          index="${chunk%%/*}"
+          total="${chunk##*/}"
+          ids_file="${{ runner.temp }}/test-ids.json"
+          count=$(jq '.tests | length' "$ids_file")
+          start=$(( (index-1)*count/total ))
+          end=$(( index*count/total ))
+          jq -r ".tests | map(.id) | .[${start}:${end}][]" "$ids_file" > "${{ runner.temp }}/selected-ids.txt"
       - name: Run tests
-        run: >-
-          dotnet test
-          --configuration Release
-          --
-          --crashdump
-          --hangdump
-          --hangdump-timeout 30m
-          --retry-failed-tests 2
-          --retry-failed-tests-max-tests 5
-          --report-xunit-trx
-          --max-threads 2
+        run: |
+          ids=($(cat "${{ runner.temp }}/selected-ids.txt"))
+          args=()
+          for id in "${ids[@]}"; do
+            args+=("-id" "$id")
+          done
+          if [ "${{ inputs.base-image-type }}" = "alpine" ]; then
+            parallel=""
+          else
+            parallel="--max-parallelism 3"
+          fi
+          dotnet test \
+            --configuration Release \
+            -- \
+            --crashdump \
+            --hangdump \
+            --hangdump-timeout 30m \
+            --retry-failed-tests 2 \
+            --retry-failed-tests-max-tests 5 \
+            --report-xunit-trx \
+            $parallel \
+            "${args[@]}"
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
