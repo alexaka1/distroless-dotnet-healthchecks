@@ -19,6 +19,11 @@ on:
         description: "Artifact name to download for healthcheck image"
         type: string
         required: false
+      test_chunk:
+        description: "Test chunk to run (1, 2, 3, or 'all')"
+        type: string
+        required: false
+        default: 'all'
 
 
 permissions: { }
@@ -68,17 +73,48 @@ jobs:
       - name: DotNet tools restore
         run: dotnet tool restore
       - name: Run tests
-        run: >-
-          dotnet test
-          --configuration Release
-          --
-          --crashdump
-          --hangdump
-          --hangdump-timeout 30m
-          --retry-failed-tests 2
-          --retry-failed-tests-max-tests 5
-          --report-xunit-trx
-          --max-threads 2
+        run: |
+          # Set max threads based on base image type and chunk
+          if [[ "${{ inputs.base-image-type }}" == "alpine" ]]; then
+            # Alpine: no parallelism limit, run all tests
+            MAX_THREADS_ARG=""
+            FILTER_ARGS=""
+          elif [[ "${{ inputs.test_chunk }}" == "all" ]]; then
+            # Ubuntu-chiseled: default behavior with 2 threads
+            MAX_THREADS_ARG="--max-threads 2"
+            FILTER_ARGS=""
+          else
+            # Ubuntu-chiseled with chunking: 3 threads
+            MAX_THREADS_ARG="--max-threads 3"
+            case "${{ inputs.test_chunk }}" in
+              "1")
+                FILTER_ARGS="--filter-class Distroless.HealthChecks.Test.ParameterTests.UrlsTest"
+                ;;
+              "2")
+                FILTER_ARGS="--filter-namespace Distroless.HealthChecks.Test.HealthyTests.Net8 --filter-namespace Distroless.HealthChecks.Test.HealthyTests.Net9"
+                ;;
+              "3")
+                FILTER_ARGS="--filter-namespace Distroless.HealthChecks.Test.HealthyTests.Net10"
+                ;;
+              *)
+                echo "Invalid test chunk: ${{ inputs.test_chunk }}"
+                exit 1
+                ;;
+            esac
+          fi
+          
+          # Run the tests
+          dotnet test \
+            --configuration Release \
+            -- \
+            --crashdump \
+            --hangdump \
+            --hangdump-timeout 30m \
+            --retry-failed-tests 2 \
+            --retry-failed-tests-max-tests 5 \
+            --report-xunit-trx \
+            $MAX_THREADS_ARG \
+            $FILTER_ARGS
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
