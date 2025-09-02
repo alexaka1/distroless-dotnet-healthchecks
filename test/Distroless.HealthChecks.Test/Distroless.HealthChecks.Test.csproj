@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.1"/>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.2"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
     <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.8.3"/>
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.8.3"/>
