@@ -100,8 +100,8 @@ jobs:
           dotnet test test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
             --configuration Release \
             -- \
-            -list full \
-            -list-format json > ${{ runner.temp }}/test-ids.json
+            -list full/json \
+            > ${{ runner.temp }}/test-ids.json
       - name: Upload test ids
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
