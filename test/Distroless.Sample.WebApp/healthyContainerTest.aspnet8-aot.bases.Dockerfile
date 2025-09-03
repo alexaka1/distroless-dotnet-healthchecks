@@ -5,10 +5,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine@sha256:d1f21f18d9a720274eef9fe68
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:3ec44932beb5fb42f6cfb252610e91c3a5f77aec4c2c1f23d229a45079e848b9
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:110c7cc76fc06bcf321d1f822959a998d0022a1ade466a7d5265bfda9a4f738a
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:76b0339a12d7a51eed05d92d61b832a45dbf73c52fcbfeb768930f42cbce6f12
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0@sha256:9343c5103e875081a433c9d83d2132a8206fd621813858cc07ce79ccc3acf64a
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:f6e40ea5d57027fa1e6b642142b4651d731b8624b7ecd0db327f3722c489c739
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0@sha256:0df395cf41d25f2a54471b4240aec5f58b89b4ba78d114f8a1b242ae17b82217
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-noble@sha256:0df395cf41d25f2a54471b4240aec5f58b89b4ba78d114f8a1b242ae17b82217
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:07aba94fce7de64ab57374e1f24f5920f976f3cf7266febd3edbb697e1ef1276
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-alpine@sha256:4f9b05fbc1254b139cd00e2bad0227b88da17b5aee0dd8c2e4ea369cb3229c3c
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble-chiseled@sha256:2936109f18b547c3cde5c5836873c472eb0ba647117f79588bca6666839eb741
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-alpine@sha256:9f24f9789f9c0921c86e29122600775899970ab4a5331c1c7fa32afa51fa8664
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-noble-chiseled@sha256:2c300490da2349ae2ad9bf6b61e1a9d1ca6f62ee296fad65ecb2b39d907e83a2
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy-chiseled@sha256:0fc46e0590a6dc3ae05db07e392d58d7bb4cce089aedc25e2db9cf81f35bb396
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-azurelinux3.0-distroless@sha256:9516903eeea49d2e7d81174d70cfb5e0ab3aa1ebb101afe76b0edae4fa857aef
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:10.0-azurelinux3.0-distroless@sha256:c14cd504240386ed401f4baeeaeb9802b2309d7d7aa6b19d03668c06021577ef
