@@ -53,6 +53,20 @@
         'mcr.microsoft.com/dotnet/nightly/**',
       ],
     },
+    {
+      "description": "Skip major upgrades for .NET",
+      "matchPackageNames": [
+        "mcr.microsoft.com/dotnet/**",
+        "mcr.microsoft.com/dotnet/nightly/**",
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDatasources": [
+        "docker"
+      ],
+      "enabled": false
+    },
   ],
   ignorePaths: [
     '**/node_modules/**',
