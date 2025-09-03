@@ -1,0 +1,5 @@
+fail-on-severity: 'moderate' # or 'low', 'high', 'critical'
+
+allow-licenses:
+  - Apache-2.0
+  - MIT
