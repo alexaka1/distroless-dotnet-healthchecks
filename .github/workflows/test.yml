@@ -71,7 +71,7 @@ jobs:
           name: ${{ env.HEALTHCHECK_IMAGE_NAME }}-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
           path: ${{ runner.temp }}/image.tar
 
-  test:
+  test-ubuntu-chiseled:
     needs: build-healthcheck
     strategy:
       fail-fast: false
@@ -79,9 +79,10 @@ jobs:
         platform:
           - amd64
           - arm64
-        base-image-type:
-          - ubuntu-chiseled
-          - alpine
+        chunk:
+          - 1
+          - 2
+          - 3
         include:
           - target-os: linux
           - platform: amd64
@@ -95,5 +96,31 @@ jobs:
     with:
       runs-on: ${{ matrix.os }}
       healthcheck_image: distroless-dotnet-healthchecks:test
-      base-image-type: ${{ matrix.base-image-type }}
-      healthcheck_artifact: distroless-dotnet-healthchecks-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
+      base-image-type: ubuntu-chiseled
+      healthcheck_artifact: distroless-dotnet-healthchecks-${{ matrix.target-os }}-${{ matrix.platform }}-ubuntu-chiseled
+      test_chunk: ${{ matrix.chunk }}
+
+  test-alpine:
+    needs: build-healthcheck
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - amd64
+          - arm64
+        include:
+          - target-os: linux
+          - platform: amd64
+            os: ubuntu-latest
+          - platform: arm64
+            os: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/test-workflow.yml
+    with:
+      runs-on: ${{ matrix.os }}
+      healthcheck_image: distroless-dotnet-healthchecks:test
+      base-image-type: alpine
+      healthcheck_artifact: distroless-dotnet-healthchecks-${{ matrix.target-os }}-${{ matrix.platform }}-alpine
+      test_chunk: all
