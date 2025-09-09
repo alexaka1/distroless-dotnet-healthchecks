@@ -1,5 +1,5 @@
 # docker manifest inspect mcr.microsoft.com/dotnet/runtime:8.0 -v | jq -r '.[0].Descriptor.digest'
-FROM mcr.microsoft.com/dotnet/runtime:8.0@sha256:62d1c7b172a4c254fc48096a29375971859e7dc1b687f9dd8fa699cfab80409a
+FROM mcr.microsoft.com/dotnet/runtime:8.0@sha256:f376c68e2c7e4998020b8513892f6ba5ead29beab2595012c36343af4c5c6b0b
 FROM mcr.microsoft.com/dotnet/runtime:8.0-noble@sha256:0db043a6fbfd9857673b1c82e47d5c726eb072ad72918aab50424c02893e9e43
 FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy@sha256:1141cd58bb96f21f36870a16b61a180e438a657b2dcdb672a834608dde6e3d42
 FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine@sha256:d124aee19fc3581685cbf7aeed4951c683f93ead48d3c0a9e867391cf95be4c5
