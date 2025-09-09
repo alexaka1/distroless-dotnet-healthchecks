@@ -5,10 +5,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine@sha256:8f4ced906b6610a1835696f59
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:6cace0e98ca6744dce40d92d8064bf44ec620b7c4742209098ec3ee42a1674b0
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:be0c8a211bad4ac1f5ce2f427dfe0f5a8519e6ef1b0b6360aa98855608a224f3
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:7c728f66c50ab46b7b0c95bf463182d16e21f8829377adaa3e88a6ae1ddf46f3
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0@sha256:069a8f99f2fbad4dfd6273ae5f18f14c7c8410a6a15dd8a9eaa343d4ce10ff76
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:f6e40ea5d57027fa1e6b642142b4651d731b8624b7ecd0db327f3722c489c739
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:07aba94fce7de64ab57374e1f24f5920f976f3cf7266febd3edbb697e1ef1276
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-alpine@sha256:4f9b05fbc1254b139cd00e2bad0227b88da17b5aee0dd8c2e4ea369cb3229c3c
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble-chiseled@sha256:2936109f18b547c3cde5c5836873c472eb0ba647117f79588bca6666839eb741
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy-chiseled@sha256:0fc46e0590a6dc3ae05db07e392d58d7bb4cce089aedc25e2db9cf81f35bb396
-FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-azurelinux3.0-distroless@sha256:27ef10a1b20f269eab5c64e35c2ec6ffe0a0826da8fb038106ad3bb678d9c5b2
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0@sha256:d36a68ce6eb92fe5c281944c89a86bc03977724db26cc1717785311cc9a69ad5
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:0df7c512a5f8e9c6e5b9dd2e3a43387d054621711ce7b8d02c1c98591cb9fd88
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:5426598a492bd1958354ce7a5e2ebe1ce492d6cc463c423e5a7fa07ed8befa1b
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-alpine@sha256:0a6eec08fe50e2ac5e4a56d41b45364878e88d3631e2d2e33ba7501c86425432
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble-chiseled@sha256:322acb284bcc461bf0df28d7dd2aafb91874fb2ef50ee404e7bf9503aa58291f
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy-chiseled@sha256:232e541720bac19edbb8b06cc7dfe23fd6e0c28c057a68ef133a4d182b5ffa62
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-azurelinux3.0-distroless@sha256:1184a0fa3d7439393d157c1609eca1c14b1f3dd8849e20e52fedce5b51e5288f
