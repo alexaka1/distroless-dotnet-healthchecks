@@ -199,7 +199,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: true
-      - uses: chainguard-dev/actions/setup-gitsign@8fa93a69e091d35d496b4af0a32d2e79c8d1ce00
+      - uses: chainguard-dev/actions/setup-gitsign@abca390b026afecb9c6315f9f4af28dceede3834
       - name: Create changelog for release
         id: changelog
         run: |
