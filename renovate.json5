@@ -9,7 +9,7 @@
     ':automergeRequireAllStatusChecks',
     ':rebaseStalePrs',
     ':pinDependencies',
-    'npm:unpublishSafe',
+    'security:minimumReleaseAgeNpm',
   ],
   baseBranchPatterns: [
     '$default',
@@ -54,18 +54,18 @@
       ],
     },
     {
-      "description": "Skip major upgrades for .NET",
-      "matchPackageNames": [
-        "mcr.microsoft.com/dotnet/**",
-        "mcr.microsoft.com/dotnet/nightly/**",
+      description: 'Skip major upgrades for .NET',
+      matchPackageNames: [
+        'mcr.microsoft.com/dotnet/**',
+        'mcr.microsoft.com/dotnet/nightly/**',
       ],
-      "matchUpdateTypes": [
-        "major"
+      matchUpdateTypes: [
+        'major',
       ],
-      "matchDatasources": [
-        "docker"
+      matchDatasources: [
+        'docker',
       ],
-      "enabled": false
+      enabled: false,
     },
   ],
   ignorePaths: [
