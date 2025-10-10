@@ -54,7 +54,7 @@ jobs:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@a8d1ac45b9a34d11fe398d5503176af0d06b303e # v3.30.7
+        uses: github/codeql-action/upload-sarif@755f44910c12a3d7ca0d8c6e42c048b3362f7cec # v3.30.8
         if: ${{ !cancelled() }}
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
