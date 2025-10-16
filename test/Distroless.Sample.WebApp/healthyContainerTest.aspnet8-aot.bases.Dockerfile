@@ -1,10 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:53f73fbe620361e5116f68752bf42958dfcda8699a94a785dcb4657bc571c8f3
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble@sha256:06103ed1ed71a8cc6c0383c6a8ee11be6ded4762ff93deb842c3f865b7e013fd
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy@sha256:2cb54caa347af268e9be6f15446b5eeff3907647cf424a7d1384d534fb4085a8
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine@sha256:c41927c17f93a060a001bbedf977c0aa30be3b7d6559ecc5b656edbac639cc84
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:6cace0e98ca6744dce40d92d8064bf44ec620b7c4742209098ec3ee42a1674b0
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:be0c8a211bad4ac1f5ce2f427dfe0f5a8519e6ef1b0b6360aa98855608a224f3
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:c7130be020ff17f9f0f6af15d886a156ed1a389a899e28dd4d28f78e01856d6f
+FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:ebdd28e9ee54ea5032a390500d37bb1b6d45c36c6ba51e10f3ddfcdc746f3e28
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble@sha256:9c484fa9f3b50fd1bf572ec765701556ee25da32e7db93fb2200381e8133f91a
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy@sha256:e9523a476a6a6140ab4283d0fbb32a654ecd458778c86b908c5cc173684c164e
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine@sha256:cb69be896f82e0d73f513c128ece501c7c1f1809c49415a69dc096e013d5314a
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled@sha256:3e27e9174a14ca0418cdae0cbf32d65ea121354383d9ed90baf9d14d3a4c065b
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled@sha256:8c017ac8670001127159c6b899901736087526604f56f9328e2d57b94d314e4e
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless@sha256:7a98b5b14d33765d88b620721407728d0c7ea2c90446c3797626e2d5411f266a
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0@sha256:944b273e6c4cf8711f4bd5c5cf113479aa73544f189f73e8aec34db30081aa35
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-noble@sha256:fc7ca2f192aa86dcd3ddc94d55bb0cbc6bd8b2c757230e8f8a33c9bc68e292ae
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:8.0-jammy@sha256:d8d3ab1ddbf37c403b22e4ee5eeabb40c2325509c35aacf1620de2a6f71a5d41
