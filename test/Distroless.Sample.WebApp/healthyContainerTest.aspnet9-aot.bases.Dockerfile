@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:366204b1d249aa2615f4942c8549677a1f3e6231829f274aa8829fc048f38d8c
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:011b79971edcb30c00afe428010595833ca5a4ae15ca7934f4f0c3a4eaff5263
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine@sha256:8c057dd0498856c4bf6c361379bd929450bc6484b0a2281e200dbeb4d6a740ab
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled@sha256:337593691c082d42622df10ae86bb2dc5467be6313ff79d4ab4e91a063516600
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless@sha256:406ef03fc0e0f7f72b10ac1f2978cb8e3ea537f7a0d08e10913df74202782302
+FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:ad4acf911eada1bcbfd0dd9f3fa514143fba8654ca8844df9032471adc2f9bd9
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:d3c20e8e331018eb5e7402066fde168304b7c605ecde4dbadb40872dc8bf28db
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine@sha256:5e8dca92553951e42caed00f2568771b0620679f419a28b1335da366477d7f98
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled@sha256:4df4493cf27cedbfdbed5333bab1651792f7fc105d4c6c4469b3adc039ed5d64
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless@sha256:a6fb9e9e684675fb25f4dffc2d91b86b7835bc73c61d0707196873fb74d90d33
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0@sha256:ff1cb31812360a80a9ce100fb3731347c98b577870bcc055b79a938cd34a92c4
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0-noble@sha256:82877c6d6cfca908ab51794dba71cd1b293e205c0cbbf91b6ec6adeb8ecf37d1
 FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0-alpine@sha256:d29c9ac766baa12d82d48ac891bf5d8506f9e85666b7fdd533b11763d3f8b268
