@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:89cc6f608ec4ce3653e29aba782eb323ead2030c53b1f66e2a84a19a4e243a96
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:1bde0fe74b7ff58fd7d0212eb2237ec4e8a42c3ee13d18ab04a31469c79aa95f
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:72f1a83c7de58476caa427af1cebb20418a4cad112fe761ba0802a5a95df5860
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine@sha256:619ccecf37596f0c875c02472e845cf4d87f1557c75b2f9eeeb772b099f7527f
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:c3d80b2b56f53938f4ac452791e78a4d344b80bbea3925d0339cf738a1ab4f1f
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:2a836b74c6c89956bc48fcd320c59ca7a8524b37b78f9e3efbdb16df02327270
