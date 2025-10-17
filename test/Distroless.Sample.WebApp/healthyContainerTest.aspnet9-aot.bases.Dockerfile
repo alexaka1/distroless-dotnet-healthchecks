@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:ad4acf911eada1bcbfd0dd9f3fa514143fba8654ca8844df9032471adc2f9bd9
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:d3c20e8e331018eb5e7402066fde168304b7c605ecde4dbadb40872dc8bf28db
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble@sha256:e183ff1306983bdb53592c3a76503c1c003461e2acd8fa7c62e04dff35819ee8
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine@sha256:5e8dca92553951e42caed00f2568771b0620679f419a28b1335da366477d7f98
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled@sha256:4df4493cf27cedbfdbed5333bab1651792f7fc105d4c6c4469b3adc039ed5d64
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless@sha256:a6fb9e9e684675fb25f4dffc2d91b86b7835bc73c61d0707196873fb74d90d33
