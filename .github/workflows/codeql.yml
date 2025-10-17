@@ -35,7 +35,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ "csharp", "actions" ]
+        include:
+          - language: actions
+            build-mode: autobuild
+          - language: csharp
+            build-mode: manual
         # CodeQL supports [ $supported-codeql-languages ]
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
@@ -72,17 +76,19 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
+        if: ${{ matrix.language != 'csharp' }}
         uses: github/codeql-action/autobuild@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+        
+        # ℹ️ Command-line programs to run using the OS shell.
+        # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+        
+        #   If the Autobuild fails above, remove it and uncomment the following three lines.
+        #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
 
-      # ℹ️ Command-line programs to run using the OS shell.
-      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-
-      #   If the Autobuild fails above, remove it and uncomment the following three lines.
-      #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
-
-      # - run: |
-      #   echo "Run, Build Application using script"
-      #   ./location_of_script_within_repo/buildscript.sh
+      - name: Build C# Application
+        if: ${{ matrix.language == 'csharp' }}
+        run: |
+          dotnet build Distroless.sln -c Release /p:MvcBuildViews=true /p:UseSharedCompilation=false /p:EmitCompilerGeneratedFiles=true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
