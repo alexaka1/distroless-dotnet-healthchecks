@@ -29,6 +29,5 @@ jobs:
         uses: sst/opencode/github@149cb6a9ec2a03db70332218f970be4f25ee5ba9 # github-v1.0.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
-          model: openai/gpt-5-mini
+          model: github-copilot/gpt-5-mini
