@@ -106,14 +106,14 @@
         "/(^|/)\\.github\\/workflows\\/.*\\.ya?ml$/"
       ],
       "matchStrings": [
-        "(?<indentation>\\s*)uses:\\s*sst\\/opencode\\/github@(?:(?<currentDigest>[0-9a-f]{40})|(?<currentValue>[^\\s#]+))(?:\\s*#\\s*(?<tagValue>github-v[0-9]+\\.[0-9]+\\.[0-9]+))?"
+        "(?<indentation>\\s*)uses:\\s*sst\\/opencode\\/github@(?<currentDigest>[0-9a-f]{40})\\s*#\\s*(?<currentValue>github-v\\d+\\.\\d+\\.\\d+)"
       ],
-      "depNameTemplate": "sst/opencode",
+      "depNameTemplate": "sst/opencode/github",
+      "packageNameTemplate": "sst/opencode",
       "datasourceTemplate": "github-tags",
       "depTypeTemplate": "action",
-      "extractVersionTemplate": "^github-v?(?<version>\\d+\\.\\d+\\.\\d+)$",
-      "versioningTemplate": "semver",
-      "autoReplaceStringTemplate": "{{indentation}}uses: {{depName}}/github@{{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}{{#if newValue}} # {{newValue}}{{else}}{{#if tagValue}} # {{tagValue}}{{/if}}{{/if}}"
+      "versioningTemplate": "regex:^github-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+      "autoReplaceStringTemplate": "{{indentation}}uses: {{depName}}@{{#if newDigest}}{{newDigest}}{{else}}{{currentDigest}}{{/if}} # {{#if newValue}}{{newValue}}{{else}}{{currentValue}}{{/if}}"
     }
   ],
 }
