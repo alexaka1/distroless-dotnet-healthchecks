@@ -10,6 +10,7 @@
     ':rebaseStalePrs',
     ':pinDependencies',
     'security:minimumReleaseAgeNpm',
+    'customManagers:githubActionsVersions',
   ],
   baseBranchPatterns: [
     '$default',
@@ -98,5 +99,21 @@
         '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+.*jetbrains/qodana-cdnet:(?<currentValue>[\\w][\\w.-]{0,127})(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:,|\\s)',
       ],
     },
+    {
+      "customType": "regex",
+      "description": "Update sst/opencode GitHub Action",
+      "managerFilePatterns": [
+        "/(^|/)\\.github\\/workflows\\/.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "(?<indentation>\\s*)uses:\\s*sst\\/opencode\\/github@(?:(?<currentDigest>[0-9a-f]{40})|(?<currentValue>[^\\s#]+))(?:\\s*#\\s*(?<tagValue>github-v[0-9]+\\.[0-9]+\\.[0-9]+))?"
+      ],
+      "depNameTemplate": "sst/opencode",
+      "datasourceTemplate": "github-tags",
+      "depTypeTemplate": "action",
+      "extractVersionTemplate": "^github-v?(?<version>\\d+\\.\\d+\\.\\d+)$",
+      "versioningTemplate": "semver",
+      "autoReplaceStringTemplate": "{{indentation}}uses: {{depName}}/github@{{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}{{#if newValue}} # {{newValue}}{{else}}{{#if tagValue}} # {{tagValue}}{{/if}}{{/if}}"
+    }
   ],
 }
