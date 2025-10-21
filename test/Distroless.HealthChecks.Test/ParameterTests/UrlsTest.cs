@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using DotNet.Testcontainers;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
@@ -83,7 +82,6 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
     {
         try
         {
-            ConsoleLogger.Instance.DebugLogLevelEnabled = true;
             await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls),
                 testContext.Current.CancellationToken);
             await _container.StartAsync(testContext.Current.CancellationToken);

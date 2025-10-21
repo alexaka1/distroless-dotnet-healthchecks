@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using DotNet.Testcontainers;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
@@ -42,7 +41,6 @@ public abstract class HealthyContainerTest<TData>(ITestOutputHelper output, ITes
     {
         try
         {
-            ConsoleLogger.Instance.DebugLogLevelEnabled = true;
             await Init(new TestData(image, runtimeTag, targetFramework, dockerfile),
                 testContext.Current.CancellationToken);
             if (_container is null)

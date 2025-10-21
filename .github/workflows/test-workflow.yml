@@ -79,7 +79,6 @@ jobs:
           --retry-failed-tests-max-tests 5
           --report-xunit-trx
           --max-threads 2
-          --xunit-diagnostics on
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
