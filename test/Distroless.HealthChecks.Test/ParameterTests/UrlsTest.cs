@@ -133,13 +133,14 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
             "ubuntu-chiseled";
 
         _image = new ImageFromDockerfileBuilder()
-            .WithDockerfile(data.Dockerfile)
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
             .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
             .WithBuildArgument("BASE_IMAGE_TYPE", baseImageType)
             .WithBuildArgument("HEALTHCHECK_IMAGE", Utils.HealthCheckImage())
-            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "")
+            .WithDockerfile(Path.GetFileName(data.Dockerfile))
+            .WithContextDirectory(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath)
+            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), Path.GetDirectoryName(data.Dockerfile))
             .Build();
         await _image.CreateAsync(cancellationToken)
             .ConfigureAwait(false);
