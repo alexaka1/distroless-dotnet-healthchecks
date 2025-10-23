@@ -2,7 +2,10 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
     'config:best-practices',
-    'security:openssf-scorecard',
+    'github>alexaka1/renovate-config',
+    'github>alexaka1/renovate-config:monorepos',
+    'github>alexaka1/renovate-config//opinionated/schedules',
+    'github>alexaka1/renovate-config//opinionated/labels',
     ':automergePr',
     ':automergePatch',
     ':automergeDigest',
@@ -10,50 +13,12 @@
     ':rebaseStalePrs',
     ':pinDependencies',
     'security:minimumReleaseAgeNpm',
-    'customManagers:githubActionsVersions',
   ],
   baseBranchPatterns: [
     '$default',
     '/^beta$/',
   ],
-  labels: [
-    'dependencies',
-  ],
   packageRules: [
-    {
-      matchDatasources: [
-        'npm',
-        'node-version',
-      ],
-      addLabels: [
-        'javascript',
-      ],
-    },
-    {
-      matchDatasources: [
-        'nuget',
-      ],
-      addLabels: [
-        '.NET',
-      ],
-    },
-    {
-      matchDatasources: [
-        'docker',
-      ],
-      addLabels: [
-        'docker',
-      ],
-    },
-    {
-      groupName: '.NET Core (Nightly) Docker containers',
-      matchDatasources: [
-        'docker',
-      ],
-      matchPackageNames: [
-        'mcr.microsoft.com/dotnet/nightly/**',
-      ],
-    },
     {
       description: 'Skip major upgrades for .NET',
       matchPackageNames: [
@@ -77,43 +42,5 @@
     '**/__tests__/**',
     '**/tests/**',
     '**/__fixtures__/**',
-  ],
-  customManagers: [
-    {
-      customType: 'regex',
-      description: 'Update pnpm in devcontainer',
-      managerFilePatterns: [
-        '/(^|/|\\.)devcontainer.json$/',
-      ],
-      matchStrings: [
-        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+"(?:.*)": "(?<currentValue>.+?)"\\s',
-      ],
-    },
-    {
-      customType: 'regex',
-      description: 'Update Qodana linter in CI/CD',
-      managerFilePatterns: [
-        '/(^|/|\\.)code-quality.ya?ml$/',
-      ],
-      matchStrings: [
-        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+.*jetbrains/qodana-cdnet:(?<currentValue>[\\w][\\w.-]{0,127})(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:,|\\s)',
-      ],
-    },
-    {
-      "customType": "regex",
-      "description": "Update sst/opencode GitHub Action",
-      "managerFilePatterns": [
-        "/(^|/)\\.github\\/workflows\\/.*\\.ya?ml$/"
-      ],
-      "matchStrings": [
-        "(?<indentation>\\s*)uses:\\s*sst\\/opencode\\/github@(?<currentDigest>[0-9a-f]{40})\\s*#\\s*(?<currentValue>github-v\\d+\\.\\d+\\.\\d+)"
-      ],
-      "depNameTemplate": "sst/opencode/github",
-      "packageNameTemplate": "sst/opencode",
-      "datasourceTemplate": "github-tags",
-      "depTypeTemplate": "action",
-      "versioningTemplate": "regex:^github-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
-      "autoReplaceStringTemplate": "{{indentation}}uses: {{depName}}@{{#if newDigest}}{{newDigest}}{{else}}{{currentDigest}}{{/if}} # {{#if newValue}}{{newValue}}{{else}}{{currentValue}}{{/if}}"
-    }
   ],
 }
