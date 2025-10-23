@@ -16,7 +16,6 @@
   ],
   baseBranchPatterns: [
     '$default',
-    '/^beta$/',
   ],
   packageRules: [
     {
