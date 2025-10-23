@@ -11,8 +11,5 @@
   "dependencies": {
     "@changesets/changelog-github": "0.5.1",
     "@changesets/cli": "2.29.7"
-  },
-  "devDependencies": {
-    "json5": "^2.2.3"
   }
 }

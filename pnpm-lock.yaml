@@ -17,10 +17,6 @@ importers:
       '@changesets/cli':
         specifier: 2.29.7
         version: 2.29.7
-    devDependencies:
-      json5:
-        specifier: ^2.2.3
-        version: 2.2.3
 
   src/Distroless.HealthChecks: {}
 
@@ -253,11 +249,6 @@ packages:
 
   js-yaml@3.14.1:
     resolution: {integrity: sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==}
-    hasBin: true
-
-  json5@2.2.3:
-    resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
-    engines: {node: '>=6'}
     hasBin: true
 
   jsonfile@4.0.0:
@@ -753,8 +744,6 @@ snapshots:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
-
-  json5@2.2.3: {}
 
   jsonfile@4.0.0:
     optionalDependencies:
