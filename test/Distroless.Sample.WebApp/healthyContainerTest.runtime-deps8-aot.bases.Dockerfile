@@ -9,6 +9,6 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:4bf12cb538aed1bff0
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble@sha256:12f43a4adcbf55c1ccb9019f8580c7e5c90b52a71cad810695536f2ea30ccbb3
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy@sha256:3c18bcdfaf618bcc80c2a1c4b530faf2ef5faec8c91ffdf3220c1d47c975cebb
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-alpine@sha256:0bda31d257add964a11ec64bd1be045e27528fb964eddb55bae4ba8bfeb9a7dc
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled@sha256:7580364209d52b11679dbd96bfcab6e8a9c95a9e0a2880aeb2775741b8e0a966
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled@sha256:9386d435c1da9c5783a71ce8443a66c9a27b68ba68b0f6b15458cd17264772ee
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled@sha256:370f60ebdcf2baea6b249e3d10f59cf5576ba1f5ed39d976abdbb3fe3416f606
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled@sha256:70a41ce31668e5eb2be42dfb54a8d8df9ba55d074ba1141575bcf242eaf953da
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless@sha256:a9aca52ee6e896446b456019d96fc964dacae0f817455136eb695e1003654a62
