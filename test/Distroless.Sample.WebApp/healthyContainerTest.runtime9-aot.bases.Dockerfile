@@ -7,4 +7,4 @@ FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0@sha256:d0bf4d3a0345bd04a6f6208
 FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-noble@sha256:b0c3753f7ee97a7544153fca7e4fe7faf10060f63d7ce521f0c17886501956ba
 FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-alpine@sha256:036ba1336aa21c2755f15fed166bc30fc21096950aaef21deddfd2eea5dce47a
 FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-noble-chiseled@sha256:fab7f3597dbc5b6281f082948c0a278ed858364effb81fe7ad7bbb1b75b71502
-FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-azurelinux3.0-distroless@sha256:74185b892323741bd465e741b506c084ce15ba8ae51cd9f43cf622653e9035cb
+FROM mcr.microsoft.com/dotnet/nightly/runtime:9.0-azurelinux3.0-distroless@sha256:db607e500c59fc033f1fbaf63a07abf1dcb6abb080d4b78af10aa93009aca371
