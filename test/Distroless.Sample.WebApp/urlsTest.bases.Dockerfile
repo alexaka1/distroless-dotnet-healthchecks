@@ -2,8 +2,8 @@
 # this is so dependabot can conveniently update these images
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:85617debd39223f2a9f3d612cbb9e3382381dcb4bb811fdecc89e5b7f2a21e65
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:fb51c46d3ae523a3d095b116bea5f6c952225cdb89799661378e0d7f872580d0
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:173480cdae3a6af040f4c49c4e131576071346d497a6019cfab3352c3550b674
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:e17d399464d9978eda3cd7481087e89dee5d6f032a375c0b28f32c6b3c7b2840
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:f22c6323e4c8bcba2f719c222c6d673cd85e1895f68f0eb43cee6a1c465e5257
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:12f3d75d90d360cb8266fd63a79e5be3ddc4524fcbb0ebae4432c9aabdc9c0cb
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:75bde23c6d2cad0868a912ca9b3a5002ff8771d3dd5f2a17b793b6638ba8f602
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:19e0e03110d47b9b07a2e02cc57e5785129e8b46eca1e8046bb43ed7b3f17a99
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:370f60ebdcf2baea6b249e3d10f59cf5576ba1f5ed39d976abdbb3fe3416f606
