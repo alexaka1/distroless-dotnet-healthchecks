@@ -23,7 +23,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
 
       - name: Run opencode
         uses: sst/opencode/github@2663415d4753a407b51999e13afe5be97c72d46e # github-v1.0.10
