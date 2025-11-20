@@ -49,7 +49,7 @@ jobs:
         with:
           egress-policy: audit
       - name: Checkout code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
       - name: Get version of package
@@ -196,7 +196,7 @@ jobs:
         with:
           egress-policy: audit
       - name: Checkout code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: true
       - uses: chainguard-dev/actions/setup-gitsign@abcc11e1cf9073eff6c69e91c49756c1430b094c # v1.5.8
