@@ -12,10 +12,10 @@ This is a simple AOT .NET app, that is able to run a health check against a list
 
 ## Usage
 
-It works with any `.NET 8`, `.NET 9` or `.NET 10` base image (even those that are not chiseled). For example
+It works with any `.NET 8`, `.NET 9` or `.NET 10` base image. For example
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS final
 # Get the executable and copy it to /healthchecks
 COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 / /healthchecks
 # Setup the healthcheck using the EXEC array syntax
@@ -26,7 +26,7 @@ WORKDIR /app
 ENTRYPOINT ["dotnet", "My.Awesome.Webapp.dll"]
 ```
 
-The published docker image contains only the executable of the health check at root. This is so it can be conveniently copied inside a Dockerfile. But you can also get the binary from GitHub and copy it manually into your image.
+The published docker image contains only the executable of the health check at root. This is so it can be conveniently copied inside a Dockerfile.
 
 It takes in a single argument named `uri`, which is a URI that the app will check. If the URI returns a 200 status code, the health check will pass.
 
