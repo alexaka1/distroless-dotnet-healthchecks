@@ -38,12 +38,7 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
         with:
           dotnet-version: |
-            9.0.x
-      - name: Setup .NET 10 preview
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
-        with:
-          dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
+            10.0.x
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
       - name: Set up Docker Buildx
