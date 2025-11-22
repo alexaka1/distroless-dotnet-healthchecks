@@ -73,4 +73,4 @@ jobs:
           dotnet packageguard 
           --configPath allowed-licenses.json
           --github-api-key ${{ secrets.GITHUB_TOKEN }}
-          ./Distroless.sln
+          ./Distroless.slnx

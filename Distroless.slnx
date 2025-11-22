@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/GitHub/">
+    <File Path=".github/FUNDING.yml" />
+    <File Path=".github/workflows/check-licenses.yml" />
+    <File Path=".github/workflows/code-quality.yml" />
+    <File Path=".github/workflows/codeql.yml" />
+    <File Path=".github/workflows/copilot-setup-steps.yml" />
+    <File Path=".github/workflows/dependency-review.yml" />
+    <File Path=".github/workflows/nightly.yml" />
+    <File Path=".github/workflows/opencode.yml" />
+    <File Path=".github/workflows/release-docker.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path=".github/workflows/scorecards.yml" />
+    <File Path=".github/workflows/test-workflow.yml" />
+    <File Path=".github/workflows/test.yml" />
+    <File Path=".github/workflows/version.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="allowed-licenses.json" />
+    <File Path="editorconfig" />
+    <File Path="nuget.config" />
+    <File Path="package.json" />
+    <File Path="pnpm-workspace.yaml" />
+    <File Path="qodana.yaml" />
+    <File Path="README.md" />
+    <File Path="renovate.json5" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj" />
+    <Project Path="test/Distroless.Sample.WebApp/Distroless.Sample.WebApp.csproj" />
+  </Folder>
+</Solution>

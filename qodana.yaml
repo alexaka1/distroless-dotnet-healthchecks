@@ -25,7 +25,7 @@ profile:
 bootstrap: sh build/qodana.sh
 
 dotnet:
-  solution: Distroless.sln
+  solution: Distroless.slnx
 
 #Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
 #plugins:
