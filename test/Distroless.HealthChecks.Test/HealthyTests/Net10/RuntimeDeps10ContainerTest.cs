@@ -1,6 +1,6 @@
 namespace Distroless.HealthChecks.Test.HealthyTests.Net10;
 
-public class RuntimeDeps10AotContainerTest(ITestOutputHelper output, ITestContextAccessor testContext)
+public class RuntimeDeps10ContainerTest(ITestOutputHelper output, ITestContextAccessor testContext)
     : HealthyContainerTest<RuntimeDeps10AotData>(output, testContext);
 
 public abstract class RuntimeDeps10AotData : ITestData

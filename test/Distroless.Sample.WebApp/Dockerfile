@@ -6,8 +6,8 @@ ARG BASE_IMAGE_TYPE=ubuntu-chiseled
 ARG HEALTHCHECK_IMAGE=distroless-dotnet-healthchecks:test
 
 # Build SDK stages for glibc and musl targets
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-noble-aot@sha256:42699fa10ba7e548f38130683555f92d7183b4dd26886ec80b84c1dc58bf7ef2 AS build-ubuntu
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-alpine-aot@sha256:c8a16605bc04071a87de71f9be878c4a2bbdd382570246058cfd60f7f4bd0228 AS build-alpine
+FROM mcr.microsoft.com/dotnet/sdk:10.0-noble-aot AS build-ubuntu
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine-aot AS build-alpine
 
 # Map ubuntu-chiseled to ubuntu build SDK
 FROM build-ubuntu AS build-ubuntu-chiseled
