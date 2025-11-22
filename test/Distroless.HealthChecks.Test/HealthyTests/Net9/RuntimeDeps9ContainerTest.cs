@@ -9,7 +9,7 @@ public abstract class RuntimeDeps9Data : ITestData
     {
         var images =
             Utils.GetImageTagsFromDockerfile(
-                "test/Distroless.Sample.WebApp/healthyContainerTest.runtime-deps9-aot.bases.Dockerfile");
+                "test/Distroless.Sample.WebApp/healthyContainerTest.runtime-deps9.bases.Dockerfile");
         var data = new TheoryData<string, string, string>();
 
         string baseImageType = Utils.CurrentBaseImageType();
