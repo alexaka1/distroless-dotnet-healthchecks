@@ -71,7 +71,6 @@ jobs:
         run: >-
           dotnet test
           --configuration Release
-          --
           --crashdump
           --hangdump
           --hangdump-timeout 30m
