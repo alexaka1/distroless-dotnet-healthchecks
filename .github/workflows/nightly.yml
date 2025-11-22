@@ -78,7 +78,7 @@ jobs:
           done
           echo "Plan:"; cat "$RUNNER_TEMP/publish-plan/images.txt" || true
       - name: Upload publish plan
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: publish-plan
           path: ${{ runner.temp }}/publish-plan/images.txt
@@ -140,7 +140,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Download publish plan
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: publish-plan
           path: ${{ runner.temp }}/publish-plan
@@ -210,7 +210,7 @@ jobs:
           touch "${{ runner.temp }}/digests-${{ matrix.variant }}/${digest#sha256:}"
       - name: Upload digest
         if: steps.plan.outputs.publish == 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: digests-${{ matrix.variant }}-${{ steps.prep.outputs.platform_pair }}
           path: ${{ runner.temp }}/digests-${{ matrix.variant }}/*
@@ -252,7 +252,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
       - name: Download publish plan
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: publish-plan
           path: ${{ runner.temp }}/publish-plan
@@ -281,7 +281,7 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
       - name: Download digests
         if: steps.plan.outputs.publish == 'true'
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           path: ${{ runner.temp }}/digests-${{ matrix.variant }}
           pattern: digests-${{ matrix.variant }}-*

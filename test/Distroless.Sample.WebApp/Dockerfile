@@ -1,20 +1,18 @@
 ﻿ARG RUNTIME_TAG="9.0@sha256:54fb43f9f282a6725e0b6462fe7f5152d9611404af8cffb4613a31f714551078"
-ARG TARGET_FRAMEWORK="9.0"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
 ARG BASE_IMAGE_TYPE=ubuntu-chiseled
 ARG HEALTHCHECK_IMAGE=distroless-dotnet-healthchecks:test
 
 # Build SDK stages for glibc and musl targets
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-noble-aot@sha256:42699fa10ba7e548f38130683555f92d7183b4dd26886ec80b84c1dc58bf7ef2 AS build-ubuntu
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-alpine-aot@sha256:c8a16605bc04071a87de71f9be878c4a2bbdd382570246058cfd60f7f4bd0228 AS build-alpine
+FROM mcr.microsoft.com/dotnet/sdk:10.0-noble-aot AS build-ubuntu
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine-aot AS build-alpine
 
 # Map ubuntu-chiseled to ubuntu build SDK
 FROM build-ubuntu AS build-ubuntu-chiseled
 
 # Select build stage based on BASE_IMAGE_TYPE
 FROM build-${BASE_IMAGE_TYPE} AS build
-ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
 WORKDIR /src
 COPY ["nuget.config", "./"]
@@ -22,12 +20,11 @@ COPY ["test/Distroless.Sample.WebApp/Distroless.Sample.WebApp.csproj", "test/Dis
 RUN dotnet restore "test/Distroless.Sample.WebApp/Distroless.Sample.WebApp.csproj"
 COPY ["test/", "./test/"]
 WORKDIR "/src/test/Distroless.Sample.WebApp"
-RUN dotnet build "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/build -f net${TARGET_FRAMEWORK}
+RUN dotnet build "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION
-RUN dotnet publish "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish -f net${TARGET_FRAMEWORK}
+RUN dotnet publish "Distroless.Sample.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 
 FROM ${HEALTHCHECK_IMAGE} AS local-healthcheck
 

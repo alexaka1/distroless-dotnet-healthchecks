@@ -1,26 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-  <PropertyGroup Label="Microsoft.Testing.Platform">
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.2"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
-    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="1.9.1"/>
-    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="1.9.1"/>
-    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="1.9.1"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="2.0.2"/>
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="2.0.2"/>
+    <PackageReference Include="Microsoft.Testing.Extensions.Retry" Version="2.0.2"/>
     <PackageReference Include="Testcontainers" Version="4.8.1"/>
-    <PackageReference Include="xunit.v3" Version="3.1.0"/>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.0"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -14,7 +14,7 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
     private IContainer? _container;
     private IFutureDockerImage? _image;
 
-    public static TheoryData<string, string, string, string, string[], HealthStatus> Data
+    public static TheoryData<string, string, string, string[], HealthStatus> Data
     {
         get
         {
@@ -37,7 +37,7 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
                 (["http://alexaka1.dev:8080/healthz"], HealthStatus.Healthy),
                 (["https://status.cloud.google.com/"], HealthStatus.UnHealthy),
             ];
-            var data = new TheoryData<string, string, string, string, string[], HealthStatus>();
+            var data = new TheoryData<string, string, string, string[], HealthStatus>();
             string baseImageType = Utils.CurrentBaseImageType();
             foreach (var image in Utils.FilterByBaseImageType(images, baseImageType))
             {
@@ -45,7 +45,6 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
                 {
                     data.Add(image.Image,
                         image.Tag,
-                        $"{dotnetMajorVersion.Match(image.Tag).Groups[1].Value}.0",
                         Dockerfile,
                         url.urls,
                         url.expected
@@ -76,13 +75,13 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
     [Theory]
     [MemberData(nameof(Data))]
     [UsedImplicitly]
-    public async Task Container_returns_expected_health_status(string image, string runtimeTag, string targetFramework,
+    public async Task Container_returns_expected_health_status(string image, string runtimeTag,
         string dockerfile,
         string[] urls, HealthStatus expected)
     {
         try
         {
-            await Init(new TestData(image, runtimeTag, targetFramework, dockerfile, urls),
+            await Init(new TestData(image, runtimeTag, dockerfile, urls),
                 testContext.Current.CancellationToken);
             await _container.StartAsync(testContext.Current.CancellationToken);
             // wait for the healthcheck to run within docker
@@ -132,7 +131,6 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
 
         _image = new ImageFromDockerfileBuilder()
             .WithBuildArgument("RUNTIME_TAG", data.RuntimeTag)
-            .WithBuildArgument("TARGET_FRAMEWORK", data.TargetFramework)
             .WithBuildArgument("IMAGE", data.Image)
             .WithBuildArgument("BASE_IMAGE_TYPE", baseImageType)
             .WithBuildArgument("HEALTHCHECK_IMAGE", Utils.HealthCheckImage())
@@ -181,7 +179,6 @@ public sealed partial class UrlsTest(ITestOutputHelper output, ITestContextAcces
     private sealed record TestData(
         string Image,
         string RuntimeTag,
-        string TargetFramework,
         // ReSharper disable once MemberHidesStaticFromOuterClass
         string Dockerfile,
         string[] Urls);
