@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.4.1
+
+### Patch Changes
+
+- [#929](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/929) [`baf3477`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/baf3477a245149699cc7c55f075280fdc30e88c1) Thanks [@alexaka1](https://github.com/alexaka1)! - Upgrade dependencies
+
 ## 1.4.0
 
 ### Minor Changes
