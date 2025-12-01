@@ -266,7 +266,7 @@ jobs:
           git tag -s "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}" -m "Release ${{ matrix.image }}:${{ needs.check-release.outputs.semver }}"
           git push origin "${{ matrix.image }}-${{ needs.check-release.outputs.semver }}"
       - name: Create GitHub release
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           body_path: ${{ steps.changelog.outputs.changes }}
           body: Oh no, it looks like the change-notes were not generated correctly by the action.
