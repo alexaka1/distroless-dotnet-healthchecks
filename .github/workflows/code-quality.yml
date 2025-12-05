@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0  # a full history is required for pull request analysis
           persist-credentials: 'false'
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@e5d20b1260e99a93210d46ec8882c83978a09036 # v2025.2.2
+        uses: JetBrains/qodana-action@8d427a3995aede61f5d65005f6ab24cab989d81e # v2025.2.3
         with:
           pr-mode: ${{ github.event.pull_request != null }}
           args: --configuration=Release,--no-statistics=true,--linter=qodana-dotnet,--within-docker,false
