@@ -86,7 +86,7 @@ jobs:
           echo "should deploy" > ${{ matrix.artifact }}.md
       - name: "Upload if package should be released"
         if: ${{ ! fromJSON(steps.check-image.outputs.exists) }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: check-release-${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.md
@@ -105,7 +105,7 @@ jobs:
           disable-sudo: true
           egress-policy: audit
       - name: Download artifact
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: check-release-*
           path: /tmp/check-release
@@ -224,7 +224,7 @@ jobs:
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Download merged artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: merged-*
           path: /tmp/merged
