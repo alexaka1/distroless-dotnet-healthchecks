@@ -65,16 +65,11 @@ jobs:
           # Build the test project first
           dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
           
-          # Enumerate all tests with theory pre-enumeration, capturing only stdout
+          # Enumerate all tests with theory pre-enumeration
+          # Suppress MSBuild and dotnet SDK logs by redirecting stderr, only JSON goes to stdout
           dotnet run --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
             --configuration Release --no-build \
-            -- -list full/json -preEnumerateTheories 2>/dev/null > test-output.txt
-          
-          # Extract JSON array more robustly - find first '[' to last ']' on valid JSON lines
-          sed -n '/^\[/,/^\]/p' test-output.txt > test-list.json
-          
-          # Extract test IDs
-          jq -r '.[].ID' test-list.json > all-test-ids.txt
+            -- -list full/json -preEnumerateTheories 2>/dev/null | jq -r '.[].ID' > all-test-ids.txt
           
           echo "Total tests: $(wc -l < all-test-ids.txt)"
       - name: Split tests into chunks
@@ -84,32 +79,28 @@ jobs:
           total_tests=$(wc -l < all-test-ids.txt)
           chunk_size=$(( (total_tests + 2) / 3 ))
           
-          # Create 3 chunks
+          # Create 3 chunks as files
           split -l "$chunk_size" all-test-ids.txt chunk-
           
-          # Convert each chunk to space-separated --filter-uid arguments and set as output
+          # Rename chunks to more descriptive names
+          mv chunk-aa chunk-0-ids.txt || true
+          mv chunk-ab chunk-1-ids.txt || true
+          mv chunk-ac chunk-2-ids.txt || true
+          
+          # Display chunk sizes
           for i in 0 1 2; do
-            case $i in
-              0) chunk_file="chunk-aa" ;;
-              1) chunk_file="chunk-ab" ;;
-              2) chunk_file="chunk-ac" ;;
-            esac
-            
-            if [ -f "$chunk_file" ]; then
-              # Build --filter-uid arguments from chunk file
-              ids=$(cat "$chunk_file" | sed 's/^/--filter-uid /' | tr '\n' ' ')
-              # Use GitHub Actions multiline output format
-              {
-                echo "chunk-$i<<EOF"
-                echo "$ids"
-                echo "EOF"
-              } >> "$GITHUB_OUTPUT"
-              echo "Chunk $i: $(wc -l < "$chunk_file") tests"
+            if [ -f "chunk-$i-ids.txt" ]; then
+              echo "Chunk $i: $(wc -l < chunk-$i-ids.txt) tests"
             else
-              echo "chunk-$i=" >> "$GITHUB_OUTPUT"
               echo "Chunk $i: 0 tests"
             fi
           done
+      - name: Upload test ID chunks
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: test-chunks-${{ inputs.platform }}
+          path: chunk-*-ids.txt
+          retention-days: 1
 
   test-ubuntu-chiseled:
     if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
@@ -152,23 +143,16 @@ jobs:
         run: dotnet tool restore
       - name: Build test project
         run: dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
-      - name: Get test IDs for chunk
-        id: get-ids
-        run: |
-          # Select the appropriate chunk based on matrix index
-          case ${{ matrix.chunk }} in
-            0) CHUNK_IDS="${{ needs.enumerate-tests.outputs.chunk-0 }}" ;;
-            1) CHUNK_IDS="${{ needs.enumerate-tests.outputs.chunk-1 }}" ;;
-            2) CHUNK_IDS="${{ needs.enumerate-tests.outputs.chunk-2 }}" ;;
-          esac
-          
-          {
-            echo "test-ids<<EOF"
-            echo "$CHUNK_IDS"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+      - name: Download test ID chunks
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: test-chunks-${{ inputs.platform }}
+          path: test-chunks
       - name: Run tests (chunk ${{ matrix.chunk }})
         run: |
+          # Read test IDs from chunk file and convert to --filter-uid arguments
+          test_ids=$(cat test-chunks/chunk-${{ matrix.chunk }}-ids.txt | sed 's/^/--filter-uid /' | tr '\n' ' ')
+          
           dotnet test \
             --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
             --configuration Release \
@@ -181,7 +165,7 @@ jobs:
             --report-xunit-trx \
             --max-threads 3 \
             --pre-enumerate-theories on \
-            ${{ steps.get-ids.outputs.test-ids }}
+            $test_ids
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
