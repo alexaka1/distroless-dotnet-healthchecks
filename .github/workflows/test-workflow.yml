@@ -127,8 +127,8 @@ jobs:
           path: chunk-*-ids.txt
           retention-days: 1
 
-  test-ubuntu-chiseled:
-    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
+  test-chunked:
+    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' || inputs.base-image-type == 'alpine' }}
     needs: enumerate-tests
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 20
@@ -203,95 +203,11 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports-${{ inputs.platform }}-ubuntu-chiseled-chunk-${{ matrix.chunk }}
+          name: trx-reports-${{ inputs.platform }}-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log-${{ inputs.platform }}-ubuntu-chiseled-chunk-${{ matrix.chunk }}
-          path: "./**/TestResults/Distroless.*.log"
-
-  test-alpine:
-    if: ${{ inputs.base-image-type == 'alpine' }}
-    needs: enumerate-tests
-    runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      pull-requests: write
-    strategy:
-      fail-fast: false
-      matrix:
-        chunk: ${{ fromJSON(needs.enumerate-tests.outputs.chunks) }}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
-        with:
-          disable-sudo: true
-          egress-policy: audit
-      - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          persist-credentials: false
-      - name: Download artifact
-        if: ${{ inputs.healthcheck_artifact != '' }}
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: ${{ inputs.healthcheck_artifact }}
-          path: ${{ runner.temp }}
-      - name: Load image
-        if: ${{ inputs.healthcheck_artifact != '' }}
-        run: |
-          docker load --input ${{ runner.temp }}/image.tar
-      - name: Setup Dotnet
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
-        with:
-          dotnet-version: |
-            10.0.x
-      - name: DotNet tools restore
-        run: dotnet tool restore
-      - name: Build test project
-        run: dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
-      - name: Download test ID chunks
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: test-chunks-${{ inputs.platform }}
-          path: test-chunks
-      - name: Run tests (chunk ${{ matrix.chunk }})
-        run: |
-          test_ids=$(cat test-chunks/chunk-${{ matrix.chunk }}-ids.txt | sed 's/^/--filter-uid /' | tr '\n' ' ')
-          
-          dotnet test \
-            --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
-            --configuration Release \
-            --no-build \
-            --crashdump \
-            --hangdump \
-            --hangdump-timeout 30m \
-            --retry-failed-tests 2 \
-            --retry-failed-tests-max-tests 5 \
-            --report-xunit-trx \
-            --max-threads 3 \
-            --pre-enumerate-theories on \
-            $test_ids
-        env:
-          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
-          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
-      - name: TRX report
-        if: ${{ !cancelled() }}
-        run: dotnet trx --gh-summary False --gh-comment True
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: TRX report upload
-        if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: trx-reports-${{ inputs.platform }}-alpine-chunk-${{ matrix.chunk }}
-          path: "./**/*.trx"
-      - name: Error log
-        if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: error-log-${{ inputs.platform }}-alpine-chunk-${{ matrix.chunk }}
+          name: error-log-${{ inputs.platform }}-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/TestResults/Distroless.*.log"
