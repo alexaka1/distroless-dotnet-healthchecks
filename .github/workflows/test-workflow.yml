@@ -35,7 +35,6 @@ env:
 
 jobs:
   enumerate-tests:
-    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' || inputs.base-image-type == 'alpine' }}
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 5
     permissions:
@@ -127,8 +126,7 @@ jobs:
           path: chunk-*-ids.txt
           retention-days: 1
 
-  test-chunked:
-    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' || inputs.base-image-type == 'alpine' }}
+  test:
     needs: enumerate-tests
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 20
