@@ -87,7 +87,7 @@ jobs:
           # Create 3 chunks
           split -l "$chunk_size" all-test-ids.txt chunk-
           
-          # Convert each chunk to space-separated -id arguments and set as output
+          # Convert each chunk to space-separated --filter-uid arguments and set as output
           for i in 0 1 2; do
             case $i in
               0) chunk_file="chunk-aa" ;;
@@ -96,8 +96,8 @@ jobs:
             esac
             
             if [ -f "$chunk_file" ]; then
-              # Build -id arguments from chunk file
-              ids=$(cat "$chunk_file" | sed 's/^/-id /' | tr '\n' ' ')
+              # Build --filter-uid arguments from chunk file
+              ids=$(cat "$chunk_file" | sed 's/^/--filter-uid /' | tr '\n' ' ')
               # Use GitHub Actions multiline output format
               {
                 echo "chunk-$i<<EOF"
