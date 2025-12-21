@@ -63,9 +63,6 @@ jobs:
         run: |
           # Build the test project first
           dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
-          
-          command -v jq >/dev/null 2>&1 || { echo "Error: jq is required for test chunking but is not available in the runner environment."; exit 1; }
-
           # Enumerate all tests by running the built executable directly
           # The test executable outputs JSON on a single line followed by empty output
           # Use head -1 to extract only the JSON line, then pipe to jq
