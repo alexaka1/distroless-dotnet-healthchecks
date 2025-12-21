@@ -6,6 +6,10 @@ on:
         description: "Runner to use for tests"
         type: string
         required: true
+      platform:
+        description: "Platform architecture (amd64, arm64)"
+        type: string
+        required: true
       base-image-type:
         description: "Base image type to use for healthcheck"
         type: string
@@ -146,6 +150,8 @@ jobs:
             10.0.x
       - name: DotNet tools restore
         run: dotnet tool restore
+      - name: Build test project
+        run: dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
       - name: Get test IDs for chunk
         id: get-ids
         env:
@@ -180,13 +186,13 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports-chunk-${{ matrix.chunk }}
+          name: trx-reports-${{ inputs.platform }}-ubuntu-chiseled-chunk-${{ matrix.chunk }}
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log-chunk-${{ matrix.chunk }}
+          name: error-log-${{ inputs.platform }}-ubuntu-chiseled-chunk-${{ matrix.chunk }}
           path: "./**/TestResults/Distroless.*.log"
 
   test-alpine:
@@ -245,11 +251,11 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports-alpine
+          name: trx-reports-${{ inputs.platform }}-alpine
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log-alpine
+          name: error-log-${{ inputs.platform }}-alpine
           path: "./**/TestResults/Distroless.*.log"
