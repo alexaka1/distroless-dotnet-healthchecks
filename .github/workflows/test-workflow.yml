@@ -30,8 +30,169 @@ env:
   TESTINGPLATFORM_TELEMETRY_OPTOUT: '1'
 
 jobs:
-  test:
+  enumerate-tests:
+    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
     runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      chunk-0: ${{ steps.split-tests.outputs.chunk-0 }}
+      chunk-1: ${{ steps.split-tests.outputs.chunk-1 }}
+      chunk-2: ${{ steps.split-tests.outputs.chunk-2 }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Dotnet
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+        with:
+          dotnet-version: |
+            10.0.x
+      - name: Enumerate tests
+        id: enumerate
+        run: |
+          # Build the test project first
+          dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
+          
+          # Enumerate all tests with theory pre-enumeration
+          dotnet run --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
+            --configuration Release --no-build \
+            -- -list full/json -preEnumerateTheories > test-output.txt 2>&1
+          
+          # Extract just the JSON array from output
+          grep -o '\[{.*}\]' test-output.txt > test-list.json
+          
+          # Extract test IDs
+          jq -r '.[].ID' test-list.json > all-test-ids.txt
+          
+          echo "Total tests: $(wc -l < all-test-ids.txt)"
+      - name: Split tests into chunks
+        id: split-tests
+        run: |
+          # Split test IDs into 3 roughly equal chunks
+          total_tests=$(wc -l < all-test-ids.txt)
+          chunk_size=$(( (total_tests + 2) / 3 ))
+          
+          # Create 3 chunks
+          split -l "$chunk_size" all-test-ids.txt chunk-
+          
+          # Convert each chunk to space-separated -id arguments and set as output
+          for i in 0 1 2; do
+            case $i in
+              0) chunk_file="chunk-aa" ;;
+              1) chunk_file="chunk-ab" ;;
+              2) chunk_file="chunk-ac" ;;
+            esac
+            
+            if [ -f "$chunk_file" ]; then
+              # Build -id arguments from chunk file
+              ids=$(cat "$chunk_file" | sed 's/^/-id /' | tr '\n' ' ')
+              # Use GitHub Actions multiline output format
+              {
+                echo "chunk-$i<<EOF"
+                echo "$ids"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              echo "Chunk $i: $(wc -l < "$chunk_file") tests"
+            else
+              echo "chunk-$i=" >> "$GITHUB_OUTPUT"
+              echo "Chunk $i: 0 tests"
+            fi
+          done
+
+  test-ubuntu-chiseled:
+    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
+    needs: enumerate-tests
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [0, 1, 2]
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Download artifact
+        if: ${{ inputs.healthcheck_artifact != '' }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: ${{ inputs.healthcheck_artifact }}
+          path: ${{ runner.temp }}
+      - name: Load image
+        if: ${{ inputs.healthcheck_artifact != '' }}
+        run: |
+          docker load --input ${{ runner.temp }}/image.tar
+      - name: Setup Dotnet
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+        with:
+          dotnet-version: |
+            10.0.x
+      - name: DotNet tools restore
+        run: dotnet tool restore
+      - name: Get test IDs for chunk
+        id: get-ids
+        env:
+          CHUNK_IDS: ${{ matrix.chunk == 0 && needs.enumerate-tests.outputs.chunk-0 || (matrix.chunk == 1 && needs.enumerate-tests.outputs.chunk-1 || needs.enumerate-tests.outputs.chunk-2) }}
+        run: |
+          {
+            echo "test-ids<<EOF"
+            echo "$CHUNK_IDS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Run tests (chunk ${{ matrix.chunk }})
+        run: |
+          dotnet test \
+            --configuration Release \
+            --crashdump \
+            --hangdump \
+            --hangdump-timeout 30m \
+            --retry-failed-tests 2 \
+            --retry-failed-tests-max-tests 5 \
+            --report-xunit-trx \
+            --max-threads 3 \
+            -- -preEnumerateTheories ${{ steps.get-ids.outputs.test-ids }}
+        env:
+          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
+          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
+      - name: TRX report
+        if: ${{ !cancelled() }}
+        run: dotnet trx --gh-summary False --gh-comment True
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: TRX report upload
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: trx-reports-chunk-${{ matrix.chunk }}
+          path: "./**/*.trx"
+      - name: Error log
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: error-log-chunk-${{ matrix.chunk }}
+          path: "./**/TestResults/Distroless.*.log"
+
+  test-alpine:
+    if: ${{ inputs.base-image-type == 'alpine' }}
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 60
     permissions:
       contents: read
       pull-requests: write
@@ -56,7 +217,6 @@ jobs:
         run: |
           docker load --input ${{ runner.temp }}/image.tar
       - name: Setup Dotnet
-        id: dotnet-setup
         uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
         with:
           dotnet-version: |
@@ -73,19 +233,9 @@ jobs:
           --retry-failed-tests 2
           --retry-failed-tests-max-tests 5
           --report-xunit-trx
-          --max-threads 2
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
-      #      - name: Attest test results
-      #        if: ${{ inputs.healthcheck_artifact == '' && success() && !cancelled() }}
-      #        run: |
-      #          echo '{"predicateType":"https://example.com/test-results/v1","predicate":{"status":"passed","commit":"${{ github.sha }}"}}' > test-att.json
-      #          cosign attest \
-      #            --keyless \
-      #            --predicate test-att.json \
-      #            --type custom-test-results \
-      #            ${{ inputs.healthcheck_image }}
       - name: TRX report
         if: ${{ !cancelled() }}
         run: dotnet trx --gh-summary False --gh-comment True
@@ -95,11 +245,11 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports
+          name: trx-reports-alpine
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log
+          name: error-log-alpine
           path: "./**/TestResults/Distroless.*.log"
