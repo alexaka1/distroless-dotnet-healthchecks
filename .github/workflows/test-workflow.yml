@@ -58,8 +58,8 @@ jobs:
       - name: Enumerate and split tests
         id: split-tests
         run: |
-          # Get test IDs from xUnit v3
-          test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test -list full/json > test-list.json 2>/dev/null || true
+          # Get test IDs from xUnit v3 and strip ANSI codes
+          test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test -list full/json 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' > test-list.json || true
           
           # Extract ALL test IDs and split into 3 chunks by ID only
           # Do NOT filter by name - split ALL IDs evenly across 3 chunks
@@ -194,11 +194,11 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports
+          name: trx-reports-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log
+          name: error-log-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/TestResults/Distroless.*.log"
