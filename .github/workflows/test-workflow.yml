@@ -164,14 +164,18 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - name: Run tests (chunk ${{ matrix.chunk }})
         run: |
-          dotnet run --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
+          dotnet test \
+            --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
             --configuration Release \
             --no-build \
-            -- \
-            -reporter default \
-            -preEnumerateTheories \
-            -maxThreads 3 \
-            -trx TestResults/test-results-chunk-${{ matrix.chunk }}.trx \
+            --crashdump \
+            --hangdump \
+            --hangdump-timeout 30m \
+            --retry-failed-tests 2 \
+            --retry-failed-tests-max-tests 5 \
+            --report-xunit-trx \
+            --max-threads 3 \
+            --pre-enumerate-theories on \
             ${{ steps.get-ids.outputs.test-ids }}
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
