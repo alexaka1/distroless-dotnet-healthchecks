@@ -166,6 +166,7 @@ jobs:
         run: |
           dotnet test \
             --configuration Release \
+            --no-build \
             --crashdump \
             --hangdump \
             --hangdump-timeout 30m \
