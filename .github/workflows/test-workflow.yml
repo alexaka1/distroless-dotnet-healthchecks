@@ -41,9 +41,8 @@ jobs:
     permissions:
       contents: read
     outputs:
-      chunk-0: ${{ steps.split-tests.outputs.chunk-0 }}
-      chunk-1: ${{ steps.split-tests.outputs.chunk-1 }}
-      chunk-2: ${{ steps.split-tests.outputs.chunk-2 }}
+      chunk-count: ${{ steps.split-tests.outputs.chunk-count }}
+      chunks: ${{ steps.split-tests.outputs.chunks }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -65,6 +64,8 @@ jobs:
           # Build the test project first
           dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
           
+          command -v jq >/dev/null 2>&1 || { echo "Error: jq is required for test chunking but is not available in the runner environment."; exit 1; }
+
           # Enumerate all tests by running the built executable directly
           # The test executable outputs JSON on a single line followed by empty output
           # Use head -1 to extract only the JSON line, then pipe to jq
@@ -75,26 +76,53 @@ jobs:
       - name: Split tests into chunks
         id: split-tests
         run: |
-          # Split test IDs into 3 roughly equal chunks
+          max_tests_per_chunk=50
           total_tests=$(wc -l < all-test-ids.txt)
-          chunk_size=$(( (total_tests + 2) / 3 ))
+          chunk_count=$(( (total_tests + max_tests_per_chunk - 1) / max_tests_per_chunk ))
+          if [ "$chunk_count" -lt 1 ]; then
+            chunk_count=1
+          fi
+          chunk_size=$(( (total_tests + chunk_count - 1) / chunk_count ))
+          if [ "$chunk_size" -lt 1 ]; then
+            chunk_size=1
+          fi
           
-          # Create 3 chunks as files
-          split -l "$chunk_size" all-test-ids.txt chunk-
+          # Create numbered chunks
+          split -l "$chunk_size" -d -a 4 all-test-ids.txt chunk-
           
           # Rename chunks to more descriptive names
-          mv chunk-aa chunk-0-ids.txt || true
-          mv chunk-ab chunk-1-ids.txt || true
-          mv chunk-ac chunk-2-ids.txt || true
-          
-          # Display chunk sizes
-          for i in 0 1 2; do
-            if [ -f "chunk-$i-ids.txt" ]; then
-              echo "Chunk $i: $(wc -l < chunk-$i-ids.txt) tests"
-            else
-              echo "Chunk $i: 0 tests"
-            fi
+          shopt -s nullglob
+          for f in chunk-*; do
+            index=$(echo "$f" | sed -E 's/^chunk-0*([0-9]+)$/\1/')
+            index=${index:-0}
+            mv "$f" "chunk-${index}-ids.txt"
           done
+
+          chunk_files=(chunk-*-ids.txt)
+          shopt -u nullglob
+
+          if [ ${#chunk_files[@]} -eq 0 ]; then
+            echo "No chunk files created" >&2
+            exit 1
+          fi
+
+          chunk_ids=()
+          for f in "${chunk_files[@]}"; do
+            idx=${f#chunk-}
+            idx=${idx%-ids.txt}
+            chunk_ids+=("$idx")
+          done
+
+          readarray -t sorted_chunk_ids < <(printf '%s\n' "${chunk_ids[@]}" | sort -n)
+
+          # Display chunk sizes
+          for idx in "${sorted_chunk_ids[@]}"; do
+            echo "Chunk $idx: $(wc -l < "chunk-${idx}-ids.txt") tests"
+          done
+
+          chunk_json=$(jq -nc '$ARGS.positional' --args "${sorted_chunk_ids[@]}")
+          echo "chunk-count=$chunk_count" >> "$GITHUB_OUTPUT"
+          echo "chunks=$chunk_json" >> "$GITHUB_OUTPUT"
       - name: Upload test ID chunks
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
@@ -113,7 +141,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        chunk: [0, 1, 2]
+        chunk: ${{ fromJSON(needs.enumerate-tests.outputs.chunks) }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
