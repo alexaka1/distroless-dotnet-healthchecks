@@ -66,9 +66,10 @@ jobs:
           dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
           
           # Enumerate all tests by running the built executable directly
-          # This avoids dotnet SDK/MSBuild logs that would contaminate JSON output
+          # The test executable outputs JSON on a single line followed by empty output
+          # Use head -1 to extract only the JSON line, then pipe to jq
           test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test \
-            -list full/json -preEnumerateTheories 2>/dev/null | jq -r '.[].ID' > all-test-ids.txt
+            -list full/json -preEnumerateTheories 2>&1 | head -1 | jq -r '.[].ID' > all-test-ids.txt
           
           echo "Total tests: $(wc -l < all-test-ids.txt)"
       - name: Split tests into chunks
