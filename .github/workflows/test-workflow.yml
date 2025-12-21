@@ -35,7 +35,7 @@ env:
 
 jobs:
   enumerate-tests:
-    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
+    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' || inputs.base-image-type == 'alpine' }}
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 5
     permissions:
@@ -214,11 +214,16 @@ jobs:
 
   test-alpine:
     if: ${{ inputs.base-image-type == 'alpine' }}
+    needs: enumerate-tests
     runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: ${{ fromJSON(needs.enumerate-tests.outputs.chunks) }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -246,16 +251,30 @@ jobs:
             10.0.x
       - name: DotNet tools restore
         run: dotnet tool restore
-      - name: Run tests
-        run: >-
-          dotnet test
-          --configuration Release
-          --crashdump
-          --hangdump
-          --hangdump-timeout 30m
-          --retry-failed-tests 2
-          --retry-failed-tests-max-tests 5
-          --report-xunit-trx
+      - name: Build test project
+        run: dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
+      - name: Download test ID chunks
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: test-chunks-${{ inputs.platform }}
+          path: test-chunks
+      - name: Run tests (chunk ${{ matrix.chunk }})
+        run: |
+          test_ids=$(cat test-chunks/chunk-${{ matrix.chunk }}-ids.txt | sed 's/^/--filter-uid /' | tr '\n' ' ')
+          
+          dotnet test \
+            --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
+            --configuration Release \
+            --no-build \
+            --crashdump \
+            --hangdump \
+            --hangdump-timeout 30m \
+            --retry-failed-tests 2 \
+            --retry-failed-tests-max-tests 5 \
+            --report-xunit-trx \
+            --max-threads 3 \
+            --pre-enumerate-theories on \
+            $test_ids
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
@@ -268,11 +287,11 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports-${{ inputs.platform }}-alpine
+          name: trx-reports-${{ inputs.platform }}-alpine-chunk-${{ matrix.chunk }}
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log-${{ inputs.platform }}-alpine
+          name: error-log-${{ inputs.platform }}-alpine-chunk-${{ matrix.chunk }}
           path: "./**/TestResults/Distroless.*.log"
