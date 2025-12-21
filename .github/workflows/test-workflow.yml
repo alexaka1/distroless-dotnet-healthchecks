@@ -59,7 +59,13 @@ jobs:
         id: split-tests
         run: |
           # Get test IDs from xUnit v3 and strip ANSI codes
-          test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test -list full/json 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' > test-list.json || true
+          test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test -list full/json 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' > test-list.json
+          
+          # Verify JSON was created successfully
+          if [ ! -s test-list.json ]; then
+            echo "Error: Failed to enumerate tests or test-list.json is empty"
+            exit 1
+          fi
           
           # Extract ALL test IDs and split into 3 chunks by ID only
           # Do NOT filter by name - split ALL IDs evenly across 3 chunks
@@ -69,6 +75,9 @@ jobs:
           # Load test data
           data = json.load(open('test-list.json'))
           all_ids = [t['ID'] for t in data]
+          
+          if not all_ids:
+            raise ValueError("No test IDs found in test-list.json")
           
           # Split IDs into 3 chunks as evenly as possible
           total = len(all_ids)
@@ -97,7 +106,7 @@ jobs:
 
   test:
     if: always()
-    needs: [enumerate-tests]
+    needs: ${{ inputs.base-image-type == 'ubuntu-chiseled' && fromJSON('["enumerate-tests"]') || fromJSON('[]') }}
     runs-on: ${{ inputs.runs-on }}
     permissions:
       contents: read
@@ -141,20 +150,22 @@ jobs:
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
           HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
-          TEST_IDS: ${{ matrix.chunk == 1 && needs.enumerate-tests.outputs.chunk-1 || matrix.chunk == 2 && needs.enumerate-tests.outputs.chunk-2 || needs.enumerate-tests.outputs.chunk-3 }}
+          TEST_IDS: ${{ (matrix.chunk == 1 && needs.enumerate-tests.outputs.chunk-1) || (matrix.chunk == 2 && needs.enumerate-tests.outputs.chunk-2) || needs.enumerate-tests.outputs.chunk-3 }}
         run: |
-          # Convert comma-separated IDs to -id arguments for xUnit v3
-          IFS=',' read -ra IDS <<< "$TEST_IDS"
-          ID_ARGS=""
-          for id in "${IDS[@]}"; do
-            ID_ARGS="$ID_ARGS -id \"$id\""
+          # Convert comma-separated IDs to array for safe handling
+          IFS=',' read -ra TEST_ID_ARRAY <<< "$TEST_IDS"
+          
+          # Build arguments array
+          declare -a ARGS=()
+          for id in "${TEST_ID_ARRAY[@]}"; do
+            ARGS+=(-id "$id")
           done
           
-          echo "Running chunk ${{ matrix.chunk }} with test IDs: $TEST_IDS"
+          echo "Running chunk ${{ matrix.chunk }} with ${#TEST_ID_ARRAY[@]} test ID(s)"
           
           # Run tests using xUnit v3 native runner with test filtering
-          eval test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test \
-            $ID_ARGS \
+          test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test \
+            "${ARGS[@]}" \
             --crashdump \
             --hangdump \
             --hangdump-timeout 30m \
