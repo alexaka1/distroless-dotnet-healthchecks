@@ -30,4 +30,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: github-copilot/gpt-5-mini
+          model: opencode/big-pickle
