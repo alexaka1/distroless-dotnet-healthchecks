@@ -171,6 +171,7 @@ jobs:
             -reporter default \
             -preEnumerateTheories \
             -maxThreads 3 \
+            -trx TestResults/test-results-chunk-${{ matrix.chunk }}.trx \
             ${{ steps.get-ids.outputs.test-ids }}
         env:
           BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
