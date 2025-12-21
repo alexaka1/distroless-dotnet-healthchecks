@@ -30,11 +30,82 @@ env:
   TESTINGPLATFORM_TELEMETRY_OPTOUT: '1'
 
 jobs:
+  # For ubuntu-chiseled: enumerate tests and prepare chunks
+  enumerate-tests:
+    if: inputs.base-image-type == 'ubuntu-chiseled'
+    runs-on: ${{ inputs.runs-on }}
+    outputs:
+      chunk-1: ${{ steps.split-tests.outputs.chunk-1 }}
+      chunk-2: ${{ steps.split-tests.outputs.chunk-2 }}
+      chunk-3: ${{ steps.split-tests.outputs.chunk-3 }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Dotnet
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+        with:
+          dotnet-version: |
+            10.0.x
+      - name: Build test project
+        run: dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
+      - name: Enumerate and split tests
+        id: split-tests
+        run: |
+          # Get test IDs from xUnit v3
+          test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test -list full/json > test-list.json 2>/dev/null || true
+          
+          # Extract ALL test IDs and split into 3 chunks by ID only
+          # Do NOT filter by name - split ALL IDs evenly across 3 chunks
+          python3 << 'EOF'
+          import json
+          
+          # Load test data
+          data = json.load(open('test-list.json'))
+          all_ids = [t['ID'] for t in data]
+          
+          # Split IDs into 3 chunks as evenly as possible
+          total = len(all_ids)
+          chunk_1_size = (total + 2) // 3  # Chunk 1 gets extra items if not divisible evenly
+          chunk_2_size = (total - chunk_1_size + 1) // 2
+          chunk_3_size = total - chunk_1_size - chunk_2_size
+          
+          chunk_1_ids = all_ids[0:chunk_1_size]
+          chunk_2_ids = all_ids[chunk_1_size:chunk_1_size+chunk_2_size]
+          chunk_3_ids = all_ids[chunk_1_size+chunk_2_size:]
+          
+          # Write to GitHub outputs
+          with open('chunk-outputs.sh', 'w') as f:
+              f.write(f'echo "chunk-1={",".join(chunk_1_ids)}" >> $GITHUB_OUTPUT\n')
+              f.write(f'echo "chunk-2={",".join(chunk_2_ids)}" >> $GITHUB_OUTPUT\n')
+              f.write(f'echo "chunk-3={",".join(chunk_3_ids)}" >> $GITHUB_OUTPUT\n')
+          
+          print(f"Total test IDs: {total}")
+          print(f"Chunk 1: {len(chunk_1_ids)} IDs")
+          print(f"Chunk 2: {len(chunk_2_ids)} IDs")
+          print(f"Chunk 3: {len(chunk_3_ids)} IDs")
+          EOF
+          
+          # Execute the output script
+          bash chunk-outputs.sh
+
   test:
+    if: always()
+    needs: [enumerate-tests]
     runs-on: ${{ inputs.runs-on }}
     permissions:
       contents: read
       pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: ${{ inputs.base-image-type == 'ubuntu-chiseled' && fromJSON('[1, 2, 3]') || fromJSON('[0]') }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -63,7 +134,39 @@ jobs:
             10.0.x
       - name: DotNet tools restore
         run: dotnet tool restore
-      - name: Run tests
+      - name: Build test project
+        run: dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
+      - name: Run tests (ubuntu-chiseled with splitting)
+        if: inputs.base-image-type == 'ubuntu-chiseled'
+        env:
+          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
+          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
+          TEST_IDS: ${{ matrix.chunk == 1 && needs.enumerate-tests.outputs.chunk-1 || matrix.chunk == 2 && needs.enumerate-tests.outputs.chunk-2 || needs.enumerate-tests.outputs.chunk-3 }}
+        run: |
+          # Convert comma-separated IDs to -id arguments for xUnit v3
+          IFS=',' read -ra IDS <<< "$TEST_IDS"
+          ID_ARGS=""
+          for id in "${IDS[@]}"; do
+            ID_ARGS="$ID_ARGS -id \"$id\""
+          done
+          
+          echo "Running chunk ${{ matrix.chunk }} with test IDs: $TEST_IDS"
+          
+          # Run tests using xUnit v3 native runner with test filtering
+          eval test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test \
+            $ID_ARGS \
+            --crashdump \
+            --hangdump \
+            --hangdump-timeout 30m \
+            --retry-failed-tests 2 \
+            --retry-failed-tests-max-tests 5 \
+            --report-xunit-trx \
+            --max-threads 3
+      - name: Run tests (alpine without splitting)
+        if: inputs.base-image-type == 'alpine'
+        env:
+          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
+          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
         run: >-
           dotnet test
           --configuration Release
@@ -73,10 +176,6 @@ jobs:
           --retry-failed-tests 2
           --retry-failed-tests-max-tests 5
           --report-xunit-trx
-          --max-threads 2
-        env:
-          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
-          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
       #      - name: Attest test results
       #        if: ${{ inputs.healthcheck_artifact == '' && success() && !cancelled() }}
       #        run: |
