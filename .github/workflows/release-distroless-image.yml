@@ -15,7 +15,7 @@ jobs:
   publish-digest-distroless-dotnet-healthcheck:
     name: Build & Push image digest (${{ matrix.platform }}) - ${{ matrix.base-image-type }}
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    environment: Production
     timeout-minutes: 15
     outputs:
       # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#using-job-outputs-in-a-matrix-job
