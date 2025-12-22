@@ -103,28 +103,30 @@ jobs:
           if git diff --cached --quiet; then
             echo "No version changes to commit."
           else
-            # Build a tree from the index (only changed files)
-            TREE_SHA="$(
-              tree_entries='[]'
-              while IFS=$'\t' read -r status file; do
-                if [[ $status == 'A' || $status == 'M' ]]; then
-                  content=$(base64 -w 0 "$file")
-                  sha=$(gh api --method POST "/repos/${REPO}/git/blobs" -f content="$content" -f encoding="base64" | jq -r '.sha')
-                  entry=$(jq -n --arg path "$file" --arg mode "100644" --arg type "blob" --arg sha "$sha" '{path: $path, mode: $mode, type: $type, sha: $sha}')
-                elif [[ $status == 'D' ]]; then
-                  entry=$(jq -n --arg path "$file" --arg mode "100644" --arg type "blob" '{path: $path, mode: $mode, type: $type, sha: null}')
-                fi
-                tree_entries=$(echo "$tree_entries" | jq --argjson entry "$entry" '. += [$entry]')
-              done < <(git diff --cached --name-status | sed 's/^\([AMD]\)\t/\1\t/')
-              gh api \
-                -H "Accept: application/vnd.github+json" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                --method POST \
-                "/repos/${REPO}/git/trees" \
-                -f base_tree="$(git rev-parse HEAD^{tree})" \
-                -F tree="$tree_entries" \
-            | jq -r '.sha'
-            )"
+            # Commit changes locally and push using the generated app token
+            BRANCH_NAME="$(echo "${BRANCH_REF}" | sed 's#refs/heads/##')"
+            COMMIT_MESSAGE="chore(version): apply changesets snapshot=${SNAPSHOT}"
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            # Create the commit locally
+            if git commit -m "${COMMIT_MESSAGE}" --allow-empty=false; then
+              echo "Local commit created"
+            else
+              echo "No changes to commit after staging; exiting"
+              exit 0
+            fi
+
+            # Push using the app token in the remote URL
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease || {
+              echo "Failed to push commit to remote" >&2
+              exit 1
+            }
+
+            # Set COMMIT_SHA for downstream steps
+            COMMIT_SHA="$(git rev-parse HEAD)"
+
           
             if [ -z "${TREE_SHA}" ] || [ "${TREE_SHA}" = "null" ]; then
               echo "Failed to create tree via API"
@@ -166,54 +168,33 @@ jobs:
             git checkout -B "$(echo "${BRANCH_REF}" | sed 's#refs/heads/##')" "${COMMIT_SHA}"
           fi
           
-          # 3) Publish packages (this likely creates lightweight tags pointing to current HEAD)
+          # 3) Publish packages
           pnpm exec changeset publish
           
-          # 4) Recreate any tags that point at HEAD as annotated, verified tags
+          # 4) Recreate any tags that point at HEAD as annotated tags and push via git
           TARGET_SHA="$(git rev-parse HEAD)"
           mapfile -t TAGS < <(git tag --points-at "${TARGET_SHA}")
-          
+
           if [ "${#TAGS[@]}" -eq 0 ]; then
             echo "No tags found pointing at HEAD after publish. Done."
             exit 0
           fi
-          
+
           for TAG in "${TAGS[@]}"; do
-            echo "Recreating ${TAG} as annotated, verified tag"
-          
-            # Delete existing tag ref on remote if present (ignore 404)
-            gh api \
-              --method DELETE \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "/repos/${REPO}/git/refs/tags/${TAG}" || true
-          
-            # Create tag object (annotated + verified via API)
-            TAG_MESSAGE="Snapshot: ${TAG} (${SNAPSHOT})"
-            TAG_OBJECT_SHA="$(
-              gh api \
-                --method POST \
-                -H "Accept: application/vnd.github+json" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "/repos/${REPO}/git/tags" \
-                -f tag="${TAG}" \
-                -f message="${TAG_MESSAGE}" \
-                -f object="${TARGET_SHA}" \
-                -f type="commit" \
-              | jq -r '.sha'
-            )"
-          
-            if [ -z "${TAG_OBJECT_SHA}" ] || [ "${TAG_OBJECT_SHA}" = "null" ]; then
-              echo "Failed to create tag object for ${TAG}"
+            echo "Recreating ${TAG} as annotated tag and pushing"
+
+            # Delete remote tag if present (ignore failures)
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" :refs/tags/${TAG} || true
+
+            # Delete local tag if present
+            git tag -d "${TAG}" >/dev/null 2>&1 || true
+
+            # Create annotated tag locally
+            git tag -a "${TAG}" -m "Snapshot: ${TAG} (${SNAPSHOT})" "${TARGET_SHA}"
+
+            # Push annotated tag to remote
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/tags/${TAG}" || {
+              echo "Failed pushing tag ${TAG}" >&2
               exit 1
-            fi
-          
-            # Create the ref pointing to the tag object
-            gh api \
-              --method POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "/repos/${REPO}/git/refs" \
-              -f ref="refs/tags/${TAG}" \
-              -f sha="${TAG_OBJECT_SHA}"
+            }
           done
