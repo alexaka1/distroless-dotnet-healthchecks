@@ -106,8 +106,8 @@ jobs:
             BRANCH_NAME="$(echo "${BRANCH_REF}" | sed 's#refs/heads/##')"
             COMMIT_MESSAGE="chore(version): apply changesets snapshot=${SNAPSHOT}"
 
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "alexaka1-release-bot[bot]"
+            git config user.email "250976967+alexaka1-release-bot[bot]@users.noreply.github.com"
 
             # Commit and push using the app token user (simple flow)
             git commit -m "${COMMIT_MESSAGE}" || { echo "No changes to commit after staging"; exit 0; }
