@@ -21,6 +21,7 @@ on:
         required: false
         type: choice
         options:
+          - ''
           - 'true'
           - 'hotfix'
         description: 'Snapshot name to use when versioning. Set to "true" to snapshot without a name.'
