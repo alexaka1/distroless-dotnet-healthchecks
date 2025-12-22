@@ -131,6 +131,7 @@ jobs:
         shell: bash
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         base-image-type:
           - ubuntu-chiseled
