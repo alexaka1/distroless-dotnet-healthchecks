@@ -16,6 +16,7 @@ jobs:
     name: Build & Push image digest (${{ matrix.platform }}) - ${{ matrix.base-image-type }}
     runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    timeout-minutes: 15
     outputs:
       # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#using-job-outputs-in-a-matrix-job
       digest-linux-amd64: ${{ steps.sanitize_platform.outputs.digest-linux-amd64 }}
@@ -117,6 +118,7 @@ jobs:
     needs: publish-digest-distroless-dotnet-healthcheck
     runs-on: ubuntu-24.04-arm
     environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    timeout-minutes: 10
     permissions:
       # docker push
       packages: write
@@ -283,10 +285,11 @@ jobs:
       - merge-and-publish-distroless-dotnet-healthcheck
     # fails on ubuntu-latest-arm as of 2025-08-27
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    environment: release
+    timeout-minutes: 5
     permissions:
-      contents: write # tag + release
-      id-token: write  # for tag signing (gitsign)
+      contents: read
+      id-token: write # for tag signing (gitsign)
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -302,7 +305,6 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
-      - uses: chainguard-dev/actions/setup-gitsign@3e8a2a226fad9e1ecbf2d359b8a7697554a4ac6d # v1.5.10
       - name: Create changelog for release
         id: changelog
         run: |
@@ -375,6 +377,23 @@ jobs:
           append_body: true
           tag_name: "${{ github.ref_name }}"
           name: "${{ github.ref_name }}"
+          token: ${{ steps.app-token.outputs.token }}
+  update-docker-hub-readme:
+    environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: release-github
+    permissions: 
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
       - name: Update repo description
         if: ${{ ! fromJSON(steps.changelog.outputs.prerelease) }}
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0

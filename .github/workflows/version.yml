@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+    
   workflow_call:
     inputs:
       snapshot:
@@ -30,6 +31,8 @@ jobs:
   check-release:
     name: Prepare release
     runs-on: ubuntu-24.04-arm
+    environment: release
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash
