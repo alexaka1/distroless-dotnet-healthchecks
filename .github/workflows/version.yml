@@ -118,11 +118,35 @@ jobs:
               exit 0
             fi
 
-            # Push using the app token in the remote URL
-            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease || {
-              echo "Failed to push commit to remote" >&2
-              exit 1
-            }
+            # Ensure origin uses the app token and fetch latest remote branch info
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+            git fetch origin "${BRANCH_NAME}" || true
+
+            # Push using --force-with-lease to avoid overwriting remote changes unexpectedly
+            if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
+              echo "Pushed commit to remote"
+            else
+              echo "Push rejected (remote changed). Fetching, rebasing local commit onto remote, and retrying"
+              # Attempt safe rebase onto remote branch and retry push
+              git fetch origin "${BRANCH_NAME}"
+              # Create a temporary branch for the local commit
+              TEMP_BRANCH="local-snapshot-$$"
+              git checkout -b "${TEMP_BRANCH}" || true
+              # Rebase our change onto origin/${BRANCH_NAME}
+              if git rebase "origin/${BRANCH_NAME}"; then
+                git checkout -B "${BRANCH_NAME}"
+                if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
+                  echo "Pushed commit after rebasing onto remote"
+                else
+                  echo "Failed to push after rebase" >&2
+                  exit 1
+                fi
+              else
+                echo "Rebase failed; aborting" >&2
+                git rebase --abort || true
+                exit 1
+              fi
+            fi
 
             # Set COMMIT_SHA for downstream steps
             COMMIT_SHA="$(git rev-parse HEAD)"
