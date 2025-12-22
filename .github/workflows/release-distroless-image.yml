@@ -114,7 +114,7 @@ jobs:
           if-no-files-found: error
           retention-days: 2
   merge-and-publish-distroless-dotnet-healthcheck:
-    name: Merge digest under tags (${{ matrix.base-image-type }}
+    name: Merge digest under tags (${{ matrix.base-image-type }})
     needs: publish-digest-distroless-dotnet-healthcheck
     runs-on: ubuntu-24.04-arm
     environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
