@@ -1,0 +1,433 @@
+name: Release images
+on:
+  push:
+    tags:
+      - 'alexaka1/distroless-dotnet-healthchecks@**'
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}-release
+permissions: { }
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  image_name: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+jobs:
+  publish-digest-distroless-dotnet-healthcheck:
+    name: Build & Push image digest (${{ matrix.platform }}) - ${{ matrix.base-image-type }}
+    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    environment: Production
+    timeout-minutes: 15
+    outputs:
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#using-job-outputs-in-a-matrix-job
+      digest-linux-amd64: ${{ steps.sanitize_platform.outputs.digest-linux-amd64 }}
+      digest-linux-arm64: ${{ steps.sanitize_platform.outputs.digest-linux-arm64 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ linux/amd64, linux/arm64 ]
+        base-image-type:
+          - ubuntu-chiseled
+          - alpine
+    permissions:
+      contents: read
+      # docker push
+      packages: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta (labels)
+        id: meta_labels
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: |
+            name=ghcr.io/${{ env.image_name }}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
+      - name: Get Git commit timestamp
+        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+      - name: Build and push by digest
+        id: docker_build
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: src/Distroless.HealthChecks/Dockerfile
+          target: binary
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            BASE_IMAGE_TYPE=${{ matrix.base-image-type }}
+          provenance: mode=max
+          sbom: true
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          # tags used to select repository path for push-by-digest
+          tags: ghcr.io/${{ env.image_name }}
+          labels: ${{ steps.meta_labels.outputs.labels }}
+          annotations: ${{ steps.meta_labels.outputs.annotations }}
+        env:
+          SOURCE_DATE_EPOCH: ${{ env.GIT_TIMESTAMP }}
+      - name: Export digest
+        if: steps.docker_build.outputs.digest != ''
+        run: |
+          set -euo pipefail
+          dir='${{ runner.temp }}/digests-${{ matrix.base-image-type }}'
+          mkdir -p "$dir"
+          digest='${{ steps.docker_build.outputs.digest }}'
+          # SHA-256 digests have exactly 64 hexadecimal characters after the 'sha256:' prefix
+          if [[ "$digest" =~ ^sha256:([A-Fa-f0-9]{64})$ ]]; then
+            fname="${BASH_REMATCH[1]}"
+          else
+            echo "Unexpected digest format: '$digest'" >&2
+            exit 1
+          fi
+          touch "$dir/$fname"
+      - name: Sanitize platform for artifact name
+        if: steps.docker_build.outputs.digest != ''
+        id: sanitize_platform
+        run: |
+          set -euo pipefail
+          platform='${{ matrix.platform }}'
+          safe=${platform//\//-}
+          echo "PLATFORM_SAFE=$safe" >> "$GITHUB_ENV"
+          echo "digest-$safe=${{ steps.docker_build.outputs.digest }}" >> "$GITHUB_OUTPUT"
+      - name: Upload digest
+        if: steps.docker_build.outputs.digest != ''
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: digests-${{ matrix.base-image-type }}-${{ env.PLATFORM_SAFE }}
+          path: ${{ runner.temp }}/digests-${{ matrix.base-image-type }}/*
+          if-no-files-found: error
+          retention-days: 2
+  merge-and-publish-distroless-dotnet-healthcheck:
+    name: Merge digest under tags (${{ matrix.base-image-type }})
+    needs: publish-digest-distroless-dotnet-healthcheck
+    runs-on: ubuntu-24.04-arm
+    environment: ${{ 'Production' }}
+    timeout-minutes: 10
+    permissions:
+      # docker push
+      packages: write
+      # attestation
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        base-image-type:
+          - ubuntu-chiseled
+          - alpine
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # Release notes and tagging now happen in a separate job
+      - name: Extract version and check for suffix
+        id: check_version
+        run: |
+          set -euo pipefail
+          tag_name="${{ github.ref_name }}"
+          # Extract version after package name (format: package-name@version)
+          if [[ "$tag_name" =~ ^[^@]+@([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            version="${BASH_REMATCH[1]}"
+            # Check if version has a suffix (anything after digits, dots, or patch number)
+            if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+.*)?$ ]]; then
+              suffix="${BASH_REMATCH[1]}"
+              if [ -n "$suffix" ]; then
+                echo "latest_flavor=false" >> "$GITHUB_OUTPUT"
+                echo "Version has suffix: $suffix"
+              else
+                echo "latest_flavor=auto" >> "$GITHUB_OUTPUT"
+                echo "Version has no suffix"
+              fi
+            else
+              echo "latest_flavor=auto" >> "$GITHUB_OUTPUT"
+              echo "Version format not matched, defaulting to auto"
+            fi
+          else
+            echo "latest_flavor=auto" >> "$GITHUB_OUTPUT"
+            echo "Tag format not matched, defaulting to auto"
+          fi
+      - name: Docker meta (tags)
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: |
+            name=ghcr.io/${{ env.image_name }}
+            name=docker.io/${{ env.image_name }}
+          flavor: |
+            latest=${{ steps.check_version.outputs.latest_flavor }}
+            suffix=${{ matrix.base-image-type == 'alpine' && '-alpine' || '' }},onlatest=true
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}},match=${{ env.VERSION_REGEX }}
+            type=semver,pattern={{major}}.{{minor}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecks@0.0.') }}
+            type=semver,pattern={{major}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecks@0.') }}
+            type=edge
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
+          VERSION_REGEX: '^alexaka1\/distroless-dotnet-healthchecks@(\d+\.\d+\.\d+.*)$'
+      - name: Compute tag lists (GHCR + Docker Hub)
+        id: taglists
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          # Extract tags for each registry once to avoid repeating jq filters
+          ghcr_tags=$(jq -c '[.tags[] | select(startswith("ghcr.io/"))]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          docker_tags=$(jq -c '[.tags[] | select(startswith("docker.io/"))]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          echo "ghcr=$ghcr_tags" >> "$GITHUB_OUTPUT"
+          echo "docker=$docker_tags" >> "$GITHUB_OUTPUT"
+      - name: Download digests
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          path: ${{ runner.temp }}/digests-${{ matrix.base-image-type }}
+          pattern: digests-${{ matrix.base-image-type }}-*
+          merge-multiple: true
+      - name: Create GHCR manifest list and push
+        working-directory: ${{ runner.temp }}/digests-${{ matrix.base-image-type }}
+        env:
+          GHCR_TAGS_JSON: ${{ steps.taglists.outputs.ghcr }}
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          if [ -z "$(ls -A)" ]; then
+            echo "No digests found for base-image-type '${{ matrix.base-image-type }}'" >&2
+            exit 1
+          fi
+          # Build tag and annotation args safely using arrays
+          readarray -t ghcr_tags < <(jq -r '.[]' <<< "$GHCR_TAGS_JSON")
+          readarray -t annotations < <(jq -r '.annotations[]?' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          args=()
+          for t in "${ghcr_tags[@]}"; do
+            args+=( -t "$t" )
+          done
+          for a in "${annotations[@]}"; do
+            args+=( --annotation "$a" )
+          done
+          # Build source refs from digest files
+          sources=()
+          for f in *; do
+            sources+=( "ghcr.io/${{ env.image_name }}@sha256:$f" )
+          done
+          docker buildx imagetools create "${args[@]}" "${sources[@]}"
+      - name: Inspect GHCR image
+        id: inspect_ghcr
+        run: |
+          set -euo pipefail
+          OUT=$(docker buildx imagetools inspect ghcr.io/${{ env.image_name }}:${{ steps.meta.outputs.version }})
+          echo "$OUT"
+          DIGEST=$(printf "%s\n" "$OUT" | sed -n 's/^Digest:\s*//p' | head -n1)
+          if [ -z "$DIGEST" ]; then echo "Failed to detect manifest digest" >&2; exit 1; fi
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+      - name: Copy manifest to Docker Hub
+        env:
+          DOCKER_TAGS_JSON: ${{ steps.taglists.outputs.docker }}
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          mapfile -t docker_tags < <(jq -r '.[]' <<< "$DOCKER_TAGS_JSON")
+          if [ "${#docker_tags[@]}" -gt 0 ]; then
+            SRC="ghcr.io/${{ env.image_name }}:${{ steps.meta.outputs.version }}"
+            readarray -t annotations < <(jq -r '.annotations[]?' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+            args=()
+            for t in "${docker_tags[@]}"; do
+              args+=( -t "$t" )
+            done
+            for a in "${annotations[@]}"; do
+              args+=( --annotation "$a" )
+            done
+            docker buildx imagetools create "${args[@]}" "$SRC"
+          else
+            echo "No Docker Hub tags to publish."
+          fi
+      - name: Attest GHCR manifest
+        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        with:
+          subject-name: ghcr.io/${{ env.image_name }}
+          subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
+          push-to-registry: true
+      - name: Attest Docker Hub manifest
+        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        with:
+          subject-name: docker.io/${{ env.image_name }}
+          subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
+          push-to-registry: true
+      - name: Persist merge metadata for release job
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euo pipefail
+          digest='${{ steps.inspect_ghcr.outputs.digest }}'
+          printf '%s\n' "$digest" > manifest-digest.txt
+          # Avoid inlining JSON into the script; read from env safely
+          printf '%s' "$DOCKER_METADATA_OUTPUT_JSON" | jq -c '.' > metadata.json
+          variant='${{ matrix.base-image-type }}'
+          printf '%s\n' "$variant" > variant.txt
+      - name: Upload merged artifact (digest + metadata)
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          # Use a slash-free name for artifacts to avoid issues
+          name: merged-${{ matrix.base-image-type }}
+          path: |
+            manifest-digest.txt
+            metadata.json
+            variant.txt
+          retention-days: 3
+  release-github:
+    name: Create GitHub release
+    needs:
+      - merge-and-publish-distroless-dotnet-healthcheck
+    # fails on ubuntu-latest-arm as of 2025-08-27
+    runs-on: ubuntu-latest
+    environment: release
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write # for tag signing (gitsign)
+    outputs: 
+      prerelease: ${{ steps.changelog.outputs.prerelease }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Generate Github App token to create releases
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Create changelog for release
+        id: changelog
+        run: |
+          input_file="src/Distroless.HealthChecks/CHANGELOG.md"
+          output_file="/tmp/changes.md"
+          # Find the line number of the first version heading
+          start_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | head -n 1 | cut -d: -f1)
+
+          # Find the line number of the next version heading, if it exists
+          end_line=$(grep -nE '^## [0-9]+\.[0-9]+\.[0-9]' "$input_file" | sed -n '2p' | cut -d: -f1)
+
+          if [ -z "$end_line" ]; then
+            # If there is no next version, extract till the end of the file
+            sed -n "${start_line},\$p" "$input_file" > "$output_file"
+          else
+            # Extract only the section for the uppermost version
+            sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
+          fi
+          echo "changes=$output_file" >> "$GITHUB_OUTPUT"
+          echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          if [ -f ".changeset/pre.json" ]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download merged artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: merged-*
+          path: /tmp/merged
+          # Keep artifacts in separate subfolders named by artifact
+          merge-multiple: false
+      - name: Append digests and tags to changelog
+        run: |
+          set -euo pipefail
+          changes="${{ steps.changelog.outputs.changes }}"
+          shopt -s nullglob
+          found_any=false
+          for dir in /tmp/merged/merged-*; do
+            [ -d "$dir" ] || continue
+            found_any=true
+            variant=$(cat "$dir/variant.txt" 2>/dev/null || echo "variant")
+            echo "" >> "$changes"
+            echo "### Digest ($variant)" >> "$changes"
+            echo "" >> "$changes"
+            if [ -f "$dir/manifest-digest.txt" ]; then
+              echo "\`$(cat "$dir/manifest-digest.txt")\`" >> "$changes"
+            else
+              echo "(missing)" >> "$changes"
+            fi
+            echo "" >> "$changes"
+            echo "### Tags ($variant)" >> "$changes"
+            echo "" >> "$changes"
+            if [ -f "$dir/metadata.json" ]; then
+              jq -r '.tags[]' "$dir/metadata.json" | awk '{print "- " $0 }' >> "$changes" || true
+            else
+              echo "(none)" >> "$changes"
+            fi
+          done
+          if [ "$found_any" = false ]; then
+            echo "No merged artifacts found for ${{ github.repository_owner }}/distroless-dotnet-healthchecks" >&2
+            exit 1
+          fi
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          body_path: ${{ steps.changelog.outputs.changes }}
+          body: Oh no, it looks like the change-notes were not generated correctly by the action.
+          draft: false
+          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
+          generate_release_notes: true
+          append_body: true
+          tag_name: "${{ github.ref_name }}"
+          name: "${{ github.ref_name }}"
+          token: ${{ steps.app-token.outputs.token }}
+  update-docker-hub-readme:
+    environment: Production
+    runs-on: ubuntu-latest
+    if: needs.release-github.outputs.prerelease != 'true'
+    timeout-minutes: 5
+    needs: release-github
+    permissions: 
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ github.repository_owner }}/distroless-dotnet-healthchecks
+          readme-filepath: ./README.md

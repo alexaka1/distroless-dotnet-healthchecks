@@ -1,6 +1,30 @@
 name: "Version packages"
 on:
+  push:
+    branches:
+      - main
+    
   workflow_call:
+    inputs:
+      snapshot:
+        required: false
+        type: string
+        description: 'Snapshot name to use when versioning. Set to "true" to snapshot without a name.'
+    secrets:
+      RELEASE_BOT_APP_ID:
+        required: true
+      RELEASE_BOT_PRIVATE_KEY:
+        required: true
+  workflow_dispatch:
+    inputs:
+      snapshot:
+        required: false
+        type: choice
+        options:
+          - ''
+          - 'true'
+          - 'hotfix'
+        description: 'Snapshot name to use when versioning. Set to "true" to snapshot without a name.'
 concurrency: ${{ github.workflow }}-${{ github.ref }}-changesets
 permissions:
   contents: read
@@ -8,6 +32,8 @@ jobs:
   check-release:
     name: Prepare release
     runs-on: ubuntu-24.04-arm
+    environment: release
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash
@@ -22,10 +48,19 @@ jobs:
         with:
           disable-sudo: true
           egress-policy: audit
+      - name: Generate Github App token to create releases
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
+      - name: GitHub API only supports non-executable files and directories
+        # https://github.com/changesets/action/issues/523
+        run: git ls-files | while read -r file; do [ -x "$file" ] && chmod -x "$file" || true; done
       - name: Setup pnpm
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
         with:
@@ -41,6 +76,9 @@ jobs:
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           version: pnpm run version
+          publish: pnpm exec changeset publish
           commitMode: 'github-api'
+          createGithubReleases: 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          SNAPSHOT: ${{ inputs.snapshot || '' }}
