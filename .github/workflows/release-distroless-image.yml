@@ -193,8 +193,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}},match=${{ env.VERSION_REGEX }}
-            type=semver,pattern={{major}}.{{minor}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecksb@0.0.') }}
-            type=semver,pattern={{major}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecksb@0.') }}
+            type=semver,pattern={{major}}.{{minor}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecks@0.0.') }}
+            type=semver,pattern={{major}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecks@0.') }}
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
@@ -317,6 +317,8 @@ jobs:
     permissions:
       contents: read
       id-token: write # for tag signing (gitsign)
+    outputs: 
+      prerelease: ${{ steps.changelog.outputs.prerelease }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -408,6 +410,7 @@ jobs:
   update-docker-hub-readme:
     environment: Production
     runs-on: ubuntu-latest
+    if: needs.release-github.outputs.prerelease != 'true'
     timeout-minutes: 5
     needs: release-github
     permissions: 
@@ -422,7 +425,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Update repo description
-        if: ${{ ! fromJSON(steps.changelog.outputs.prerelease) }}
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
         with:
           username: ${{ github.repository_owner }}
