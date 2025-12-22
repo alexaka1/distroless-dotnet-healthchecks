@@ -85,6 +85,7 @@ jobs:
       - name: Create snapshot release
         if: ${{ inputs.snapshot != '' }}
         env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SNAPSHOT: ${{ inputs.snapshot }}
         run: |
