@@ -1,5 +1,5 @@
 {
-  "name": "alexaka1/distroless-dotnet-healthchecks",
+  "name": "distroless-dotnet-healthchecks",
   "version": "1.5.2",
   "private": true
 }
