@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="Version.props" />
   <PropertyGroup Label="Package">
     <PackageId>Alexaka1.Distroless.HealthChecks</PackageId>
     <Description>A simple .NET app, that is able to perform health checks inside a distroless container that only has the .NET runtime as a dependency.</Description>
-    <Version>1.5.1</Version>
     <Authors>Alex Martossy</Authors>
     <PackageTags>docker;healthcheck;dotnet;distroless;chiseled-container</PackageTags>
     <PackageProjectUrl>https://github.com/alexaka1/distroless-dotnet-healthchecks</PackageProjectUrl>
