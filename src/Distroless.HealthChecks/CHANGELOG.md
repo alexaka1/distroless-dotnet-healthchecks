@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 0.0.0-hotfix-20251222133902
+
+### Patch Changes
+
+- [`bc80ba6`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/bc80ba612c936db9ddb08722a37daefdfecb0956) Thanks [@alexaka1](https://github.com/alexaka1)! - hotfix-test
+
 ## 0.0.0-hotfix-20251222131849
 
 ### Patch Changes
