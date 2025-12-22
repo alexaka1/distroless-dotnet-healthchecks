@@ -191,6 +191,7 @@ jobs:
       # attestation
       id-token: write
       attestations: write
+      artifact-metadata: write
     defaults:
       run:
         shell: bash

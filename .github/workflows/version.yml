@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-    
+  
   workflow_call:
     inputs:
       snapshot:
@@ -58,6 +58,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: GitHub API only supports non-executable files and directories
         # https://github.com/changesets/action/issues/523
         run: git ls-files | while read -r file; do [ -x "$file" ] && chmod -x "$file" || true; done
@@ -73,6 +74,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Create Release Pull Request or Prepare release
         id: changesets
+        if: ${{ inputs.snapshot == '' }}
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           version: pnpm run version
@@ -81,4 +83,52 @@ jobs:
           createGithubReleases: 'true'
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          SNAPSHOT: ${{ inputs.snapshot || '' }}
+      - name: Create snapshot release
+        if: ${{ inputs.snapshot != '' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SNAPSHOT: ${{ inputs.snapshot }}
+          REPO: ${{ github.repository }}
+          BRANCH_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+
+          # Run version to update files locally
+          pnpm run version
+
+          # Stage all changes and commit if any
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No version changes to commit."
+          else
+            BRANCH_NAME="$(echo "${BRANCH_REF}" | sed 's#refs/heads/##')"
+            COMMIT_MESSAGE="chore(version): apply changesets snapshot=${SNAPSHOT}"
+
+            git config user.name "alexaka1-release-bot[bot]"
+            git config user.email "250976967+alexaka1-release-bot[bot]@users.noreply.github.com"
+
+            # Commit and push using the app token user (simple flow)
+            git commit -m "${COMMIT_MESSAGE}" || { echo "No changes to commit after staging"; exit 0; }
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}"
+          fi
+
+          # Publish packages
+          pnpm exec changeset publish
+
+          # Push tags created by the publish step that point at HEAD
+          TARGET_SHA="$(git rev-parse HEAD)"
+          TAGS=( $(git tag --points-at "${TARGET_SHA}") )
+
+          if [ "${#TAGS[@]}" -eq 0 ]; then
+            echo "No tags found pointing at HEAD after publish. Done."
+            exit 0
+          fi
+
+          for TAG in "${TAGS[@]}"; do
+            echo "Pushing tag ${TAG}"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/tags/${TAG}"
+          done
+
