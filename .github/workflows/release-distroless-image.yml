@@ -1,4 +1,4 @@
-name: Release images
+name: Release distroless-dotnet-healthchecks
 on:
   push:
     tags:
