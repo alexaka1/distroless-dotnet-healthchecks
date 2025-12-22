@@ -406,7 +406,7 @@ jobs:
           name: "${{ github.ref_name }}"
           token: ${{ steps.app-token.outputs.token }}
   update-docker-hub-readme:
-    environment: ${{ github.ref == 'refs/heads/beta' && 'Beta' || 'Production' }}
+    environment: Production
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: release-github
