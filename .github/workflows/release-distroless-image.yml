@@ -131,7 +131,6 @@ jobs:
         shell: bash
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         base-image-type:
           - ubuntu-chiseled
@@ -260,6 +259,10 @@ jobs:
           DIGEST=$(printf "%s\n" "$OUT" | sed -n 's/^Digest:\s*//p' | head -n1)
           if [ -z "$DIGEST" ]; then echo "Failed to detect manifest digest" >&2; exit 1; fi
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+      - name: Wait before copying to Docker Hub
+        run: |
+          set -euo pipefail
+          sleep 10
       - name: Copy manifest to Docker Hub
         env:
           DOCKER_TAGS_JSON: ${{ steps.taglists.outputs.docker }}
