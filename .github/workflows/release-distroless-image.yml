@@ -162,7 +162,7 @@ jobs:
             name=docker.io/${{ env.image_name }}
           flavor: |
             latest=${{ github.ref != 'refs/heads/beta' && 'auto' || 'false' }}
-            suffix=${{ matrix.base-image-type == 'alpine' && 'alpine' || '' }},onlatest=true
+            suffix=${{ matrix.base-image-type == 'alpine' && '-alpine' || '' }},onlatest=true
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}},match=${{ env.VERSION_REGEX }}
