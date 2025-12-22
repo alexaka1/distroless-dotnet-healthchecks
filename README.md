@@ -1,5 +1,5 @@
 [![Docker Image Version (tag)](https://img.shields.io/docker/v/alexaka1/distroless-dotnet-healthchecks/latest?logo=docker&label=docker.io&cacheSeconds=3600)](https://hub.docker.com/r/alexaka1/distroless-dotnet-healthchecks)
-[![Release images](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml/badge.svg?event=push)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release.yml)
+[![Release images](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release-distroless-image.yml/badge.svg?event=push)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/release-distroless-image.yml)
 [![Nightly build](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/alexaka1/distroless-dotnet-healthchecks/badge)](https://scorecard.dev/viewer/?uri=github.com/alexaka1/distroless-dotnet-healthchecks)
 [![Qodana](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/code-quality.yml/badge.svg)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/code-quality.yml)
