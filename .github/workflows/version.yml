@@ -122,29 +122,38 @@ jobs:
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
             git fetch origin "${BRANCH_NAME}" || true
 
-            # Push using --force-with-lease to avoid overwriting remote changes unexpectedly
+            # Try a safe push first, then fall back to force if necessary
             if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
               echo "Pushed commit to remote"
             else
-              echo "Push rejected (remote changed). Fetching, rebasing local commit onto remote, and retrying"
-              # Attempt safe rebase onto remote branch and retry push
-              git fetch origin "${BRANCH_NAME}"
-              # Create a temporary branch for the local commit
-              TEMP_BRANCH="local-snapshot-$$"
-              git checkout -b "${TEMP_BRANCH}" || true
-              # Rebase our change onto origin/${BRANCH_NAME}
-              if git rebase "origin/${BRANCH_NAME}"; then
-                git checkout -B "${BRANCH_NAME}"
-                if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
-                  echo "Pushed commit after rebasing onto remote"
+              echo "Push rejected (remote changed). Attempting to rebase local commits onto remote"
+              # Try to rebase local changes onto the updated remote branch
+              if git rev-parse --verify "origin/${BRANCH_NAME}" >/dev/null 2>&1; then
+                if git rebase "origin/${BRANCH_NAME}"; then
+                  echo "Rebase successful; retrying push with --force-with-lease"
+                  if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
+                    echo "Pushed commit after rebasing onto remote"
+                  else
+                    echo "Push still rejected after rebase; forcing push (dangerous)" >&2
+                    git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force || {
+                      echo "Failed to force-push commit to remote" >&2
+                      exit 1
+                    }
+                  fi
                 else
-                  echo "Failed to push after rebase" >&2
-                  exit 1
+                  echo "Rebase failed; aborting and attempting force push as last resort" >&2
+                  git rebase --abort || true
+                  git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force || {
+                    echo "Failed to force-push commit to remote" >&2
+                    exit 1
+                  }
                 fi
               else
-                echo "Rebase failed; aborting" >&2
-                git rebase --abort || true
-                exit 1
+                echo "Remote branch does not exist; pushing normally"
+                git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" || {
+                  echo "Failed to push new branch to remote" >&2
+                  exit 1
+                }
               fi
             fi
 
