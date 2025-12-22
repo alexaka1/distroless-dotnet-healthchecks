@@ -168,15 +168,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ linux/amd64, linux/arm64 ]
+        platform: [ amd64, arm64 ]
     permissions:
       contents: read
       pull-requests: write
     uses: ./.github/workflows/test-workflow.yml
     with:
-      runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs[matrix.platform == 'linux/amd64' && 'digest-linux-amd64' || 'digest-linux-arm64'] }}
+      runs-on: ${{ matrix.platform == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+      healthcheck_image: ghcr.io/${{ inputs.image }}@${{ needs.publish-digest.outputs[matrix.platform == 'amd64' && 'digest-linux-amd64' || 'digest-linux-arm64'] }}
       base-image-type: ${{ inputs.base-image-type }}
+      platform: ${{ matrix.platform }}
 
   merge-and-publish:
     name: Merge digest under tags (${{ inputs.base-image-type }}${{ inputs.tag-suffix }})
