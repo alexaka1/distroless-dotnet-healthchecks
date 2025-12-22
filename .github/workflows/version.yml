@@ -88,58 +88,121 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SNAPSHOT: ${{ inputs.snapshot }}
+          REPO: ${{ github.repository }}
+          BRANCH_REF: ${{ github.ref }}
         run: |
+          set -euo pipefail
+          
+          # 1) Run version to update files locally
           pnpm run version
+          
+          # 2) Stage and detect changes (we will build a tree from the index)
+          git add -A
+          
+          # If no changes, skip commit creation
+          if git diff --cached --quiet; then
+            echo "No version changes to commit."
+          else
+            # Build a tree from the index
+            TREE_SHA="$(
+              gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                --method POST \
+                "/repos/${REPO}/git/trees" \
+                -f base_tree="$(git rev-parse HEAD^{tree})" \
+                -F tree="$(git ls-files -z | xargs -0 -I{} bash -c 'printf "{\"path\":\"%s\",\"mode\":\"100644\",\"type\":\"blob\",\"sha\":\"%s\"}\n" "{}" "$(git hash-object -w "{}")"' | jq -s '.')" \
+            | jq -r '.sha'
+            )"
+          
+            if [ -z "${TREE_SHA}" ] || [ "${TREE_SHA}" = "null" ]; then
+              echo "Failed to create tree via API"
+              exit 1
+            fi
+          
+            # Create a verified commit via the API
+            COMMIT_MESSAGE="chore(version): apply changesets snapshot=${SNAPSHOT}"
+            PARENT_SHA="$(git rev-parse HEAD)"
+            COMMIT_SHA="$(
+              gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                --method POST \
+                "/repos/${REPO}/git/commits" \
+                -f message="${COMMIT_MESSAGE}" \
+                -f tree="${TREE_SHA}" \
+                -F parents[]="${PARENT_SHA}" \
+            | jq -r '.sha'
+            )"
+          
+            if [ -z "${COMMIT_SHA}" ] || [ "${COMMIT_SHA}" = "null" ]; then
+              echo "Failed to create commit via API"
+              exit 1
+            fi
+          
+            # Update the branch ref to point to the new commit
+            # github.ref is like "refs/heads/main"
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              --method PATCH \
+              "/repos/${REPO}/git/${BRANCH_REF}" \
+              -f sha="${COMMIT_SHA}" \
+              -f force=false
+          
+            # Move local HEAD to the new commit for subsequent steps
+            git fetch origin "${BRANCH_REF}:${BRANCH_REF}"
+            git checkout -B "$(echo "${BRANCH_REF}" | sed 's#refs/heads/##')" "${COMMIT_SHA}"
+          fi
+          
+          # 3) Publish packages (this likely creates lightweight tags pointing to current HEAD)
           pnpm exec changeset publish
-
-          # For all tags that point to the current HEAD, recreate them as
-          # annotated, verified tags via the GitHub API using the App token.
+          
+          # 4) Recreate any tags that point at HEAD as annotated, verified tags
           TARGET_SHA="$(git rev-parse HEAD)"
           mapfile -t TAGS < <(git tag --points-at "${TARGET_SHA}")
+          
           if [ "${#TAGS[@]}" -eq 0 ]; then
-           echo "No tags found pointing at HEAD after publish. Exiting."
-           exit 1
+            echo "No tags found pointing at HEAD after publish. Done."
+            exit 0
           fi
           
           for TAG in "${TAGS[@]}"; do
-           echo "Processing tag ${TAG} -> ${TARGET_SHA}"
-
-           # If a lightweight ref already exists remotely, delete it first to
-           # avoid 'Reference already exists' when creating as annotated.
-           # Ignore errors if it doesn't exist.
-           gh api \
-             --method DELETE \
-           -H "Accept: application/vnd.github+json" \
-           -H "X-GitHub-Api-Version: 2022-11-28" \
-             "/repos/${{ github.repository }}/git/refs/tags/${TAG}" || true
+            echo "Recreating ${TAG} as annotated, verified tag"
           
-          TAG_MESSAGE="Snapshot: ${TAG} (${SNAPSHOT})"
-
-           create_tag_response="$(
-             gh api \
-               --method POST \
-             -H "Accept: application/vnd.github+json" \
-             -H "X-GitHub-Api-Version: 2022-11-28" \
-               /repos/${{ github.repository }}/git/tags \
-               -f tag="${TAG}" \
-               -f message="${TAG_MESSAGE}" \
-               -f object="${TARGET_SHA}" \
-               -f type="commit"
-           )"
-
-           TAG_OBJECT_SHA="$(echo "$create_tag_response" | jq -r '.sha')"
-           if [ -z "$TAG_OBJECT_SHA" ] || [ "$TAG_OBJECT_SHA" = "null" ]; then
-             echo "Failed to create tag object for ${TAG}. Response:"
-             echo "$create_tag_response"
-             exit 1
-           fi
-
-           gh api \
-             --method POST \
-           -H "Accept: application/vnd.github+json" \
-           -H "X-GitHub-Api-Version: 2022-11-28" \
-             /repos/${{ github.repository }}/git/refs \
-             -f ref="refs/tags/${TAG}" \
-             -f sha="${TAG_OBJECT_SHA}"
+            # Delete existing tag ref on remote if present (ignore 404)
+            gh api \
+              --method DELETE \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/${REPO}/git/refs/tags/${TAG}" || true
+          
+            # Create tag object (annotated + verified via API)
+            TAG_MESSAGE="Snapshot: ${TAG} (${SNAPSHOT})"
+            TAG_OBJECT_SHA="$(
+              gh api \
+                --method POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "/repos/${REPO}/git/tags" \
+                -f tag="${TAG}" \
+                -f message="${TAG_MESSAGE}" \
+                -f object="${TARGET_SHA}" \
+                -f type="commit" \
+              | jq -r '.sha'
+            )"
+          
+            if [ -z "${TAG_OBJECT_SHA}" ] || [ "${TAG_OBJECT_SHA}" = "null" ]; then
+              echo "Failed to create tag object for ${TAG}"
+              exit 1
+            fi
+          
+            # Create the ref pointing to the tag object
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/${REPO}/git/refs" \
+              -f ref="refs/tags/${TAG}" \
+              -f sha="${TAG_OBJECT_SHA}"
           done
-          
