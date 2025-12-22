@@ -47,6 +47,7 @@ jobs:
       && !cancelled()
     runs-on: ${{ matrix.os }}
     needs: path-filter
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -119,6 +120,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    timeout-minutes: 20
     uses: ./.github/workflows/test-workflow.yml
     with:
       runs-on: ${{ matrix.os }}

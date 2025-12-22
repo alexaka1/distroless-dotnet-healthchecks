@@ -38,6 +38,7 @@ jobs:
               - '!**/*.md'
   check-dotnet:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: >-
       (github.event_name == 'workflow_dispatch' ||
         needs.path-filter.outputs.code == 'true')

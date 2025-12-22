@@ -9,8 +9,6 @@
     <File Path=".github/workflows/nightly.yml" />
     <File Path=".github/workflows/opencode.yml" />
     <File Path=".github/workflows/release-distroless-image.yml" />
-    <File Path=".github/workflows/release-docker.yml" />
-    <File Path=".github/workflows/release.yml" />
     <File Path=".github/workflows/scorecards.yml" />
     <File Path=".github/workflows/test-workflow.yml" />
     <File Path=".github/workflows/test.yml" />
