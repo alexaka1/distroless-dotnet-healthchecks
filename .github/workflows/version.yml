@@ -93,85 +93,34 @@ jobs:
           BRANCH_REF: ${{ github.ref }}
         run: |
           set -euo pipefail
-          
-          # 1) Run version to update files locally
+
+          # Run version to update files locally
           pnpm run version
-          
-          # 2) Stage and detect changes (we will build a tree from the index)
+
+          # Stage all changes and commit if any
           git add -A
-          
-          # If no changes, skip commit creation
+
           if git diff --cached --quiet; then
             echo "No version changes to commit."
           else
-            # Commit changes locally and push using the generated app token (regular git commit/push)
             BRANCH_NAME="$(echo "${BRANCH_REF}" | sed 's#refs/heads/##')"
             COMMIT_MESSAGE="chore(version): apply changesets snapshot=${SNAPSHOT}"
 
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-            # Create the commit locally; exit gracefully if no staged changes
-            if git commit -m "${COMMIT_MESSAGE}"; then
-              echo "Local commit created"
-            else
-              echo "No changes to commit after staging; exiting"
-              exit 0
-            fi
-
-            # Ensure origin uses the app token and fetch latest remote branch info
+            # Commit and push using the app token user (simple flow)
+            git commit -m "${COMMIT_MESSAGE}" || { echo "No changes to commit after staging"; exit 0; }
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
-            git fetch origin "${BRANCH_NAME}" || true
-
-            # Try a safe push first, then fall back to force if necessary
-            if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
-              echo "Pushed commit to remote"
-            else
-              echo "Push rejected (remote changed). Attempting to rebase local commits onto remote"
-              # Try to rebase local changes onto the updated remote branch
-              if git rev-parse --verify "origin/${BRANCH_NAME}" >/dev/null 2>&1; then
-                if git rebase "origin/${BRANCH_NAME}"; then
-                  echo "Rebase successful; retrying push with --force-with-lease"
-                  if git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force-with-lease; then
-                    echo "Pushed commit after rebasing onto remote"
-                  else
-                    echo "Push still rejected after rebase; forcing push (dangerous)" >&2
-                    git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force || {
-                      echo "Failed to force-push commit to remote" >&2
-                      exit 1
-                    }
-                  fi
-                else
-                  echo "Rebase failed; aborting and attempting force push as last resort" >&2
-                  git rebase --abort || true
-                  git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" --force || {
-                    echo "Failed to force-push commit to remote" >&2
-                    exit 1
-                  }
-                fi
-              else
-                echo "Remote branch does not exist; pushing normally"
-                git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}" || {
-                  echo "Failed to push new branch to remote" >&2
-                  exit 1
-                }
-              fi
-            fi
-
-            # Set COMMIT_SHA for downstream steps
-            COMMIT_SHA="$(git rev-parse HEAD)"
-
-            # Ensure local branch points to the pushed commit
-            git checkout -B "${BRANCH_NAME}" "${COMMIT_SHA}"
-            git branch --set-upstream-to="origin/${BRANCH_NAME}" "${BRANCH_NAME}" || true
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH_NAME}"
           fi
-          
-          # 3) Publish packages
+
+          # Publish packages
           pnpm exec changeset publish
-          
-          # 4) Recreate any tags that point at HEAD as annotated tags and push via git
+
+          # Push tags created by the publish step that point at HEAD (simple)
           TARGET_SHA="$(git rev-parse HEAD)"
-          mapfile -t TAGS < <(git tag --points-at "${TARGET_SHA}")
+          TAGS=( $(git tag --points-at "${TARGET_SHA}") )
 
           if [ "${#TAGS[@]}" -eq 0 ]; then
             echo "No tags found pointing at HEAD after publish. Done."
@@ -179,20 +128,7 @@ jobs:
           fi
 
           for TAG in "${TAGS[@]}"; do
-            echo "Recreating ${TAG} as annotated tag and pushing"
-
-            # Delete remote tag if present (ignore failures)
-            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" :refs/tags/${TAG} || true
-
-            # Delete local tag if present
-            git tag -d "${TAG}" >/dev/null 2>&1 || true
-
-            # Create annotated tag locally
-            git tag -a "${TAG}" -m "Snapshot: ${TAG} (${SNAPSHOT})" "${TARGET_SHA}"
-
-            # Push annotated tag to remote
-            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/tags/${TAG}" || {
-              echo "Failed pushing tag ${TAG}" >&2
-              exit 1
-            }
+            echo "Pushing tag ${TAG}"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/tags/${TAG}"
           done
+
