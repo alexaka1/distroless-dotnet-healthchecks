@@ -29,9 +29,9 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}-changesets
 permissions:
   contents: read
 jobs:
-  check-release:
+  version:
     name: Prepare release
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     environment: release
     timeout-minutes: 10
     defaults:
