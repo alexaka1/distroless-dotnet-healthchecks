@@ -52,6 +52,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Docker meta (labels)
         id: meta_labels
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
@@ -75,8 +80,10 @@ jobs:
           provenance: mode=max
           sbom: true
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          # tags used to select repository path for push-by-digest
-          tags: ghcr.io/${{ env.image_name }}
+          # tags used to select repository path for push-by-digest; include Docker Hub so per-arch images land there too
+          tags: |
+            ghcr.io/${{ env.image_name }}
+            docker.io/${{ env.image_name }}
           labels: ${{ steps.meta_labels.outputs.labels }}
           annotations: ${{ steps.meta_labels.outputs.annotations }}
         env:
@@ -125,7 +132,6 @@ jobs:
       # attestation
       id-token: write
       attestations: write
-      artifact-metadata: write
     defaults:
       run:
         shell: bash
@@ -155,7 +161,7 @@ jobs:
         with:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       # Release notes and tagging now happen in a separate job
       - name: Extract version and check for suffix
         id: check_version
@@ -244,7 +250,7 @@ jobs:
           for a in "${annotations[@]}"; do
             args+=( --annotation "$a" )
           done
-          # Build source refs from digest files
+          # Build source refs from digest files (GHCR)
           sources=()
           for f in *; do
             sources+=( "ghcr.io/${{ env.image_name }}@sha256:$f" )
@@ -259,31 +265,33 @@ jobs:
           DIGEST=$(printf "%s\n" "$OUT" | sed -n 's/^Digest:\s*//p' | head -n1)
           if [ -z "$DIGEST" ]; then echo "Failed to detect manifest digest" >&2; exit 1; fi
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
-      - name: Wait before copying to Docker Hub
-        run: |
-          set -euo pipefail
-          sleep 10
-      - name: Copy manifest to Docker Hub
+      - name: Create Docker Hub manifest list and push
+        working-directory: ${{ runner.temp }}/digests-${{ matrix.base-image-type }}
         env:
           DOCKER_TAGS_JSON: ${{ steps.taglists.outputs.docker }}
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
           set -euo pipefail
-          mapfile -t docker_tags < <(jq -r '.[]' <<< "$DOCKER_TAGS_JSON")
-          if [ "${#docker_tags[@]}" -gt 0 ]; then
-            SRC="ghcr.io/${{ env.image_name }}:${{ steps.meta.outputs.version }}"
-            readarray -t annotations < <(jq -r '.annotations[]?' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-            args=()
-            for t in "${docker_tags[@]}"; do
-              args+=( -t "$t" )
-            done
-            for a in "${annotations[@]}"; do
-              args+=( --annotation "$a" )
-            done
-            docker buildx imagetools create "${args[@]}" "$SRC"
-          else
-            echo "No Docker Hub tags to publish."
+          if [ -z "$(ls -A)" ]; then
+            echo "No digests found for base-image-type '${{ matrix.base-image-type }}'" >&2
+            exit 1
           fi
+          # Build tag and annotation args safely using arrays
+          readarray -t docker_tags < <(jq -r '.[]' <<< "$DOCKER_TAGS_JSON")
+          readarray -t annotations < <(jq -r '.annotations[]?' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          args=()
+          for t in "${docker_tags[@]}"; do
+            args+=( -t "$t" )
+          done
+          for a in "${annotations[@]}"; do
+            args+=( --annotation "$a" )
+          done
+          # Build source refs from digest files (Docker Hub)
+          sources=()
+          for f in *; do
+            sources+=( "docker.io/${{ env.image_name }}@sha256:$f" )
+          done
+          docker buildx imagetools create "${args[@]}" "${sources[@]}"
       - name: Attest GHCR manifest
         uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
         with:
