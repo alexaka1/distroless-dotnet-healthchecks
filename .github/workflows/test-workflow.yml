@@ -32,18 +32,18 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
   CI: 'true'
   TESTINGPLATFORM_TELEMETRY_OPTOUT: '1'
+  BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
+  HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
 
 jobs:
   enumerate-tests:
-    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 5
     permissions:
       contents: read
     outputs:
-      chunk-0: ${{ steps.split-tests.outputs.chunk-0 }}
-      chunk-1: ${{ steps.split-tests.outputs.chunk-1 }}
-      chunk-2: ${{ steps.split-tests.outputs.chunk-2 }}
+      chunk-count: ${{ steps.split-tests.outputs.chunk-count }}
+      chunks: ${{ steps.split-tests.outputs.chunks }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -64,7 +64,6 @@ jobs:
         run: |
           # Build the test project first
           dotnet build test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj --configuration Release
-          
           # Enumerate all tests by running the built executable directly
           # The test executable outputs JSON on a single line followed by empty output
           # Use head -1 to extract only the JSON line, then pipe to jq
@@ -75,35 +74,61 @@ jobs:
       - name: Split tests into chunks
         id: split-tests
         run: |
-          # Split test IDs into 3 roughly equal chunks
+          max_tests_per_chunk=50
           total_tests=$(wc -l < all-test-ids.txt)
-          chunk_size=$(( (total_tests + 2) / 3 ))
+          chunk_count=$(( (total_tests + max_tests_per_chunk - 1) / max_tests_per_chunk ))
+          if [ "$chunk_count" -lt 1 ]; then
+            chunk_count=1
+          fi
+          chunk_size=$(( (total_tests + chunk_count - 1) / chunk_count ))
+          if [ "$chunk_size" -lt 1 ]; then
+            chunk_size=1
+          fi
           
-          # Create 3 chunks as files
-          split -l "$chunk_size" all-test-ids.txt chunk-
+          # Create numbered chunks
+          split -l "$chunk_size" -d -a 4 all-test-ids.txt chunk-
           
           # Rename chunks to more descriptive names
-          mv chunk-aa chunk-0-ids.txt || true
-          mv chunk-ab chunk-1-ids.txt || true
-          mv chunk-ac chunk-2-ids.txt || true
-          
-          # Display chunk sizes
-          for i in 0 1 2; do
-            if [ -f "chunk-$i-ids.txt" ]; then
-              echo "Chunk $i: $(wc -l < chunk-$i-ids.txt) tests"
-            else
-              echo "Chunk $i: 0 tests"
-            fi
+          shopt -s nullglob
+          for f in chunk-*; do
+            index=$(echo "$f" | sed -E 's/^chunk-0*([0-9]+)$/\1/')
+            index=${index:-0}
+            mv "$f" "chunk-${index}-ids.txt"
           done
+
+          chunk_files=(chunk-*-ids.txt)
+          shopt -u nullglob
+
+          if [ ${#chunk_files[@]} -eq 0 ]; then
+            echo "No chunk files created" >&2
+            exit 1
+          fi
+
+          chunk_ids=()
+          for f in "${chunk_files[@]}"; do
+            idx=${f#chunk-}
+            idx=${idx%-ids.txt}
+            chunk_ids+=("$idx")
+          done
+
+          readarray -t sorted_chunk_ids < <(printf '%s\n' "${chunk_ids[@]}" | sort -n)
+
+          # Display chunk sizes
+          for idx in "${sorted_chunk_ids[@]}"; do
+            echo "Chunk $idx: $(wc -l < "chunk-${idx}-ids.txt") tests"
+          done
+
+          chunk_json=$(jq -nc '$ARGS.positional' --args "${sorted_chunk_ids[@]}")
+          echo "chunk-count=$chunk_count" >> "$GITHUB_OUTPUT"
+          echo "chunks=$chunk_json" >> "$GITHUB_OUTPUT"
       - name: Upload test ID chunks
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: test-chunks-${{ inputs.platform }}
+          name: test-chunks-${{ inputs.platform }}-${{ inputs.base-image-type }}
           path: chunk-*-ids.txt
           retention-days: 1
 
-  test-ubuntu-chiseled:
-    if: ${{ inputs.base-image-type == 'ubuntu-chiseled' }}
+  test:
     needs: enumerate-tests
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 20
@@ -113,7 +138,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        chunk: [0, 1, 2]
+        chunk: ${{ fromJSON(needs.enumerate-tests.outputs.chunks) }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -146,7 +171,7 @@ jobs:
       - name: Download test ID chunks
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: test-chunks-${{ inputs.platform }}
+          name: test-chunks-${{ inputs.platform }}-${{ inputs.base-image-type }}
           path: test-chunks
       - name: Run tests (chunk ${{ matrix.chunk }})
         run: |
@@ -178,76 +203,11 @@ jobs:
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: trx-reports-${{ inputs.platform }}-ubuntu-chiseled-chunk-${{ matrix.chunk }}
+          name: trx-reports-${{ inputs.platform }}-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: error-log-${{ inputs.platform }}-ubuntu-chiseled-chunk-${{ matrix.chunk }}
-          path: "./**/TestResults/Distroless.*.log"
-
-  test-alpine:
-    if: ${{ inputs.base-image-type == 'alpine' }}
-    runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
-        with:
-          disable-sudo: true
-          egress-policy: audit
-      - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          persist-credentials: false
-      - name: Download artifact
-        if: ${{ inputs.healthcheck_artifact != '' }}
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: ${{ inputs.healthcheck_artifact }}
-          path: ${{ runner.temp }}
-      - name: Load image
-        if: ${{ inputs.healthcheck_artifact != '' }}
-        run: |
-          docker load --input ${{ runner.temp }}/image.tar
-      - name: Setup Dotnet
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
-        with:
-          dotnet-version: |
-            10.0.x
-      - name: DotNet tools restore
-        run: dotnet tool restore
-      - name: Run tests
-        run: >-
-          dotnet test
-          --configuration Release
-          --crashdump
-          --hangdump
-          --hangdump-timeout 30m
-          --retry-failed-tests 2
-          --retry-failed-tests-max-tests 5
-          --report-xunit-trx
-        env:
-          BASE_IMAGE_TYPE: ${{ inputs.base-image-type }}
-          HEALTHCHECK_IMAGE: ${{ inputs.healthcheck_image }}
-      - name: TRX report
-        if: ${{ !cancelled() }}
-        run: dotnet trx --gh-summary False --gh-comment True
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: TRX report upload
-        if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: trx-reports-${{ inputs.platform }}-alpine
-          path: "./**/*.trx"
-      - name: Error log
-        if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: error-log-${{ inputs.platform }}-alpine
+          name: error-log-${{ inputs.platform }}-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/TestResults/Distroless.*.log"
