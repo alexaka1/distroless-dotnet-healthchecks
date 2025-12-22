@@ -2,7 +2,7 @@ name: Release distroless-dotnet-healthchecks
 on:
   push:
     tags:
-      - 'alexaka1/distroless-dotnet-healthchecks@**'
+      - 'distroless-dotnet-healthchecks@**'
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}-release
@@ -206,12 +206,12 @@ jobs:
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}},match=${{ env.VERSION_REGEX }}
-            type=semver,pattern={{major}}.{{minor}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecks@0.0.') }}
-            type=semver,pattern={{major}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/alexaka1/distroless-dotnet-healthchecks@0.') }}
+            type=semver,pattern={{major}}.{{minor}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/distroless-dotnet-healthchecks@0.0.') }}
+            type=semver,pattern={{major}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/distroless-dotnet-healthchecks@0.') }}
             type=edge
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
-          VERSION_REGEX: '^alexaka1\/distroless-dotnet-healthchecks@(\d+\.\d+\.\d+.*)$'
+          VERSION_REGEX: '^distroless-dotnet-healthchecks@(\d+\.\d+\.\d+.*)$'
       - name: Compute tag lists (GHCR + Docker Hub)
         id: taglists
         env:
