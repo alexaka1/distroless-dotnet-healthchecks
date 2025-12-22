@@ -135,6 +135,8 @@ jobs:
         base-image-type:
           - ubuntu-chiseled
           - alpine
+    outputs: 
+      prerelease: ${{ steps.changelog.outputs.prerelease }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -168,17 +170,21 @@ jobs:
               suffix="${BASH_REMATCH[1]}"
               if [ -n "$suffix" ]; then
                 echo "latest_flavor=false" >> "$GITHUB_OUTPUT"
+                echo "pre_release=true" >> "$GITHUB_OUTPUT"
                 echo "Version has suffix: $suffix"
               else
                 echo "latest_flavor=auto" >> "$GITHUB_OUTPUT"
+                echo "pre_release=false" >> "$GITHUB_OUTPUT"
                 echo "Version has no suffix"
               fi
             else
               echo "latest_flavor=auto" >> "$GITHUB_OUTPUT"
+              echo "pre_release=false" >> "$GITHUB_OUTPUT"
               echo "Version format not matched, defaulting to auto"
             fi
           else
             echo "latest_flavor=auto" >> "$GITHUB_OUTPUT"
+            echo "pre_release=false" >> "$GITHUB_OUTPUT"
             echo "Tag format not matched, defaulting to auto"
           fi
       - name: Docker meta (tags)
@@ -318,8 +324,6 @@ jobs:
     permissions:
       contents: read
       id-token: write # for tag signing (gitsign)
-    outputs: 
-      prerelease: ${{ steps.changelog.outputs.prerelease }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -354,10 +358,6 @@ jobs:
             sed -n "${start_line},$(($end_line-1))p" "$input_file" > "$output_file"
           fi
           echo "changes=$output_file" >> "$GITHUB_OUTPUT"
-          echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          if [ -f ".changeset/pre.json" ]; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          fi
       - name: Download merged artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
@@ -402,7 +402,7 @@ jobs:
           body_path: ${{ steps.changelog.outputs.changes }}
           body: Oh no, it looks like the change-notes were not generated correctly by the action.
           draft: false
-          prerelease: ${{ fromJSON(steps.changelog.outputs.prerelease) }}
+          prerelease: ${{ fromJSON(needs.merge-and-publish-distroless-dotnet-healthcheck.outputs.prerelease) }}
           generate_release_notes: true
           append_body: true
           tag_name: "${{ github.ref_name }}"
@@ -411,9 +411,11 @@ jobs:
   update-docker-hub-readme:
     environment: Production
     runs-on: ubuntu-latest
-    if: needs.release-github.outputs.prerelease != 'true'
+    if: needs.merge-and-publish-distroless-dotnet-healthcheck.outputs.prerelease != 'true'
     timeout-minutes: 5
-    needs: release-github
+    needs: 
+      - merge-and-publish-distroless-dotnet-healthcheck
+      - release-github
     permissions: 
       contents: read
     steps:
