@@ -58,6 +58,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: GitHub API only supports non-executable files and directories
         # https://github.com/changesets/action/issues/523
         run: git ls-files | while read -r file; do [ -x "$file" ] && chmod -x "$file" || true; done
