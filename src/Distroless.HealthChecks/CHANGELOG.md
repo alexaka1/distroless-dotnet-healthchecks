@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.5.3
+
+### Patch Changes
+
+- [#1000](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1000) [`968510e`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/968510e04c3015ea712d0592e2a8ce64751c977a) Thanks [@alexaka1](https://github.com/alexaka1)! - Update release naming strategy
+
 ## 1.5.2
 
 ### Patch Changes
