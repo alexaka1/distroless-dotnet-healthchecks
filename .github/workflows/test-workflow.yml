@@ -118,6 +118,13 @@ jobs:
             echo "Chunk $idx: $(wc -l < "chunk-${idx}-ids.txt") tests"
           done
 
+          # Display chunks with test IDs using GitHub console grouping
+          for idx in "${sorted_chunk_ids[@]}"; do
+            echo "::group::Chunk $idx"
+            cat "chunk-${idx}-ids.txt"
+            echo "::endgroup::"
+          done
+
           chunk_json=$(jq -nc '$ARGS.positional' --args "${sorted_chunk_ids[@]}")
           echo "chunk-count=$chunk_count" >> "$GITHUB_OUTPUT"
           echo "chunks=$chunk_json" >> "$GITHUB_OUTPUT"
