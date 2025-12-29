@@ -182,8 +182,11 @@ jobs:
           path: test-chunks
       - name: Run tests (chunk ${{ matrix.chunk }})
         run: |
+          set -euo pipefail
+          set -x
           # Read test IDs from chunk file and convert to --filter-uid arguments
-          test_ids=$(cat test-chunks/chunk-${{ matrix.chunk }}-ids.txt | sed 's/^/--filter-uid /' | tr '\n' ' ')
+          test_ids=$(xargs -a test-chunks/chunk-${{ matrix.chunk }}-ids.txt -I{} echo --filter-uid "{}")
+          echo "Running tests: '$test_ids'"
           
           dotnet test \
             --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
