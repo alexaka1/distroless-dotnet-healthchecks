@@ -184,6 +184,7 @@ jobs:
         run: |
           # Read test IDs from chunk file and convert to --filter-uid arguments
           test_ids=$(xargs -a test-chunks/chunk-${{ matrix.chunk }}-ids.txt -I{} echo --filter-uid "{}")
+          echo "Running tests: '$test_ids'"
           
           dotnet test \
             --project test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj \
