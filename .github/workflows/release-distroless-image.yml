@@ -66,7 +66,7 @@ jobs:
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
       - name: Get Git commit timestamp
-        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+        run: echo "GIT_TIMESTAMP=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
       - name: Build and push by digest
         id: docker_build
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -408,6 +408,13 @@ jobs:
             echo "No merged artifacts found for ${{ github.repository_owner }}/distroless-dotnet-healthchecks" >&2
             exit 1
           fi
+      - name: Extract version from tag name
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION=$(echo "${{ github.ref_name }}" | sed -e 's/^distroless-dotnet-healthchecks@//')
+          if [ -z "$VERSION" ]; then echo "::error::Failed to extract version from tag name" >&2; exit 1; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Create GitHub release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
@@ -418,7 +425,7 @@ jobs:
           generate_release_notes: true
           append_body: true
           tag_name: "${{ github.ref_name }}"
-          name: "${{ github.ref_name }}"
+          name: "${{ env.image_name }}:${{ steps.version.outputs.version }}"
           token: ${{ steps.app-token.outputs.token }}
   update-docker-hub-readme:
     environment: Production
