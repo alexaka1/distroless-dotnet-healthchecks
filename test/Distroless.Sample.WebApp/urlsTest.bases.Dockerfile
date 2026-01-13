@@ -1,11 +1,11 @@
 # this file contains the test cases for the base images
 # this is so dependabot can conveniently update these images
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:43bd4f38c69add880c3aad502031149c75e2f7315292c7ae9879631a9b24fa13
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:9053ae577d78dcff9e598ed9cd78113715fcac9c12e2f93cfa5ae3fb4a1911c3
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:7ca529be6f591ba4719aee477648a388b74f45fa9f47e1aa7b75ba58cc0a3e84
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:24918795e0d80d562c48a9a07cb5e80fc9ad00f410d88e08c4b08c8e84893845
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:818a26e4f9aff43aca152bbb20af4cb0d655b6c7830b74037bd88b5a613e3dfd
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:0603f84792661619d785c136dc84334b6e467afe8b5e928ee4ba2f04ee0f3cbf
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:a5ae01ce4507635fd4114871411c82355f8b230972bab50b1abd10ecbc9bd77a
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:2f93d20a77bde3d446df152add8b95dd612e50d081148528cf710061e31ab933
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:67fcfd9eb82fb5e25e4a9c3a35ed612837e5b4064a680e29c11f14ae72e77242
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine@sha256:d62c5b23e84b53f68849c8eb7d7f3934bb71df6a9a791e1155590440e27862bc
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:237b4f1ad00f09f65e3f39e7c6d359c981af1aeb36282fe367ca6b5e989e800d
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:370f60ebdcf2baea6b249e3d10f59cf5576ba1f5ed39d976abdbb3fe3416f606
