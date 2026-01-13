@@ -1,4 +1,4 @@
-﻿ARG RUNTIME_TAG="9.0@sha256:c8029dff6ec67e25907cb5fa4c7e26605cc1784606d8146c920a782b64dfa9e6"
+﻿ARG RUNTIME_TAG="9.0@sha256:9d81c225cf9fc0b338f62bfeebfe58433dd57fdedd7d05ed347c551bc630769b"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
 ARG BASE_IMAGE_TYPE=ubuntu-chiseled
