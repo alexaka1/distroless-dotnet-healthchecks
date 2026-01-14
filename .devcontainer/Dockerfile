@@ -2,6 +2,6 @@ FROM mcr.microsoft.com/devcontainers/dotnet:2-9.0-noble@sha256:5a3911be72a3a52b2
 
 # Finally install the most recent .NET 10.0 preview using the dotnet-install script
 COPY --from=mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview@sha256:edbf0a0723f1be3261e7122a54afaa75bba09f59d4a8330cfe3baf0288c61d1e /usr/share/dotnet /usr/share/dotnet
-COPY --from=mcr.microsoft.com/dotnet/sdk:8.0-noble@sha256:5293b6ae1dd1dcaddb2d9f1b25c5b8e92467bf437c9963a2734e4eeb1666488f /usr/share/dotnet /usr/share/dotnet
+COPY --from=mcr.microsoft.com/dotnet/sdk:8.0-noble@sha256:2734bc88063e3891681fe14a6fb509cb3d91560d8d6b9b53c5bef5ab2ad469da /usr/share/dotnet /usr/share/dotnet
 
 RUN sudo dotnet workload update;
