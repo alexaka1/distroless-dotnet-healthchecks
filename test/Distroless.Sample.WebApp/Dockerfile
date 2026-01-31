@@ -6,7 +6,7 @@ ARG HEALTHCHECK_IMAGE=distroless-dotnet-healthchecks:test
 
 # Build SDK stages for glibc and musl targets
 FROM mcr.microsoft.com/dotnet/sdk:10.0-noble-aot@sha256:d68a5e260330b659f7eae596a255bddbdc4e406e3579eb2d85d718ac58dd7dcb AS build-ubuntu
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine-aot@sha256:9198dda492c8b4d13c387fa0bed8858c0dd1c1f304571531a6601e88b77a8902 AS build-alpine
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine-aot@sha256:395caeece6214340aff2960e0b20578ec3d29ace733518ce37be81ee8feaf66e AS build-alpine
 
 # Map ubuntu-chiseled to ubuntu build SDK
 FROM build-ubuntu AS build-ubuntu-chiseled
