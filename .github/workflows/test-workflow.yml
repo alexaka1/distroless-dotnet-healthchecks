@@ -129,7 +129,7 @@ jobs:
           echo "chunk-count=$chunk_count" >> "$GITHUB_OUTPUT"
           echo "chunks=$chunk_json" >> "$GITHUB_OUTPUT"
       - name: Upload test ID chunks
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test-chunks-${{ inputs.platform }}-${{ inputs.base-image-type }}
           path: chunk-*-ids.txt
@@ -211,13 +211,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: TRX report upload
         if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: trx-reports-${{ inputs.platform }}-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/*.trx"
       - name: Error log
         if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: error-log-${{ inputs.platform }}-${{ inputs.base-image-type }}-chunk-${{ matrix.chunk }}
           path: "./**/TestResults/Distroless.*.log"
