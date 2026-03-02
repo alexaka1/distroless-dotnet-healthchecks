@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.5.5
+
+### Patch Changes
+
+- [#1096](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1096) [`2168797`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/216879733b3f5b56f23b7aa143246af4ac75bd33) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - update dotnet version
+
 ## 1.5.4
 
 ### Patch Changes
