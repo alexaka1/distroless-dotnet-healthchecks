@@ -132,6 +132,7 @@ jobs:
       # attestation
       id-token: write
       attestations: write
+      artifact-metadata: write
     defaults:
       run:
         shell: bash
@@ -293,13 +294,13 @@ jobs:
           done
           docker buildx imagetools create "${args[@]}" "${sources[@]}"
       - name: Attest GHCR manifest
-        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4
         with:
           subject-name: ghcr.io/${{ env.image_name }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
           push-to-registry: true
       - name: Attest Docker Hub manifest
-        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4
         with:
           subject-name: docker.io/${{ env.image_name }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
