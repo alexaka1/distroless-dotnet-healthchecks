@@ -294,13 +294,13 @@ jobs:
           done
           docker buildx imagetools create "${args[@]}" "${sources[@]}"
       - name: Attest GHCR manifest
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-name: ghcr.io/${{ env.image_name }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
           push-to-registry: true
       - name: Attest Docker Hub manifest
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-name: docker.io/${{ env.image_name }}
           subject-digest: ${{ steps.inspect_ghcr.outputs.digest }}
