@@ -1,7 +1,7 @@
 # this file contains the test cases for the base images
 # this is so dependabot can conveniently update these images
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:549ea6f876285dbd6fd5f461005c368905de0945b8bb2fbcf9bba6b0c52623fc
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:b79c2f79e726c7ef2cf99f892b9dc5c11d8754ee17fd4e0e16c60738a6a02406
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:aaa4f0a0b44c1e524e25fcd56a2c3fb6311e67bc38c6b4059dbe70d8387d16ea
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:c6a9c84a181b8259f8eccc682025f137ea499501db388e5016704768344477f9
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:8638fa71a7367900fa0f3819029ba504befe8155d4958229c488406a12c4c11f
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:efbde7dd11decb0f9751cdd5336da759fa21aa387b3de1132deafd88a67b89fc
