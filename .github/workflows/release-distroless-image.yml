@@ -417,7 +417,7 @@ jobs:
           if [ -z "$VERSION" ]; then echo "::error::Failed to extract version from tag name" >&2; exit 1; fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Create GitHub release
-        uses: softprops/action-gh-release@26e8ad27a09a225049a7075d7ec1caa2df6ff332 # v2.6.0
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           body_path: ${{ steps.changelog.outputs.changes }}
           body: Oh no, it looks like the change-notes were not generated correctly by the action.
