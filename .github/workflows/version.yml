@@ -61,7 +61,7 @@ jobs:
         # https://github.com/changesets/action/issues/523
         run: git ls-files | while read -r file; do [ -x "$file" ] && chmod -x "$file" || true; done
       - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           run_install: false
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
