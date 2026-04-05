@@ -3,6 +3,7 @@
 [![Nightly build](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml/badge.svg)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/nightly.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/alexaka1/distroless-dotnet-healthchecks/badge)](https://scorecard.dev/viewer/?uri=github.com/alexaka1/distroless-dotnet-healthchecks)
 [![Qodana](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/code-quality.yml/badge.svg)](https://github.com/alexaka1/distroless-dotnet-healthchecks/actions/workflows/code-quality.yml)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/alexaka1/distroless-dotnet-healthchecks?utm_source=oss&utm_medium=github&utm_campaign=alexaka1%2Fdistroless-dotnet-healthchecks&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 # Docker HEALTHCHECK for .NET chiseled containers
 
