@@ -34,6 +34,15 @@
       ],
       enabled: false,
     },
+    {
+      description: [
+        "Ignore pnpm workspace overrides",
+      ],
+      matchManagers: ["npm"],
+      matchDepTypes: ["pnpm-workspace.overrides"],
+      matchFileNames: ["pnpm-workspace.yaml"],
+      enabled: false,
+    },
   ],
   ignorePaths: [
     '**/node_modules/**',
