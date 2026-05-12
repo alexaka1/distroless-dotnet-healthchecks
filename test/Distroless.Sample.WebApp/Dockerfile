@@ -1,12 +1,12 @@
-﻿ARG RUNTIME_TAG="9.0@sha256:7590f1b7e124fe7a4b7cffa5f6f9958f2c02a22bf5bd7a0387a84b88cddf4057"
+﻿ARG RUNTIME_TAG="9.0@sha256:d955f883a9e648f0ff80b8bfe01e6b79874c296ef3bbcb5637c6981b64981a9a"
 ARG IMAGE="mcr.microsoft.com/dotnet/runtime"
 ARG BUILD_CONFIGURATION=Release
 ARG BASE_IMAGE_TYPE=ubuntu-chiseled
 ARG HEALTHCHECK_IMAGE=distroless-dotnet-healthchecks:test
 
 # Build SDK stages for glibc and musl targets
-FROM mcr.microsoft.com/dotnet/sdk:10.0-noble-aot@sha256:a9fa40ac0fa75d13245e339dca6206d3b2860ef31f06c4798bb784e5cc057c21 AS build-ubuntu
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine-aot@sha256:e5f6788ff13bf2ed89b02b0679142546196eb0d770f9009a8ed4963c606141d4 AS build-alpine
+FROM mcr.microsoft.com/dotnet/sdk:10.0-noble-aot@sha256:2888b5111cb2dda638c4997729a19515c905e06b7b20e0944e1f744be1bd3ebf AS build-ubuntu
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine-aot@sha256:09a3700950d0d6584c0ec25ded708b4def9ca6c99d1d73f66a11d4cd5544a246 AS build-alpine
 
 # Map ubuntu-chiseled to ubuntu build SDK
 FROM build-ubuntu AS build-ubuntu-chiseled
