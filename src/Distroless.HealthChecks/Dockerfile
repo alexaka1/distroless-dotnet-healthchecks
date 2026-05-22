@@ -11,10 +11,10 @@ FROM base-ubuntu AS base-ubuntu-chiseled
 FROM base-${BASE_IMAGE_TYPE} AS base
 WORKDIR /app
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:10.0-noble-aot@sha256:304f7073e3592683dcc62c331917ff840264a1da0ca194db9d993bb32b24e60f AS build-ubuntu
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:10.0-noble-aot@sha256:0e0cb0b25b15877cd71174ad359bce89710f0617faf7cedb2b31ddb4f1e6c275 AS build-ubuntu
 # alpine does not use cross compilation, because https://github.com/dotnet/runtime/issues/92294, also see https://github.com/dotnet/aspire/pull/10275 for more context
 # TL;DR native builder to build for a specific `arch`
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-alpine-aot@sha256:fbd9c1d61d228178d2bbbba972c0efae7182341684b1ff0a564dcce51cd3f544 AS build-alpine
+FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-alpine-aot@sha256:499be07d7fbea87cfec48e13643af49240ec3774a6ef12e441248a01cf2f7cf2 AS build-alpine
 
 # Support both "ubuntu" and "ubuntu-chiseled" for build stage, matching base mapping.
 FROM build-ubuntu AS build-ubuntu-chiseled
