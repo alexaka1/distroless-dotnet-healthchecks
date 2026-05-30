@@ -35,3 +35,13 @@
 - Be mindful that `DOTNET_` env vars can influence host defaults.
 - Pin container images by major tag (e.g., `ghcr.io/...:1`) instead of `latest`.
 
+## Cursor Cloud specific instructions
+
+- **Solution file:** use `Distroless.slnx` (there is no `Distroless.sln` on disk).
+- **SDK:** .NET **10** (`net10.0`). Cloud VMs may need the SDK installed under `/usr/share/dotnet` (see CI: `10.0.x`).
+- **Docker:** required with **buildx** for `dotnet test`. On nested VMs, Docker may need `fuse-overlayfs`, `iptables-legacy`, and membership in the `docker` group (or readable `/var/run/docker.sock`).
+- **Before full test runs:** build the healthcheck image once: `docker build -f src/Distroless.HealthChecks/Dockerfile -t distroless-dotnet-healthchecks:test --target binary .` Tests read `HEALTHCHECK_IMAGE` (default `distroless-dotnet-healthchecks:test`).
+- **Running tests:** the project uses **Microsoft Testing Platform** (not VSTest `--filter`). Pass xUnit options after `--`, e.g. `dotnet test test/Distroless.HealthChecks.Test/Distroless.HealthChecks.Test.csproj -c Release -- --filter-query "/Distroless.HealthChecks.Test/.../RuntimeDeps10ContainerTest/Container_is_healthy"`. List tests: `test/Distroless.HealthChecks.Test/bin/Release/net10.0/Distroless.HealthChecks.Test -list full`.
+- **Node/pnpm:** optional for changesets/licenses. Pin Node with `.node-version` (`24.16.0`) and `pnpm install --frozen-lockfile` at the repo root.
+- **No long-running app server:** the shipped artifact is a one-shot healthcheck binary used inside container `HEALTHCHECK` definitions; integration tests are the practical end-to-end proof.
+
