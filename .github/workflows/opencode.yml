@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Run opencode
-        uses: sst/opencode/github@76d814e7476c98dfc18b5cc51f959f6feae0ef9f # github-v1.2.24
+        uses: sst/opencode/github@a3b97d9090ccf4aa9ac32268486283e3131e36b4 # github-v1.2.25
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
