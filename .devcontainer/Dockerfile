@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/dotnet:2-9.0-noble@sha256:c5baf99552f13287e7b9bf2a223dc3ead1dd56e17d834f87ec3a9d74a2e72263
+FROM mcr.microsoft.com/devcontainers/dotnet:2-9.0-noble@sha256:e814e3e0cf345741554cc1e8cf8176737c77c02416782e1023e052e88fcc303c
 
 # Finally install the most recent .NET 10.0 preview using the dotnet-install script
 COPY --from=mcr.microsoft.com/dotnet/nightly/sdk:10.0-preview@sha256:edbf0a0723f1be3261e7122a54afaa75bba09f59d4a8330cfe3baf0288c61d1e /usr/share/dotnet /usr/share/dotnet
