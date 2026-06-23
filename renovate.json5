@@ -15,9 +15,6 @@
     ':pinDependencies',
     'security:minimumReleaseAgeNpm',
   ],
-  // Rebase as soon as main moves ahead so CodeQL/Qodana scan the up-to-date head
-  // instead of leaving PRs blocked on stale test-merge commits.
-  rebaseWhen: 'behind-base-branch',
   baseBranchPatterns: [
     '$default',
     '/^beta$/',

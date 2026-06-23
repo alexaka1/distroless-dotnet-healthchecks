@@ -15,7 +15,8 @@ permissions:
   contents: none
 
 jobs:
-  qodana:
+  qodana-pr:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: Dev
     timeout-minutes: 10
@@ -38,13 +39,54 @@ jobs:
             10.0.x
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0  # a full history is required for pull request analysis
           persist-credentials: 'false'
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@4861e015da555e86a72b862892aba6c2b93e6891 # v2026.1.3
         with:
-          pr-mode: ${{ github.event_name == 'pull_request' }}
+          pr-mode: true
+          args: --configuration=Release,--no-statistics=true,--linter=qodana-dotnet,--within-docker,false
+          upload-result: true
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+          QODANA_ENDPOINT: 'https://qodana.cloud'
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        if: ${{ !cancelled() }}
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+          category: 'qodana'
+
+  qodana:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: Dev
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: write
+      security-events: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: Setup Dotnet
+        id: dotnet-setup
+        uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5.3.0
+        with:
+          dotnet-version: |
+            10.0.x
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: 'false'
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@4861e015da555e86a72b862892aba6c2b93e6891 # v2026.1.3
+        with:
+          pr-mode: false
           args: --configuration=Release,--no-statistics=true,--linter=qodana-dotnet,--within-docker,false
           upload-result: true
         env:
