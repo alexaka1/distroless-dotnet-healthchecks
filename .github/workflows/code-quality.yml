@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - beta
+  merge_group:
   push:
     branches: # Specify your branches here
       - main # The 'main' branch
@@ -37,13 +38,13 @@ jobs:
             10.0.x
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0  # a full history is required for pull request analysis
           persist-credentials: 'false'
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@4861e015da555e86a72b862892aba6c2b93e6891 # v2026.1.3
         with:
-          pr-mode: ${{ github.event.pull_request != null }}
+          pr-mode: ${{ github.event_name == 'pull_request' }}
           args: --configuration=Release,--no-statistics=true,--linter=qodana-dotnet,--within-docker,false
           upload-result: true
         env:
