@@ -5,10 +5,10 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:49cb3b45cd69eeee657
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled@sha256:8a9830d58cbe4de129ac094d7e39fe7f092ad6022f25b9500ce9228ea41e9c96
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy-chiseled@sha256:b663d13cc1b2591cd38176960f8ca69b3cd39be67270c422b02c582cca4bd7ae
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-azurelinux3.0-distroless@sha256:ee4e488cb9d568fcb47956b92f56a1d8ec938b5c6af85610fc882889b6d80f40
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:df68da2a6ebdcacf6f246760ab9cbc377da67fbaf0cc0ec88966aac85e0a204e
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble@sha256:ef724662b97505edabc4373a055572e42c5a97ca172789e69d4a9d48e1293d11
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy@sha256:715a0f19f2b8fa9ad2ba6eaba255ef5fd471230eb746d0af53d198528ec7666e
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-alpine@sha256:53d781ae3f2856f6e80ec10694618dc760b763668f69ed5e88aace9ebe2589ab
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:97ebc1fdcce68defae5b31f5ce6be6c1abe86ac7fe0247d454a3a92685df2f95
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble@sha256:4ae9a95bf74253d8a9961d72a1a10832115e186d6e881c14353dd79ef86fba13
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy@sha256:9f0f4f69238898e8454bcdac91a58e2b74b9ed3ba9adae9c26a394e836008e76
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-alpine@sha256:bfdd0f8bf00e8f37e5f0e5bd9b950fcaeb4198c3962794f49a5f15cfac4e0066
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled@sha256:320e13df8f613ccd8bbf128b5a2504ab623b1237b6008bf9ebc6dff86231b4f1
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-jammy-chiseled@sha256:81996fc79bf0b219b785d93a4ad43a0b28aa38e4ecb4ad402a210e61f1513679
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless@sha256:3f0aa4c8a0f87bbb7ebd88fa544801bc3369666190b336ac4b1981d5174bdf1b
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-azurelinux3.0-distroless@sha256:9aa605af96f795a349e46a36d3b0484472c76f73f9cff4bf70605ad677aed2ef
