@@ -169,6 +169,12 @@ sealed class BinarySizeSnapshot
     }
 }
 
+static class BinarySizeVariantNames
+{
+    public static string FormatDisplay(string variant) =>
+        variant.Equals("ubuntu-chiseled", StringComparison.Ordinal) ? "linux" : variant;
+}
+
 static class BinarySizeFormatter
 {
     public static string FormatBytes(long bytes)
@@ -439,7 +445,7 @@ static class ReleaseNotesAppender
         {
             var previousValues = previousSnapshot.TryGetValues(variant, platform);
             builder.Append("| ")
-                .Append(variant)
+                .Append(BinarySizeVariantNames.FormatDisplay(variant))
                 .Append(" | ")
                 .Append(platform)
                 .Append(" | ")
