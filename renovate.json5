@@ -53,4 +53,12 @@
     '**/tests/**',
     '**/__fixtures__/**',
   ],
+  // Renovate 43.26+ extracts #:package / #:sdk from file-based C# apps when matched.
+  // Patterns are additive with the NuGet manager defaults (.csproj, etc.).
+  // https://docs.renovatebot.com/modules/manager/nuget/
+  nuget: {
+    managerFilePatterns: [
+      '/(^|/)build\\/.*\\.cs$/',
+    ],
+  },
 }
