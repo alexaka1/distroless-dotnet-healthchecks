@@ -1,5 +1,13 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.5.6
+
+### Patch Changes
+
+- [#1162](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1162) [`b0a8795`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/b0a8795bedfebc75b7f7f1cadc3e2fe2acbeaf5a) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Bump dependencies
+
+- [#1291](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1291) [`766b736`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/766b7367f33d303bc28e05cb7d534ad7aa900526) Thanks [@alexaka1](https://github.com/alexaka1)! - Add binary size comparison table to GitHub release notes, showing executable and total publish size per variant and platform with deltas from the previous release.
+
 ## 1.5.5
 
 ### Patch Changes
