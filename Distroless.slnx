@@ -24,6 +24,9 @@
     <File Path="README.md" />
     <File Path="renovate.json5" />
   </Folder>
+  <Folder Name="/build/">
+    <Project Path="build/ReleaseBinarySize/ReleaseBinarySize.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" />
   </Folder>
