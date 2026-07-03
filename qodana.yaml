@@ -4,8 +4,8 @@
 #-------------------------------------------------------------------------------#
 version: "1.0"
 
-#Specify IDE code to run analysis without container (Applied in CI/CD pipeline)
-ide: QDNET
+#Specify Qodana Community for .NET linter (Docker mode)
+linter: qodana-cdnet
 
 #Specify inspection profile for code analysis
 profile:
