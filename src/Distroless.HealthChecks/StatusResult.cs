@@ -1,6 +1,11 @@
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
 namespace Distroless.HealthChecks;
+
+public enum HealthStatus
+{
+    Unhealthy = 0,
+    Degraded = 1,
+    Healthy = 2,
+}
 
 public class StatusResult
 {

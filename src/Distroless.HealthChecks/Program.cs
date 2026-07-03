@@ -1,10 +1,8 @@
 using Distroless.HealthChecks;
-using Distroless.HealthChecks.Checks;
 using Distroless.HealthChecks.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 IHost host;
@@ -17,9 +15,6 @@ try
         Configuration = new ConfigurationManager(),
         ContentRootPath = Directory.GetCurrentDirectory(),
     };
-    settings.Configuration.AddInMemoryCollection([
-        new KeyValuePair<string, string?>("Logging:LogLevel:Default", "Error"),
-    ]);
     settings.Configuration.AddEnvironmentVariables("DISTROLESS_HEALTHCHECKS_");
     var builder = Host.CreateApplicationBuilder(settings);
     var config = builder.Configuration;
@@ -32,15 +27,8 @@ try
         .Bind(config.GetSection(Features.Key))
         .ValidateOnStart();
 
-    builder.Logging.ClearProviders();
-    builder.Logging.AddConsole();
-
-    builder.Services.AddHttpClient(SimpleHealthCheck.Name);
     builder.Services.AddSingleton<IPostConfigureOptions<HealthCheckOptions>, PostConfigureHealthCheckOptions>();
     builder.Services.AddSingleton<StatusResult>();
-
-    builder.Services.AddHealthChecks()
-        .AddCheck<SimpleHealthCheck>(SimpleHealthCheck.Name, tags: ["simple"]);
 
     builder.Services.AddHostedService<HealthCheckHostedService>();
     host = builder.Build();
@@ -52,7 +40,6 @@ catch (Exception e)
     return StatusResult.ExitCodes.UnHealthy;
 }
 
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
 var result = host.Services.GetRequiredService<StatusResult>();
 try
 {
@@ -60,7 +47,8 @@ try
 }
 catch (Exception e)
 {
-    logger.LogCritical(e, "Healthcheck terminated unexpectedly");
+    Console.Error.WriteLine("Healthcheck terminated unexpectedly");
+    Console.Error.WriteLine(e);
     return StatusResult.ExitCodes.UnHealthy;
 }
 
