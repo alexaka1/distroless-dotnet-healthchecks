@@ -1,6 +1,6 @@
 using System.Globalization;
 using Distroless.HealthChecks.Checks;
-using Microsoft.Extensions.Configuration;
+using Distroless.HealthChecks.Configuration;
 
 namespace Distroless.HealthChecks;
 
@@ -27,7 +27,7 @@ internal static class ConsoleLog
     private const int HealthCheckFailedEventId = 591182496;
 
     public static void HealthCheckEnd(
-        IConfiguration configuration,
+        AppConfiguration configuration,
         string healthCheckName,
         HealthStatus status,
         TimeSpan duration,
@@ -46,7 +46,7 @@ internal static class ConsoleLog
         Write(ConsoleLogLevel.Error, DefaultHealthCheckServiceCategory, HealthCheckEndEventId, message, exception);
     }
 
-    public static void HealthCheckFailed(IConfiguration configuration, string report)
+    public static void HealthCheckFailed(AppConfiguration configuration, string report)
     {
         if (!IsEnabled(configuration, HealthCheckHostedServiceCategory, ConsoleLogLevel.Error))
         {
@@ -57,7 +57,7 @@ internal static class ConsoleLog
     }
 
     public static void HealthCheckResult(
-        IConfiguration configuration,
+        AppConfiguration configuration,
         string category,
         Uri uri,
         System.Net.HttpStatusCode statusCode)
@@ -71,7 +71,7 @@ internal static class ConsoleLog
     }
 
     public static void HealthCheckException(
-        IConfiguration configuration,
+        AppConfiguration configuration,
         string category,
         Uri uri,
         Exception exception)
@@ -85,7 +85,7 @@ internal static class ConsoleLog
     }
 
     public static void UnableToDetermineHostAddress(
-        IConfiguration configuration,
+        AppConfiguration configuration,
         string category,
         Uri uri,
         Exception exception)
@@ -99,7 +99,7 @@ internal static class ConsoleLog
     }
 
     public static void UriHostAddress(
-        IConfiguration configuration,
+        AppConfiguration configuration,
         string category,
         Uri uri,
         System.Net.IPAddress[] hostAddress)
@@ -113,7 +113,7 @@ internal static class ConsoleLog
     }
 
     public static void HostAddress(
-        IConfiguration configuration,
+        AppConfiguration configuration,
         string category,
         System.Net.IPAddress[] hostAddress)
     {
@@ -128,7 +128,7 @@ internal static class ConsoleLog
     public static void Critical(string category, string message, Exception exception) =>
         Write(ConsoleLogLevel.Critical, category, 0, message, exception);
 
-    private static bool IsEnabled(IConfiguration configuration, string category, ConsoleLogLevel level)
+    private static bool IsEnabled(AppConfiguration configuration, string category, ConsoleLogLevel level)
     {
         var current = category;
         while (true)
@@ -153,7 +153,7 @@ internal static class ConsoleLog
         return IsLevelEnabled(level, defaultLevel);
     }
 
-    private static bool TryGetConfiguredLevel(IConfiguration configuration, string key, out ConsoleLogLevel level)
+    private static bool TryGetConfiguredLevel(AppConfiguration configuration, string key, out ConsoleLogLevel level)
     {
         var value = configuration[key];
         if (string.IsNullOrEmpty(value))

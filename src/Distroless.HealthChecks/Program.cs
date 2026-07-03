@@ -1,45 +1,18 @@
 using Distroless.HealthChecks;
 using Distroless.HealthChecks.Checks;
-using Distroless.HealthChecks.Features;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Distroless.HealthChecks.Configuration;
 
-IHost host;
+HealthStatus healthStatus;
 try
 {
     Utils.SetCurrentDirectoryToBinaryLocation();
-    var settings = new HostApplicationBuilderSettings
-    {
-        Args = args,
-        Configuration = new ConfigurationManager(),
-        ContentRootPath = Directory.GetCurrentDirectory(),
-    };
-    settings.Configuration.AddInMemoryCollection([
-        new KeyValuePair<string, string?>("Logging:LogLevel:Default", "Error"),
-    ]);
-    settings.Configuration.AddEnvironmentVariables("DISTROLESS_HEALTHCHECKS_");
-    var builder = Host.CreateApplicationBuilder(settings);
-    var config = builder.Configuration;
-    builder.Services
-        .AddSingleton<IValidateOptions<HealthCheckOptions>, HealthCheckOptionsValidator>()
-        .AddOptions<HealthCheckOptions>()
-        .Bind(config)
-        .ValidateOnStart();
-    builder.Services.AddOptions<Features>()
-        .Bind(config.GetSection(Features.Key))
-        .ValidateOnStart();
+    var configuration = AppConfiguration.Load(Directory.GetCurrentDirectory(), args);
+    var healthCheckOptions = configuration.BindHealthCheckOptions();
+    var features = configuration.BindFeatures();
+    HealthCheckOptionsValidator.Validate(configuration, healthCheckOptions, features);
 
-    builder.Logging.ClearProviders();
-
-    builder.Services.AddSingleton<SimpleHealthCheck>();
-    builder.Services.AddSingleton<IPostConfigureOptions<HealthCheckOptions>, PostConfigureHealthCheckOptions>();
-    builder.Services.AddSingleton<StatusResult>();
-
-    builder.Services.AddHostedService<HealthCheckHostedService>();
-    host = builder.Build();
+    var healthCheck = new SimpleHealthCheck(healthCheckOptions, configuration);
+    healthStatus = await HealthCheckRunner.RunAsync(configuration, healthCheck);
 }
 catch (Exception e)
 {
@@ -48,15 +21,4 @@ catch (Exception e)
     return StatusResult.ExitCodes.UnHealthy;
 }
 
-var result = host.Services.GetRequiredService<StatusResult>();
-try
-{
-    host.Run();
-}
-catch (Exception e)
-{
-    ConsoleLog.Critical("Program", "Healthcheck terminated unexpectedly", e);
-    return StatusResult.ExitCodes.UnHealthy;
-}
-
-return StatusResult.ToExitCode(result.HealthStatus);
+return StatusResult.ToExitCode(healthStatus);

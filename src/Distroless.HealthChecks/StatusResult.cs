@@ -1,9 +1,7 @@
 namespace Distroless.HealthChecks;
 
-public class StatusResult
+public static class StatusResult
 {
-    public HealthStatus HealthStatus { get; set; } = HealthStatus.Healthy;
-
     /// <summary>
     ///     Convert a <see cref="HealthStatus" /> to an exit code.
     /// </summary>

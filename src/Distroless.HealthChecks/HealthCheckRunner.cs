@@ -1,31 +1,23 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Distroless.HealthChecks.Checks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+using Distroless.HealthChecks.Configuration;
 
 namespace Distroless.HealthChecks;
 
-public class HealthCheckHostedService(
-    IHost host,
-    SimpleHealthCheck simpleHealthCheck,
-    IConfiguration configuration,
-    StatusResult statusResult)
-    : BackgroundService
+internal static class HealthCheckRunner
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public static async Task<HealthStatus> RunAsync(
+        AppConfiguration configuration,
+        SimpleHealthCheck healthCheck,
+        CancellationToken cancellationToken = default)
     {
         var totalStopwatch = Stopwatch.StartNew();
-        var result = await simpleHealthCheck.CheckAsync(stoppingToken);
+        var result = await healthCheck.CheckAsync(cancellationToken);
         totalStopwatch.Stop();
 
         if (result.Status is not HealthStatus.Healthy)
         {
-            if (statusResult.HealthStatus > result.Status)
-            {
-                statusResult.HealthStatus = result.Status;
-            }
-
             ConsoleLog.HealthCheckEnd(
                 configuration,
                 SimpleHealthCheck.Name,
@@ -38,8 +30,10 @@ public class HealthCheckHostedService(
             ConsoleLog.HealthCheckFailed(
                 configuration,
                 JsonSerializer.Serialize(report, HealthCheckSerializerContext.Default.HealthFailureReport));
+
+            return result.Status;
         }
 
-        await host.StopAsync(stoppingToken);
+        return HealthStatus.Healthy;
     }
 }

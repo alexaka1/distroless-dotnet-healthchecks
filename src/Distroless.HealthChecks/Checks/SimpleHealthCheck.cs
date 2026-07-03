@@ -1,13 +1,12 @@
 using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+using Distroless.HealthChecks.Configuration;
 
 namespace Distroless.HealthChecks.Checks;
 
-public class SimpleHealthCheck(
-    IOptions<HealthCheckOptions> options,
-    IConfiguration configuration)
+internal sealed class SimpleHealthCheck(
+    HealthCheckOptions options,
+    AppConfiguration configuration)
 {
     public const string Name = "SimpleCheck";
     public static readonly string[] Tags = ["simple"];
@@ -20,7 +19,7 @@ public class SimpleHealthCheck(
 
     public async Task<SimpleHealthCheckResult> CheckAsync(CancellationToken cancellationToken = default)
     {
-        var uris = options.Value.Uris;
+        var uris = options.Uris;
         var stopwatch = Stopwatch.StartNew();
 
         foreach (var uri in uris)

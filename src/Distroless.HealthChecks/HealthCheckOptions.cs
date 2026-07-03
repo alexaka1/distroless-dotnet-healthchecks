@@ -1,6 +1,5 @@
 using System.Net;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+using Distroless.HealthChecks.Configuration;
 
 namespace Distroless.HealthChecks;
 
@@ -13,49 +12,41 @@ public class HealthCheckOptions
     public const string Key = "HealthCheck";
 }
 
-public class HealthCheckOptionsValidator(
-    IConfiguration configuration,
-    IOptions<Features.Features> features)
-    : IValidateOptions<HealthCheckOptions>
+internal static class HealthCheckOptionsValidator
 {
     private const string Category = "Distroless.HealthChecks.HealthCheckOptionsValidator";
 
-    private readonly Lazy<IPAddress[]> _localAddresses = new(() =>
+    private static readonly Lazy<IPAddress[]> LocalAddresses = new(() =>
         [..Dns.GetHostAddresses(Dns.GetHostName()), IPAddress.Loopback, IPAddress.IPv6Loopback]);
 
-    public ValidateOptionsResult Validate(string? name, HealthCheckOptions options)
+    public static void Validate(AppConfiguration configuration, HealthCheckOptions options, Features.Features features)
     {
-        var f = features.Value;
-        var builder = new ValidateOptionsResultBuilder();
+        var errors = new List<string>();
 
         if ((options.Uri is not null && options.Uris.Count > 1) ||
             (options.Uri is not null && options.Uris.Count is 1 && options.Uris[0] != options.Uri))
         {
-            builder.AddError("Uri and Uris cannot be used together. Please use only one of them.", nameof(options.Uri));
+            errors.Add("Uri and Uris cannot be used together. Please use only one of them.");
         }
 
-        if (f.AllowUnsafeExternalUris is false)
+        if (features.AllowUnsafeExternalUris is false)
         {
-            var uris = options.Uris.AsEnumerable();
-            if (options.Uri is not null)
+            foreach (var uri in options.Uris)
             {
-                uris = uris.Append(options.Uri);
-            }
-
-            foreach (var uri in uris)
-            {
-                if (!IsLoopback(uri))
+                if (!IsLoopback(configuration, uri))
                 {
-                    builder.AddError($"$Uri {uri} must be a loopback address", nameof(options.Uris));
+                    errors.Add($"$Uri {uri} must be a loopback address");
                 }
             }
         }
 
-
-        return builder.Build();
+        if (errors.Count > 0)
+        {
+            throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
+        }
     }
 
-    private bool IsLoopback(Uri uri)
+    private static bool IsLoopback(AppConfiguration configuration, Uri uri)
     {
         try
         {
@@ -67,7 +58,7 @@ public class HealthCheckOptionsValidator(
             var hostAddresses = Dns.GetHostAddresses(uri.Host);
             ConsoleLog.UriHostAddress(configuration, Category, uri, hostAddresses);
 
-            var localAddresses = _localAddresses.Value;
+            var localAddresses = LocalAddresses.Value;
             ConsoleLog.HostAddress(configuration, Category, localAddresses);
 
             return hostAddresses.Any(hostAddr => localAddresses.Any(hostAddr.Equals));
@@ -78,17 +69,5 @@ public class HealthCheckOptionsValidator(
         }
 
         return false;
-    }
-}
-
-public class PostConfigureHealthCheckOptions
-    : IPostConfigureOptions<HealthCheckOptions>
-{
-    public void PostConfigure(string? name, HealthCheckOptions options)
-    {
-        if (options.Uri is not null)
-        {
-            options.Uris.Add(options.Uri);
-        }
     }
 }
