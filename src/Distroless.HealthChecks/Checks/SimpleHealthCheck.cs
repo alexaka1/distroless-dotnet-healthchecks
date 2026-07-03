@@ -13,7 +13,7 @@ public class SimpleHealthCheck(
     public static readonly string[] Tags = ["simple"];
     private const string Category = "Distroless.HealthChecks.Checks.SimpleHealthCheck";
 
-    private static readonly HttpClient HttpClient = new()
+    private static readonly HttpClient s_httpClient = new()
     {
         Timeout = TimeSpan.FromSeconds(30),
     };
@@ -28,8 +28,8 @@ public class SimpleHealthCheck(
             try
             {
                 using var requestTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                requestTimeout.CancelAfter(HttpClient.Timeout);
-                using var result = await HttpClient.GetAsync(uri, requestTimeout.Token);
+                requestTimeout.CancelAfter(s_httpClient.Timeout);
+                using var result = await s_httpClient.GetAsync(uri, requestTimeout.Token);
                 ConsoleLog.HealthCheckResult(configuration, Category, uri, result.StatusCode);
                 if (!result.IsSuccessStatusCode)
                 {

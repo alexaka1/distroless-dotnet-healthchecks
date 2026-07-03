@@ -22,8 +22,8 @@ internal static class ConsoleLog
     private const string HealthCheckHostedServiceCategory =
         "Distroless.HealthChecks.HealthCheckHostedService";
 
-    public const int HealthCheckEndEventId = 103;
-    public const int HealthCheckFailedEventId = 591182496;
+    private const int HealthCheckEndEventId = 103;
+    private const int HealthCheckFailedEventId = 591182496;
 
     public static void HealthCheckEnd(
         IConfiguration configuration,
@@ -191,7 +191,7 @@ internal static class HealthFailureReportFactory
             Description = result.Description ?? result.Exception?.Message,
             Duration = result.Duration,
             Status = result.Status,
-            Tags = Checks.SimpleHealthCheck.Tags,
+            Tags = SimpleHealthCheck.Tags,
             Exception = result.Exception?.Message,
         };
 
@@ -201,7 +201,7 @@ internal static class HealthFailureReportFactory
             TotalDuration = totalDuration,
             Entries = new Dictionary<string, HealthFailureReportEntry>
             {
-                [Checks.SimpleHealthCheck.Name] = entry,
+                [SimpleHealthCheck.Name] = entry,
             },
         };
     }
