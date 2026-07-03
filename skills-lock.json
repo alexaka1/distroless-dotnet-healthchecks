@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "file-based-csharp": {
+      "source": "alexaka1/skills",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/file-based-csharp/SKILL.md",
+      "computedHash": "d14f0b1f7e7a9daead39253f08d9afb5a43e8d3c9703c29202a58699ef663900"
+    }
+  }
+}
