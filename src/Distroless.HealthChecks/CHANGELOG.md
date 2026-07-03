@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.5.7
+
+### Patch Changes
+
+- [#1298](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1298) [`91105c5`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/91105c57e2636901f9433f8e4c598bc0161ef7fa) Thanks [@alexaka1](https://github.com/alexaka1)! - Fix release binary size measurement by reading build output locally instead of pulling digest images, and exclude buildx SBOM/provenance artifacts from total size.
+
 ## 1.5.6
 
 ### Patch Changes
