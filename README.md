@@ -71,15 +71,13 @@ The `Uri` parameter is just a convenience input for baking in the url to the Doc
 
 ### Framework exception messages
 
-Release builds enable [`UseSystemResourceKeys`](https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trim-framework-library-features) to keep the native binary small. When a `System.*` exception is thrown, its message is a **resource key** (for example `ArgumentNull_Generic`) instead of the full text. Parameters may be appended after a comma, for example `ArgumentNull_Generic, value`.
+When a `System.*` exception is thrown, its message is a **resource key** (for example `ArgumentNull_Generic`) instead of the full text. Parameters may be appended after a comma, for example `ArgumentNull_Generic, value`.
 
 To decode a key:
 
 1. Take the key name (the part before the first `,`, if present).
-2. Search the [.NET runtime repository](https://github.com/dotnet/runtime) for that string in a `Strings.resx` file under the library that threw (for example `System.Net.Http` for HTTP errors).
+2. Search the [.NET runtime repository](https://github.com/dotnet/runtime) for that string in a `Strings.resx` file.
 3. The matching `<value>` entry is the human-readable message.
-
-If you need full exception text at runtime, build from source with `<UseSystemResourceKeys>false</UseSystemResourceKeys>` in the Release property group (this increases binary size by roughly 30–40 KB).
 
 ## Building
 
