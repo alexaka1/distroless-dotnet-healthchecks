@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.5.8
+
+### Patch Changes
+
+- [#1300](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1300) [`fcf3386`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/fcf33863cb62394ad5f75928fea825c334866196) Thanks [@alexaka1](https://github.com/alexaka1)! - Fix release workflow failure when appending binary size comparison to release notes. The append step no longer re-fetches the previous release by tag (which returned 404 after the failed 1.5.6 release); it uses the already-fetched releases list instead.
+
 ## 1.5.7
 
 ### Patch Changes
