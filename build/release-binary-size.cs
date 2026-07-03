@@ -1,7 +1,9 @@
 #!/usr/bin/env dotnet
 #:package NuGet.Versioning@7.6.0
+#:package System.CommandLine@2.0.9
 #:property PublishAot=false
 
+using System.CommandLine;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
@@ -9,108 +11,117 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using NuGet.Versioning;
 
-if (args.Length == 0)
+Option<string> imageOption = new("--image")
 {
-    PrintUsage();
-    return 1;
-}
+    Description = "Full image reference to pull and measure (registry/image@sha256:...).",
+    Required = true,
+};
 
-try
+Option<string> variantOption = new("--variant")
 {
-    return args[0] switch
+    Description = "Image variant (ubuntu-chiseled or alpine).",
+    Required = true,
+};
+
+Option<string> platformOption = new("--platform")
+{
+    Description = "Target platform (linux/amd64 or linux/arm64).",
+    Required = true,
+};
+
+Option<string> outputOption = new("--output")
+{
+    Description = "Directory to write the binary size JSON artifact.",
+    Required = true,
+};
+
+Command measureCommand = new("measure", "Measure binary size from a built Docker image.")
+{
+    imageOption,
+    variantOption,
+    platformOption,
+    outputOption,
+};
+
+Option<string> sizesDirectoryOption = new("--sizes-dir")
+{
+    Description = "Directory containing binary size JSON artifacts.",
+    Required = true,
+};
+
+Option<string> changesFileOption = new("--changes-file")
+{
+    Description = "Release notes file to append the binary size table to.",
+    Required = true,
+};
+
+Option<string> repositoryOption = new("--repo")
+{
+    Description = "GitHub repository (owner/name).",
+    Required = true,
+};
+
+Option<string> tagOption = new("--tag")
+{
+    Description = "Current release tag name.",
+    Required = true,
+};
+
+Command appendReleaseCommand = new("append-release", "Append binary size comparison to release notes.")
+{
+    sizesDirectoryOption,
+    changesFileOption,
+    repositoryOption,
+    tagOption,
+};
+
+RootCommand rootCommand = new("Measure and report distroless healthcheck binary sizes for GitHub releases.");
+rootCommand.Subcommands.Add(measureCommand);
+rootCommand.Subcommands.Add(appendReleaseCommand);
+
+measureCommand.SetAction(async (parseResult, cancellationToken) =>
+{
+    try
     {
-        "measure" => await RunMeasureAsync(args[1..]),
-        "append-release" => await RunAppendReleaseAsync(args[1..]),
-        _ => UnknownCommand(args[0]),
-    };
-}
-catch (Exception exception)
-{
-    await Console.Error.WriteLineAsync(exception.Message);
-    return 1;
-}
+        await DockerBinaryMeasurer.MeasureAsync(
+            parseResult.GetValue(imageOption)!,
+            parseResult.GetValue(variantOption)!,
+            parseResult.GetValue(platformOption)!,
+            parseResult.GetValue(outputOption)!,
+            cancellationToken);
 
-static async Task<int> RunMeasureAsync(string[] commandArgs)
-{
-    var options = ParseOptions(commandArgs);
-    var image = RequireOption(options, "image");
-    var variant = RequireOption(options, "variant");
-    var platform = RequireOption(options, "platform");
-    var output = RequireOption(options, "output");
-
-    await DockerBinaryMeasurer.MeasureAsync(image, variant, platform, output);
-    return 0;
-}
-
-static async Task<int> RunAppendReleaseAsync(string[] commandArgs)
-{
-    var options = ParseOptions(commandArgs);
-    var sizesDirectory = RequireOption(options, "sizes-dir");
-    var changesFile = RequireOption(options, "changes-file");
-    var repository = RequireOption(options, "repo");
-    var tag = RequireOption(options, "tag");
-
-    using var githubClient = GitHubReleaseClient.CreateFromEnvironment();
-    await ReleaseNotesAppender.AppendAsync(
-        sizesDirectory,
-        changesFile,
-        repository,
-        tag,
-        githubClient);
-
-    return 0;
-}
-
-static Dictionary<string, string> ParseOptions(string[] commandArgs)
-{
-    var options = new Dictionary<string, string>(StringComparer.Ordinal);
-
-    for (var index = 0; index < commandArgs.Length; index++)
-    {
-        var argument = commandArgs[index];
-        if (!argument.StartsWith("--", StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException($"Unknown argument: {argument}");
-        }
-
-        var key = argument[2..];
-        if (index + 1 >= commandArgs.Length)
-        {
-            throw new InvalidOperationException($"Missing value for --{key}");
-        }
-
-        options[key] = commandArgs[++index];
+        return 0;
     }
-
-    return options;
-}
-
-static string RequireOption(IReadOnlyDictionary<string, string> options, string key)
-{
-    if (!options.TryGetValue(key, out var value) || string.IsNullOrWhiteSpace(value))
+    catch (Exception exception)
     {
-        throw new InvalidOperationException($"Missing required option --{key}");
+        await Console.Error.WriteLineAsync(exception.Message);
+        return 1;
     }
+});
 
-    return value;
-}
-
-static int UnknownCommand(string command)
+appendReleaseCommand.SetAction(async (parseResult, cancellationToken) =>
 {
-    Console.Error.WriteLine($"Unknown command: {command}");
-    PrintUsage();
-    return 1;
-}
+    try
+    {
+        using var githubClient = GitHubReleaseClient.CreateFromEnvironment();
+        await ReleaseNotesAppender.AppendAsync(
+            parseResult.GetValue(sizesDirectoryOption)!,
+            parseResult.GetValue(changesFileOption)!,
+            parseResult.GetValue(repositoryOption)!,
+            parseResult.GetValue(tagOption)!,
+            githubClient,
+            cancellationToken);
 
-static void PrintUsage()
-{
-    Console.Error.WriteLine(
-        """
-        Usage:
-          release-binary-size.cs measure --image <registry/image@sha256:...> --variant <variant> --platform <platform> --output <dir>
-          release-binary-size.cs append-release --sizes-dir <dir> --changes-file <file> --repo <owner/repo> --tag <tag>
-        """);
-}
+        return 0;
+    }
+    catch (Exception exception)
+    {
+        await Console.Error.WriteLineAsync(exception.Message);
+        return 1;
+    }
+});
+
+return await rootCommand.Parse(args).InvokeAsync();
 
 sealed record BinarySizeMeasurement(string Variant, string Platform, long Executable, long Total);
 
