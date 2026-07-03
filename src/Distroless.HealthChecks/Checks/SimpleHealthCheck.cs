@@ -13,7 +13,10 @@ public class SimpleHealthCheck(
     public static readonly string[] Tags = ["simple"];
     private const string Category = "Distroless.HealthChecks.Checks.SimpleHealthCheck";
 
-    private static readonly HttpClient HttpClient = new();
+    private static readonly HttpClient HttpClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(30),
+    };
 
     public async Task<SimpleHealthCheckResult> CheckAsync(CancellationToken cancellationToken = default)
     {
@@ -24,7 +27,9 @@ public class SimpleHealthCheck(
         {
             try
             {
-                using var result = await HttpClient.GetAsync(uri, cancellationToken);
+                using var requestTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                requestTimeout.CancelAfter(HttpClient.Timeout);
+                using var result = await HttpClient.GetAsync(uri, requestTimeout.Token);
                 ConsoleLog.HealthCheckResult(configuration, Category, uri, result.StatusCode);
                 if (!result.IsSuccessStatusCode)
                 {
@@ -59,22 +64,4 @@ public class SimpleHealthCheck(
             data: new Dictionary<string, object>(),
             stopwatch.Elapsed);
     }
-}
-
-public sealed class SimpleHealthCheckResult(
-    HealthStatus status,
-    string? description,
-    Exception? exception,
-    IReadOnlyDictionary<string, object> data,
-    TimeSpan duration)
-{
-    public HealthStatus Status { get; } = status;
-
-    public string? Description { get; } = description;
-
-    public Exception? Exception { get; } = exception;
-
-    public IReadOnlyDictionary<string, object> Data { get; } = data;
-
-    public TimeSpan Duration { get; } = duration;
 }

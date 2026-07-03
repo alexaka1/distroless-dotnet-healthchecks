@@ -36,7 +36,6 @@
     <EventSourceSupport>false</EventSourceSupport>
     <Http3Support>false</Http3Support>
     <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-    <UseSystemResourceKeys>true</UseSystemResourceKeys>
   </PropertyGroup>
 
   <PropertyGroup Label="Source generation">

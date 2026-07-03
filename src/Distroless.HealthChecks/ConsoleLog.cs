@@ -190,14 +190,14 @@ internal static class HealthFailureReportFactory
             Data = ToDataDictionary(result.Data),
             Description = result.Description ?? result.Exception?.Message,
             Duration = result.Duration,
-            Status = (HealthFailureStatus)result.Status,
+            Status = result.Status,
             Tags = Checks.SimpleHealthCheck.Tags,
             Exception = result.Exception?.Message,
         };
 
         return new HealthFailureReport
         {
-            Status = (HealthFailureStatus)result.Status,
+            Status = result.Status,
             TotalDuration = totalDuration,
             Entries = new Dictionary<string, HealthFailureReportEntry>
             {
