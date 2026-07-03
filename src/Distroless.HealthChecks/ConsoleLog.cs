@@ -195,7 +195,6 @@ internal static class ConsoleLog
         ConsoleLogLevel.Error => "fail",
         ConsoleLogLevel.Critical => "crit",
         ConsoleLogLevel.None => "none",
-        _ => "none",
     };
 }
 
