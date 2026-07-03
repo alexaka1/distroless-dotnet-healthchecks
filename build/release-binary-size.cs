@@ -270,6 +270,7 @@ sealed class GitHubReleaseClient(HttpClient httpClient) : IDisposable
         var releaseTags = releases
             .Select(release => release.TagName)
             .Where(tag => tag.StartsWith(PackageTagPrefix, StringComparison.Ordinal))
+            .Where(tag => !string.Equals(tag, currentTag, StringComparison.Ordinal))
             .ToList();
 
         var comparisonTag = SemverReleaseComparer.FindComparisonTag(currentTag, releaseTags);
@@ -278,17 +279,9 @@ sealed class GitHubReleaseClient(HttpClient httpClient) : IDisposable
             return null;
         }
 
-        using var response = await httpClient.GetAsync(
-            $"repos/{repository}/releases/tags/{Uri.EscapeDataString(comparisonTag)}",
-            cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var release = await JsonSerializer.DeserializeAsync<GitHubRelease>(
-            stream,
-            cancellationToken: cancellationToken);
-
-        return release?.Body;
+        return releases
+            .FirstOrDefault(release => string.Equals(release.TagName, comparisonTag, StringComparison.Ordinal))
+            ?.Body;
     }
 
     private async Task<IReadOnlyList<GitHubRelease>> GetReleasesAsync(
@@ -384,7 +377,10 @@ static class SemverReleaseComparer
             return null;
         }
 
-        return $"{PackageTagPrefix}{comparisonVersion}";
+        return releaseTags
+            .Where(tag => TryParseTag(tag, out var version) && version == comparisonVersion)
+            .OrderByDescending(tag => tag, StringComparer.Ordinal)
+            .FirstOrDefault();
     }
 
     private static bool TryParseTag(string tag, out NuGetVersion? version)
