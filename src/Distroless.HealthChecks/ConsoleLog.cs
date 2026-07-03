@@ -195,6 +195,7 @@ internal static class ConsoleLog
         ConsoleLogLevel.Error => "fail",
         ConsoleLogLevel.Critical => "crit",
         ConsoleLogLevel.None => "none",
+        _ => throw new ArgumentOutOfRangeException(nameof(level), level, null),
     };
 }
 

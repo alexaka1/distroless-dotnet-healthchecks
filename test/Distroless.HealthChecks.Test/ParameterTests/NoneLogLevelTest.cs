@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Builders;
@@ -98,8 +97,7 @@ public sealed class NoneLogLevelTest(ITestOutputHelper output, ITestContextAcces
             .Build();
         await _image.CreateAsync(cancellationToken).ConfigureAwait(false);
 
-        _container = new ContainerBuilder()
-            .WithImage(_image)
+        _container = new ContainerBuilder(_image)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
                 Regex.Escape("Application started. Press Ctrl+C to shut down."),
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30))))
