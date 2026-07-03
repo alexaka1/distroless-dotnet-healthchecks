@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Distroless.HealthChecks;
@@ -12,9 +13,13 @@ public class HealthCheckOptions
     public const string Key = "HealthCheck";
 }
 
-public class HealthCheckOptionsValidator(IOptions<Features.Features> features)
+public class HealthCheckOptionsValidator(
+    IConfiguration configuration,
+    IOptions<Features.Features> features)
     : IValidateOptions<HealthCheckOptions>
 {
+    private const string Category = "Distroless.HealthChecks.HealthCheckOptionsValidator";
+
     private readonly Lazy<IPAddress[]> _localAddresses = new(() =>
         [..Dns.GetHostAddresses(Dns.GetHostName()), IPAddress.Loopback, IPAddress.IPv6Loopback]);
 
@@ -60,13 +65,19 @@ public class HealthCheckOptionsValidator(IOptions<Features.Features> features)
             }
 
             var hostAddresses = Dns.GetHostAddresses(uri.Host);
+            ConsoleLog.UriHostAddress(configuration, Category, uri, hostAddresses);
+
             var localAddresses = _localAddresses.Value;
+            ConsoleLog.HostAddress(configuration, Category, localAddresses);
+
             return hostAddresses.Any(hostAddr => localAddresses.Any(hostAddr.Equals));
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return false;
+            ConsoleLog.UnableToDetermineHostAddress(configuration, Category, uri, e);
         }
+
+        return false;
     }
 }
 
