@@ -18,7 +18,7 @@ Option<string> publishDirOption = new("--publish-dir")
 
 Option<string> variantOption = new("--variant")
 {
-    Description = "Image variant (ubuntu-chiseled or alpine).",
+    Description = "Image variant (ubuntu-chiseled or alpine). Stored as-is; release table shows linux for ubuntu-chiseled.",
     Required = true,
 };
 
@@ -167,6 +167,12 @@ sealed class BinarySizeSnapshot
 
         return platforms.TryGetValue(platform, out var values) ? values : null;
     }
+}
+
+static class BinarySizeVariantNames
+{
+    public static string FormatDisplay(string variant) =>
+        variant.Equals("ubuntu-chiseled", StringComparison.Ordinal) ? "linux" : variant;
 }
 
 static class BinarySizeFormatter
@@ -439,7 +445,7 @@ static class ReleaseNotesAppender
         {
             var previousValues = previousSnapshot.TryGetValues(variant, platform);
             builder.Append("| ")
-                .Append(variant)
+                .Append(BinarySizeVariantNames.FormatDisplay(variant))
                 .Append(" | ")
                 .Append(platform)
                 .Append(" | ")
