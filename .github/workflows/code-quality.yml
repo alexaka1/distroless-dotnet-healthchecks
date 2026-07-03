@@ -41,10 +41,7 @@ jobs:
         with:
           # Community for .NET does not support pr-mode yet; see JetBrains/qodana-action tests/dotnet
           pr-mode: false
-          # renovate: datasource=docker packageName=jetbrains/qodana-cdnet
-          args: |
-            --image jetbrains/qodana-cdnet:2026.1
-            --no-statistics=true
+          args: --no-statistics=true
           upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
@@ -79,10 +76,7 @@ jobs:
         uses: JetBrains/qodana-action@4861e015da555e86a72b862892aba6c2b93e6891 # v2026.1.3
         with:
           pr-mode: false
-          # renovate: datasource=docker packageName=jetbrains/qodana-cdnet
-          args: |
-            --image jetbrains/qodana-cdnet:2026.1
-            --no-statistics=true
+          args: --no-statistics=true
           upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
