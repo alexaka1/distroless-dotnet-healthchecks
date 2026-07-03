@@ -69,6 +69,16 @@ The image uses semver. It is recommended that you pin it to at least a major ver
 
 The `Uri` parameter is just a convenience input for baking in the url to the Dockerfile. You can however set logic to your builds to configure the underlying Uri array instead. Such as: `DISTROLESS_HEALTHCHECKS_Uris__0=http://localhost:8080/healthz` and `DISTROLESS_HEALTHCHECKS_Uris__1=http://localhost/some/other/path`.
 
+### Framework exception messages
+
+When a `System.*` exception is thrown, its message is a **resource key** (for example `ArgumentNull_Generic`) instead of the full text. Parameters may be appended after a comma, for example `ArgumentNull_Generic, value`.
+
+To decode a key:
+
+1. Take the key name (the part before the first `,`, if present).
+2. Search the [.NET runtime repository](https://github.com/dotnet/runtime) for that string in a `Strings.resx` file.
+3. The matching `<value>` entry is the human-readable message.
+
 ## Building
 
 You will need the .NET 9 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.

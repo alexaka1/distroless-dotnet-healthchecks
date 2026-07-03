@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
 namespace Distroless.HealthChecks;
 
 public class StatusResult
@@ -17,8 +15,8 @@ public class StatusResult
         return healthStatus switch
         {
             HealthStatus.Healthy => ExitCodes.Healthy,
+            HealthStatus.Degraded => ExitCodes.Degraded,
             HealthStatus.Unhealthy => ExitCodes.UnHealthy,
-            // HealthStatus.Degraded => ExitCodes.Degraded,
             _ => ExitCodes.UnHealthy,
         };
     }

@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
-using HealthChecks.UI.Core;
 
 namespace Distroless.HealthChecks;
 
-[JsonSerializable(typeof(UIHealthReport))]
-[JsonSerializable(typeof(Uri))]
+[JsonSerializable(typeof(HealthFailureReport))]
+[JsonSerializable(typeof(HealthFailureReportEntry))]
+[JsonSerializable(typeof(Dictionary<string, HealthFailureReportEntry>))]
+[JsonSerializable(typeof(Dictionary<string, string>))]
+[JsonSerializable(typeof(TimeSpan))]
 [JsonSourceGenerationOptions(UseStringEnumConverter = true)]
 public partial class HealthCheckSerializerContext : JsonSerializerContext;

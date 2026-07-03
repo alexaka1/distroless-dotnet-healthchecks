@@ -1,5 +1,5 @@
 using System.Net;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Distroless.HealthChecks;
@@ -13,11 +13,13 @@ public class HealthCheckOptions
     public const string Key = "HealthCheck";
 }
 
-public partial class HealthCheckOptionsValidator(
-    ILogger<HealthCheckOptionsValidator> logger,
+public class HealthCheckOptionsValidator(
+    IConfiguration configuration,
     IOptions<Features.Features> features)
     : IValidateOptions<HealthCheckOptions>
 {
+    private const string Category = "Distroless.HealthChecks.HealthCheckOptionsValidator";
+
     private readonly Lazy<IPAddress[]> _localAddresses = new(() =>
         [..Dns.GetHostAddresses(Dns.GetHostName()), IPAddress.Loopback, IPAddress.IPv6Loopback]);
 
@@ -62,36 +64,21 @@ public partial class HealthCheckOptionsValidator(
                 return true;
             }
 
-            // Get the IP addresses of the given hostname
             var hostAddresses = Dns.GetHostAddresses(uri.Host);
-            LogHostAddress(uri, hostAddresses);
+            ConsoleLog.UriHostAddress(configuration, Category, uri, hostAddresses);
 
-            // Get the IP addresses of the local machine
             var localAddresses = _localAddresses.Value;
-            LogHostAddress(localAddresses);
+            ConsoleLog.HostAddress(configuration, Category, localAddresses);
 
-            // Check if any of the host's addresses match any of the local addresses
             return hostAddresses.Any(hostAddr => localAddresses.Any(hostAddr.Equals));
         }
         catch (Exception e)
         {
-            LogUnableToDetermineHostAddress(e, uri);
+            ConsoleLog.UnableToDetermineHostAddress(configuration, Category, uri, e);
         }
 
         return false;
     }
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Unable to determine host address of {Uri}",
-        EventName = "UnableToDetermineHostAddress")]
-    private partial void LogUnableToDetermineHostAddress(Exception ex, Uri uri);
-
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Host address of uri {Uri} is {HostAddress}",
-        EventName = "UriHostAddress")]
-    private partial void LogHostAddress(Uri uri, IPAddress[] hostAddress);
-
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Host address of machine is {HostAddress}",
-        EventName = "HostAddress")]
-    private partial void LogHostAddress(IPAddress[] hostAddress);
 }
 
 public class PostConfigureHealthCheckOptions

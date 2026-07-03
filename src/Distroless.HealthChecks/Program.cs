@@ -33,14 +33,10 @@ try
         .ValidateOnStart();
 
     builder.Logging.ClearProviders();
-    builder.Logging.AddConsole();
 
-    builder.Services.AddHttpClient(SimpleHealthCheck.Name);
+    builder.Services.AddSingleton<SimpleHealthCheck>();
     builder.Services.AddSingleton<IPostConfigureOptions<HealthCheckOptions>, PostConfigureHealthCheckOptions>();
     builder.Services.AddSingleton<StatusResult>();
-
-    builder.Services.AddHealthChecks()
-        .AddCheck<SimpleHealthCheck>(SimpleHealthCheck.Name, tags: ["simple"]);
 
     builder.Services.AddHostedService<HealthCheckHostedService>();
     host = builder.Build();
@@ -52,7 +48,6 @@ catch (Exception e)
     return StatusResult.ExitCodes.UnHealthy;
 }
 
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
 var result = host.Services.GetRequiredService<StatusResult>();
 try
 {
@@ -60,7 +55,7 @@ try
 }
 catch (Exception e)
 {
-    logger.LogCritical(e, "Healthcheck terminated unexpectedly");
+    ConsoleLog.Critical("Program", "Healthcheck terminated unexpectedly", e);
     return StatusResult.ExitCodes.UnHealthy;
 }
 

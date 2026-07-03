@@ -1,55 +1,68 @@
+using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Distroless.HealthChecks.Checks;
 
-public partial class SimpleHealthCheck(
+public class SimpleHealthCheck(
     IOptions<HealthCheckOptions> options,
-    IHttpClientFactory clientFactory,
-    ILogger<SimpleHealthCheck> logger
-) : IHealthCheck
+    IConfiguration configuration)
 {
     public const string Name = "SimpleCheck";
+    public static readonly string[] Tags = ["simple"];
+    private const string Category = "Distroless.HealthChecks.Checks.SimpleHealthCheck";
 
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
-        CancellationToken cancellationToken = default)
+    private static readonly HttpClient s_httpClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(30),
+    };
+
+    public async Task<SimpleHealthCheckResult> CheckAsync(CancellationToken cancellationToken = default)
     {
         var uris = options.Value.Uris;
-        var client = clientFactory.CreateClient(Name);
-        if (context.Registration.Delay.HasValue)
-        {
-            client.Timeout = context.Registration.Delay.Value;
-        }
+        var stopwatch = Stopwatch.StartNew();
 
         foreach (var uri in uris)
         {
             try
             {
-                using var result = await client.GetAsync(uri, cancellationToken);
-                LogHealthCheckResult(uri, result.StatusCode);
+                using var requestTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                requestTimeout.CancelAfter(s_httpClient.Timeout);
+                using var result = await s_httpClient.GetAsync(uri, requestTimeout.Token);
+                ConsoleLog.HealthCheckResult(configuration, Category, uri, result.StatusCode);
                 if (!result.IsSuccessStatusCode)
                 {
-                    return HealthCheckResult.Unhealthy(data: new Dictionary<string, object>
-                        { { "Uri", uri }, { "StatusCode", result.StatusCode.ToString("G") } });
+                    return new SimpleHealthCheckResult(
+                        HealthStatus.Unhealthy,
+                        description: $"HTTP {result.StatusCode:D} {result.StatusCode:G}",
+                        exception: null,
+                        data: new Dictionary<string, object>
+                        {
+                            ["Uri"] = uri,
+                            ["StatusCode"] = result.StatusCode.ToString("G"),
+                        },
+                        stopwatch.Elapsed);
                 }
             }
             catch (Exception e)
             {
-                LogHealthCheckFailed(uri, e);
-                return HealthCheckResult.Unhealthy(null, e, new Dictionary<string, object> { { "Uri", uri } });
+                var failure = new SimpleHealthCheckResult(
+                    HealthStatus.Unhealthy,
+                    description: null,
+                    exception: e,
+                    data: new Dictionary<string, object> { ["Uri"] = uri },
+                    stopwatch.Elapsed);
+                ConsoleLog.HealthCheckException(configuration, Category, uri, e);
+                return failure;
             }
         }
 
-        return HealthCheckResult.Healthy();
+        return new SimpleHealthCheckResult(
+            HealthStatus.Healthy,
+            description: null,
+            exception: null,
+            data: new Dictionary<string, object>(),
+            stopwatch.Elapsed);
     }
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Health check failed for {Uri}",
-        EventName = "HealthCheckFailed")]
-    private partial void LogHealthCheckFailed(Uri uri, Exception ex);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Health check result for {Uri}: {StatusCode}",
-        EventName = "HealthCheckResult")]
-    private partial void LogHealthCheckResult(Uri uri, HttpStatusCode statusCode);
 }

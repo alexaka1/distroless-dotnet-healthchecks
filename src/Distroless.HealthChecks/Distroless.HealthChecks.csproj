@@ -33,6 +33,10 @@
     <DebuggerSupport>false</DebuggerSupport>
     <MetricsSupport>false</MetricsSupport>
     <StackTraceSupport>false</StackTraceSupport>
+    <EventSourceSupport>false</EventSourceSupport>
+    <Http3Support>false</Http3Support>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
   </PropertyGroup>
 
   <PropertyGroup Label="Source generation">
@@ -41,10 +45,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.UI.Core" Version="9.0.0"/>
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.9"/>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9"/>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9"/>
   </ItemGroup>
 
   <PropertyGroup Label="Supply chain auditing">

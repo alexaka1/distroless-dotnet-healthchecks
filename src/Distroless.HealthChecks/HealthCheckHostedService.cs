@@ -1,36 +1,45 @@
+using System.Diagnostics;
 using System.Text.Json;
-using HealthChecks.UI.Core;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Distroless.HealthChecks.Checks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Distroless.HealthChecks;
 
-public partial class HealthCheckHostedService(
+public class HealthCheckHostedService(
     IHost host,
-    ILogger<HealthCheckHostedService> logger,
-    HealthCheckService healthCheckService,
+    SimpleHealthCheck simpleHealthCheck,
+    IConfiguration configuration,
     StatusResult statusResult)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var health = await healthCheckService.CheckHealthAsync(stoppingToken);
-        if (health.Status is not HealthStatus.Healthy)
+        var totalStopwatch = Stopwatch.StartNew();
+        var result = await simpleHealthCheck.CheckAsync(stoppingToken);
+        totalStopwatch.Stop();
+
+        if (result.Status is not HealthStatus.Healthy)
         {
-            var report = UIHealthReport.CreateFrom(health);
-            LogHealthCheckFailed(JsonSerializer.Serialize(report, HealthCheckSerializerContext.Default.UIHealthReport));
-            // Regress from healthy to degraded to unhealthy
-            if (statusResult.HealthStatus > health.Status)
+            if (statusResult.HealthStatus > result.Status)
             {
-                statusResult.HealthStatus = health.Status;
+                statusResult.HealthStatus = result.Status;
             }
+
+            ConsoleLog.HealthCheckEnd(
+                configuration,
+                SimpleHealthCheck.Name,
+                result.Status,
+                result.Duration,
+                result.Description,
+                result.Exception);
+
+            var report = HealthFailureReportFactory.CreateFrom(result, totalStopwatch.Elapsed);
+            ConsoleLog.HealthCheckFailed(
+                configuration,
+                JsonSerializer.Serialize(report, HealthCheckSerializerContext.Default.HealthFailureReport));
         }
 
-        // Check completed, we can stop the service
         await host.StopAsync(stoppingToken);
     }
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "{Report}", EventName = "HealthCheckFailed")]
-    private partial void LogHealthCheckFailed(string report);
 }
