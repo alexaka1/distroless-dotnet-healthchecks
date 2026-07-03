@@ -79,7 +79,9 @@ jobs:
             BASE_IMAGE_TYPE=${{ matrix.base-image-type }}
           provenance: mode=max
           sbom: true
-          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          outputs: |
+            type=local,dest=${{ runner.temp }}/binary-publish
+            type=image,push-by-digest=true,name-canonical=true,push=true
           # tags used to select repository path for push-by-digest
           tags: |
             ghcr.io/${{ env.image_name }}
@@ -120,7 +122,7 @@ jobs:
       - name: Measure binary size
         if: steps.docker_build.outputs.digest != ''
         env:
-          BINARY_SIZE_IMAGE: ghcr.io/${{ env.image_name }}@${{ steps.docker_build.outputs.digest }}
+          BINARY_SIZE_PUBLISH_DIR: ${{ runner.temp }}/binary-publish
           BINARY_SIZE_VARIANT: ${{ matrix.base-image-type }}
           BINARY_SIZE_PLATFORM: ${{ matrix.platform }}
           BINARY_SIZE_OUTPUT: ${{ runner.temp }}/binary-sizes
@@ -128,7 +130,7 @@ jobs:
           set -euo pipefail
           dotnet run build/release-binary-size.cs -- \
             measure \
-            --image "$BINARY_SIZE_IMAGE" \
+            --publish-dir "$BINARY_SIZE_PUBLISH_DIR" \
             --variant "$BINARY_SIZE_VARIANT" \
             --platform "$BINARY_SIZE_PLATFORM" \
             --output "$BINARY_SIZE_OUTPUT"

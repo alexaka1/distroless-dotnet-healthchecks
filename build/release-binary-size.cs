@@ -4,16 +4,15 @@
 #:property PublishAot=false
 
 using System.CommandLine;
-using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NuGet.Versioning;
 
-Option<string> imageOption = new("--image")
+Option<string> publishDirOption = new("--publish-dir")
 {
-    Description = "Full image reference to pull and measure (registry/image@sha256:...).",
+    Description = "Directory containing the published binary output.",
     Required = true,
 };
 
@@ -35,9 +34,9 @@ Option<string> outputOption = new("--output")
     Required = true,
 };
 
-Command measureCommand = new("measure", "Measure binary size from a built Docker image.")
+Command measureCommand = new("measure", "Measure binary size from a published build output directory.")
 {
-    imageOption,
+    publishDirOption,
     variantOption,
     platformOption,
     outputOption,
@@ -83,8 +82,8 @@ measureCommand.SetAction(async (parseResult, cancellationToken) =>
 {
     try
     {
-        await DockerBinaryMeasurer.MeasureAsync(
-            parseResult.GetValue(imageOption)!,
+        await BinarySizeMeasurer.MeasureAsync(
+            parseResult.GetValue(publishDirOption)!,
             parseResult.GetValue(variantOption)!,
             parseResult.GetValue(platformOption)!,
             parseResult.GetValue(outputOption)!,
@@ -209,76 +208,7 @@ static class BinarySizeFormatter
     }
 }
 
-static class ProcessRunner
-{
-    private static async Task<(string Stdout, string Stderr, int ExitCode)> RunProcessAsync(
-        string fileName,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken = default)
-    {
-        using var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = fileName,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-            },
-        };
-
-        foreach (var argument in arguments)
-        {
-            process.StartInfo.ArgumentList.Add(argument);
-        }
-
-        if (!process.Start())
-        {
-            throw new InvalidOperationException($"Failed to start process: {fileName}");
-        }
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
-
-        var stdout = await stdoutTask;
-        var stderr = await stderrTask;
-
-        return (stdout, stderr, process.ExitCode);
-    }
-
-    public static async Task RunAsync(
-        string fileName,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken = default)
-    {
-        var (stdout, stderr, exitCode) = await RunProcessAsync(fileName, arguments, cancellationToken);
-
-        if (exitCode != 0)
-        {
-            throw new InvalidOperationException(
-                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {exitCode}.{Environment.NewLine}{stderr}{stdout}");
-        }
-    }
-
-    public static async Task<string> RunForOutputAsync(
-        string fileName,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken = default)
-    {
-        var (stdout, stderr, exitCode) = await RunProcessAsync(fileName, arguments, cancellationToken);
-
-        if (exitCode != 0)
-        {
-            throw new InvalidOperationException(
-                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {exitCode}.{Environment.NewLine}{stderr}");
-        }
-
-        return stdout;
-    }
-}
-
-static class DockerBinaryMeasurer
+static class BinarySizeMeasurer
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -287,59 +217,43 @@ static class DockerBinaryMeasurer
     };
 
     public static async Task MeasureAsync(
-        string image,
+        string publishDirectory,
         string variant,
         string platform,
         string outputDirectory,
         CancellationToken cancellationToken = default)
     {
-        var extractDirectory = Path.Combine(outputDirectory, "extract");
-        Directory.CreateDirectory(extractDirectory);
-
-        // push-by-digest builds are not loaded into the local daemon; pull first.
-        await ProcessRunner.RunAsync(
-            "docker",
-            ["pull", "--platform", platform, image],
-            cancellationToken);
-
-        var containerId = (await ProcessRunner.RunForOutputAsync(
-            "docker",
-            ["create", "--platform", platform, image],
-            cancellationToken)).Trim();
-
-        try
+        var executablePath = Path.Combine(publishDirectory, "Distroless.HealthChecks");
+        if (!File.Exists(executablePath))
         {
-            var executablePath = Path.Combine(extractDirectory, "Distroless.HealthChecks");
-            var publishDirectory = Path.Combine(extractDirectory, "publish");
-
-            await ProcessRunner.RunAsync(
-                "docker",
-                ["cp", $"{containerId}:/Distroless.HealthChecks", executablePath],
-                cancellationToken);
-            Directory.CreateDirectory(publishDirectory);
-            await ProcessRunner.RunAsync(
-                "docker",
-                ["cp", $"{containerId}:/.", publishDirectory],
-                cancellationToken);
-
-            var executableSize = new FileInfo(executablePath).Length;
-            var totalSize = Directory
-                .EnumerateFiles(publishDirectory, "*", SearchOption.AllDirectories)
-                .Sum(path => new FileInfo(path).Length);
-
-            var measurement = new BinarySizeMeasurement(variant, platform, executableSize, totalSize);
-            var safePlatform = platform.Replace('/', '-');
-            var outputPath = Path.Combine(outputDirectory, $"{variant}-{safePlatform}.json");
-            var json = JsonSerializer.Serialize(measurement, JsonOptions);
-            await File.WriteAllTextAsync(outputPath, json, cancellationToken);
+            throw new FileNotFoundException($"Executable not found at '{executablePath}'.");
         }
-        finally
+
+        var executableSize = new FileInfo(executablePath).Length;
+        var totalSize = Directory
+            .EnumerateFiles(publishDirectory, "*", SearchOption.AllDirectories)
+            .Where(path => !IsBuildxExportArtifact(path))
+            .Sum(path => new FileInfo(path).Length);
+
+        var measurement = new BinarySizeMeasurement(variant, platform, executableSize, totalSize);
+        var safePlatform = platform.Replace('/', '-');
+        Directory.CreateDirectory(outputDirectory);
+        var outputPath = Path.Combine(outputDirectory, $"{variant}-{safePlatform}.json");
+        var json = JsonSerializer.Serialize(measurement, JsonOptions);
+        await File.WriteAllTextAsync(outputPath, json, cancellationToken);
+    }
+
+    private static bool IsBuildxExportArtifact(string path)
+    {
+        var fileName = Path.GetFileName(path);
+
+        if (fileName.Equals("provenance.json", StringComparison.OrdinalIgnoreCase))
         {
-            await ProcessRunner.RunAsync(
-                "docker",
-                ["rm", "-f", containerId],
-                cancellationToken);
+            return true;
         }
+
+        return fileName.StartsWith("sbom", StringComparison.OrdinalIgnoreCase)
+            && fileName.EndsWith(".spdx.json", StringComparison.OrdinalIgnoreCase);
     }
 }
 
