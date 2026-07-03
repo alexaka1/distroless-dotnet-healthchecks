@@ -57,9 +57,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: GitHub API only supports non-executable files and directories
-        # https://github.com/changesets/action/issues/523
-        run: git ls-files | while read -r file; do [ -x "$file" ] && chmod -x "$file" || true; done
       - name: Setup pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
