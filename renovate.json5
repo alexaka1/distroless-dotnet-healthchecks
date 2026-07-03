@@ -9,6 +9,7 @@
     'github>alexaka1/renovate-config//opinionated/security',
     ':automergePr',
     ':automergePatch',
+    ':automergeMinor',
     ':automergeDigest',
     ':automergeRequireAllStatusChecks',
     ':rebaseStalePrs',
