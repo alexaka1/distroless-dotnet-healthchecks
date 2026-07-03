@@ -128,7 +128,7 @@ internal static class ConsoleLog
     public static void Critical(string category, string message, Exception exception) =>
         Write(ConsoleLogLevel.Critical, category, 0, message, exception);
 
-    internal static bool IsEnabled(IConfiguration configuration, string category, ConsoleLogLevel level)
+    private static bool IsEnabled(IConfiguration configuration, string category, ConsoleLogLevel level)
     {
         var current = category;
         while (true)
