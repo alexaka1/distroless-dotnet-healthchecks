@@ -13,8 +13,6 @@ public class SimpleHealthCheck(
     public static readonly string[] Tags = ["simple"];
     private const string Category = "Distroless.HealthChecks.Checks.SimpleHealthCheck";
 
-    private static readonly HttpClient HttpClient = new();
-
     public async Task<SimpleHealthCheckResult> CheckAsync(CancellationToken cancellationToken = default)
     {
         var uris = options.Value.Uris;
@@ -22,32 +20,31 @@ public class SimpleHealthCheck(
 
         foreach (var uri in uris)
         {
-            try
+            var (statusCode, error) = await PlainHttpHealthClient.GetAsync(uri, cancellationToken);
+            ConsoleLog.HealthCheckResult(configuration, Category, uri, statusCode);
+
+            if (error is not null)
             {
-                using var result = await HttpClient.GetAsync(uri, cancellationToken);
-                ConsoleLog.HealthCheckResult(configuration, Category, uri, result.StatusCode);
-                if (!result.IsSuccessStatusCode)
-                {
-                    return new SimpleHealthCheckResult(
-                        HealthStatus.Unhealthy,
-                        description: null,
-                        exception: null,
-                        data: new Dictionary<string, object>
-                        {
-                            ["Uri"] = uri,
-                            ["StatusCode"] = result.StatusCode.ToString("G"),
-                        },
-                        stopwatch.Elapsed);
-                }
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.HealthCheckException(configuration, Category, uri, e);
+                ConsoleLog.HealthCheckException(configuration, Category, uri, error);
                 return new SimpleHealthCheckResult(
                     HealthStatus.Unhealthy,
                     description: null,
-                    exception: e,
+                    exception: error,
                     data: new Dictionary<string, object> { ["Uri"] = uri },
+                    stopwatch.Elapsed);
+            }
+
+            if (!IsSuccessStatusCode(statusCode))
+            {
+                return new SimpleHealthCheckResult(
+                    HealthStatus.Unhealthy,
+                    description: null,
+                    exception: null,
+                    data: new Dictionary<string, object>
+                    {
+                        ["Uri"] = uri,
+                        ["StatusCode"] = statusCode.ToString("G"),
+                    },
                     stopwatch.Elapsed);
             }
         }
@@ -59,6 +56,9 @@ public class SimpleHealthCheck(
             data: new Dictionary<string, object>(),
             stopwatch.Elapsed);
     }
+
+    private static bool IsSuccessStatusCode(HttpStatusCode statusCode) =>
+        (int)statusCode is >= 200 and <= 299;
 }
 
 public sealed class SimpleHealthCheckResult(

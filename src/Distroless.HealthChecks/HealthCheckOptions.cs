@@ -44,6 +44,12 @@ public class HealthCheckOptionsValidator(
 
             foreach (var uri in uris)
             {
+                if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+                {
+                    builder.AddError($"$Uri {uri} must use the http scheme", nameof(options.Uris));
+                    continue;
+                }
+
                 if (!IsLoopback(uri))
                 {
                     builder.AddError($"$Uri {uri} must be a loopback address", nameof(options.Uris));
