@@ -18,7 +18,7 @@ Option<string> publishDirOption = new("--publish-dir")
 
 Option<string> variantOption = new("--variant")
 {
-    Description = "Image variant (ubuntu-chiseled or alpine). Stored as-is; release table shows linux for ubuntu-chiseled.",
+    Description = "Image variant (ubuntu-chiseled or alpine).",
     Required = true,
 };
 
