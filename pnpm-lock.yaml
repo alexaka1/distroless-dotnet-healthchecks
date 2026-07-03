@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@babel/runtime@<7.26.10': 7.29.7
+  '@babel/runtime@<7.26.10': ^7.29.7
 
 importers:
 
