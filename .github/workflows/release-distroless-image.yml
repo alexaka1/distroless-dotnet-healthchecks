@@ -121,7 +121,7 @@ jobs:
         if: steps.docker_build.outputs.digest != ''
         run: |
           set -euo pipefail
-          dotnet run --project build/ReleaseBinarySize/ReleaseBinarySize.csproj --configuration Release -- \
+          dotnet run build/release-binary-size.cs -- \
             measure \
             --digest '${{ steps.docker_build.outputs.digest }}' \
             --variant '${{ matrix.base-image-type }}' \
@@ -448,7 +448,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
-          dotnet run --project build/ReleaseBinarySize/ReleaseBinarySize.csproj --configuration Release -- \
+          dotnet run build/release-binary-size.cs -- \
             append-release \
             --sizes-dir /tmp/binary-sizes \
             --changes-file "${{ steps.changelog.outputs.changes }}" \
