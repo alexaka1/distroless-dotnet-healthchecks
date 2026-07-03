@@ -33,12 +33,12 @@ catch (Exception exception)
 static async Task<int> RunMeasureAsync(string[] commandArgs)
 {
     var options = ParseOptions(commandArgs);
-    var digest = RequireOption(options, "digest");
+    var image = RequireOption(options, "image");
     var variant = RequireOption(options, "variant");
     var platform = RequireOption(options, "platform");
     var output = RequireOption(options, "output");
 
-    await DockerBinaryMeasurer.MeasureAsync(digest, variant, platform, output);
+    await DockerBinaryMeasurer.MeasureAsync(image, variant, platform, output);
     return 0;
 }
 
@@ -107,7 +107,7 @@ static void PrintUsage()
     Console.Error.WriteLine(
         """
         Usage:
-          release-binary-size.cs measure --digest <digest> --variant <variant> --platform <platform> --output <dir>
+          release-binary-size.cs measure --image <registry/image@sha256:...> --variant <variant> --platform <platform> --output <dir>
           release-binary-size.cs append-release --sizes-dir <dir> --changes-file <file> --repo <owner/repo> --tag <tag>
         """);
 }
@@ -286,7 +286,7 @@ static class DockerBinaryMeasurer
     };
 
     public static async Task MeasureAsync(
-        string digest,
+        string image,
         string variant,
         string platform,
         string outputDirectory,
@@ -295,9 +295,15 @@ static class DockerBinaryMeasurer
         var extractDirectory = Path.Combine(outputDirectory, "extract");
         Directory.CreateDirectory(extractDirectory);
 
+        // push-by-digest builds are not loaded into the local daemon; pull first.
+        await ProcessRunner.RunAsync(
+            "docker",
+            ["pull", "--platform", platform, image],
+            cancellationToken);
+
         var containerId = (await ProcessRunner.RunForOutputAsync(
             "docker",
-            ["create", digest],
+            ["create", "--platform", platform, image],
             cancellationToken)).Trim();
 
         try

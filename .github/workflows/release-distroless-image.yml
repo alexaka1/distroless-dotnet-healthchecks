@@ -123,7 +123,7 @@ jobs:
           set -euo pipefail
           dotnet run build/release-binary-size.cs -- \
             measure \
-            --digest '${{ steps.docker_build.outputs.digest }}' \
+            --image 'ghcr.io/${{ env.image_name }}@${{ steps.docker_build.outputs.digest }}' \
             --variant '${{ matrix.base-image-type }}' \
             --platform '${{ matrix.platform }}' \
             --output '${{ runner.temp }}/binary-sizes'
