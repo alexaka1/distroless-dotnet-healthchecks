@@ -1,4 +1,5 @@
 #!/usr/bin/env dotnet
+#:package NuGet.Versioning@7.6.0
 #:property PublishAot=false
 
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NuGet.Versioning;
 
 if (args.Length == 0)
 {
@@ -344,19 +346,19 @@ sealed class GitHubReleaseClient(HttpClient httpClient) : IDisposable
         CancellationToken cancellationToken = default)
     {
         var releases = await GetReleasesAsync(repository, cancellationToken);
-        var previousTag = releases
+        var releaseTags = releases
             .Select(release => release.TagName)
-            .FirstOrDefault(tag =>
-                tag.StartsWith(PackageTagPrefix, StringComparison.Ordinal) &&
-                !string.Equals(tag, currentTag, StringComparison.Ordinal));
+            .Where(tag => tag.StartsWith(PackageTagPrefix, StringComparison.Ordinal))
+            .ToList();
 
-        if (previousTag is null)
+        var comparisonTag = SemverReleaseComparer.FindComparisonTag(currentTag, releaseTags);
+        if (comparisonTag is null)
         {
             return null;
         }
 
         using var response = await httpClient.GetAsync(
-            $"repos/{repository}/releases/tags/{Uri.EscapeDataString(previousTag)}",
+            $"repos/{repository}/releases/tags/{Uri.EscapeDataString(comparisonTag)}",
             cancellationToken);
         response.EnsureSuccessStatusCode();
 
@@ -426,6 +428,59 @@ sealed class GitHubReleaseClient(HttpClient httpClient) : IDisposable
 
         [JsonPropertyName("body")]
         public string? Body { get; init; }
+    }
+}
+
+static class SemverReleaseComparer
+{
+    private const string PackageTagPrefix = "distroless-dotnet-healthchecks@";
+
+    public static string? FindComparisonTag(string currentTag, IEnumerable<string> releaseTags)
+    {
+        if (!TryParseTag(currentTag, out var currentVersion) || currentVersion is null)
+        {
+            return null;
+        }
+
+        var versions = releaseTags
+            .Select(tag => TryParseTag(tag, out var version) ? version : null)
+            .OfType<NuGetVersion>()
+            .ToList();
+
+        var stableVersions = versions
+            .Where(version => !version.IsPrerelease)
+            .ToList();
+
+        NuGetVersion? comparisonVersion = currentVersion.IsPrerelease
+            ? stableVersions.OrderByDescending(version => version).FirstOrDefault()
+            : stableVersions
+                .Where(version => version < currentVersion)
+                .OrderByDescending(version => version)
+                .FirstOrDefault();
+
+        if (comparisonVersion is null)
+        {
+            return null;
+        }
+
+        return $"{PackageTagPrefix}{comparisonVersion}";
+    }
+
+    private static bool TryParseTag(string tag, out NuGetVersion? version)
+    {
+        version = null;
+        if (!tag.StartsWith(PackageTagPrefix, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!NuGetVersion.TryParse(tag[PackageTagPrefix.Length..], out var parsed))
+        {
+            return false;
+        }
+
+        version = parsed;
+        return true;
     }
 }
 
