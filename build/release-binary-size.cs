@@ -203,7 +203,7 @@ static class BinarySizeFormatter
         }
 
         var sign = diff > 0 ? "+" : "-";
-        var percentage = previous.Value == 0 ? 0.0 : diff / (double)previous.Value * 100.0;
+        var percentage = Math.Abs(diff / (double)previous.Value * 100.0);
 
         return $"{sign}{FormatBytes(diff)} ({sign}{percentage:F1}%)";
     }
@@ -211,7 +211,7 @@ static class BinarySizeFormatter
 
 static class ProcessRunner
 {
-    public static async Task RunAsync(
+    private static async Task<(string Stdout, string Stderr, int ExitCode)> RunProcessAsync(
         string fileName,
         IReadOnlyList<string> arguments,
         CancellationToken cancellationToken = default)
@@ -237,14 +237,27 @@ static class ProcessRunner
             throw new InvalidOperationException($"Failed to start process: {fileName}");
         }
 
-        var stdout = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stderr = await process.StandardError.ReadToEndAsync(cancellationToken);
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
         await process.WaitForExitAsync(cancellationToken);
 
-        if (process.ExitCode != 0)
+        var stdout = await stdoutTask;
+        var stderr = await stderrTask;
+
+        return (stdout, stderr, process.ExitCode);
+    }
+
+    public static async Task RunAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        CancellationToken cancellationToken = default)
+    {
+        var (stdout, stderr, exitCode) = await RunProcessAsync(fileName, arguments, cancellationToken);
+
+        if (exitCode != 0)
         {
             throw new InvalidOperationException(
-                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {process.ExitCode}.{Environment.NewLine}{stderr}{stdout}");
+                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {exitCode}.{Environment.NewLine}{stderr}{stdout}");
         }
     }
 
@@ -253,35 +266,12 @@ static class ProcessRunner
         IReadOnlyList<string> arguments,
         CancellationToken cancellationToken = default)
     {
-        using var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = fileName,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-            },
-        };
+        var (stdout, stderr, exitCode) = await RunProcessAsync(fileName, arguments, cancellationToken);
 
-        foreach (var argument in arguments)
-        {
-            process.StartInfo.ArgumentList.Add(argument);
-        }
-
-        if (!process.Start())
-        {
-            throw new InvalidOperationException($"Failed to start process: {fileName}");
-        }
-
-        var stdout = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stderr = await process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
-
-        if (process.ExitCode != 0)
+        if (exitCode != 0)
         {
             throw new InvalidOperationException(
-                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {process.ExitCode}.{Environment.NewLine}{stderr}");
+                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {exitCode}.{Environment.NewLine}{stderr}");
         }
 
         return stdout;
@@ -503,7 +493,7 @@ static class SemverReleaseComparer
 
 static class ReleaseNotesAppender
 {
-    public const string BinarySizesMarker = "binary-sizes:";
+    private const string BinarySizesMarker = "binary-sizes:";
 
     private static readonly JsonSerializerOptions JsonReadOptions = new()
     {

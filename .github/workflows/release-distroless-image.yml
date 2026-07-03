@@ -119,14 +119,19 @@ jobs:
             10.0.x
       - name: Measure binary size
         if: steps.docker_build.outputs.digest != ''
+        env:
+          BINARY_SIZE_IMAGE: ghcr.io/${{ env.image_name }}@${{ steps.docker_build.outputs.digest }}
+          BINARY_SIZE_VARIANT: ${{ matrix.base-image-type }}
+          BINARY_SIZE_PLATFORM: ${{ matrix.platform }}
+          BINARY_SIZE_OUTPUT: ${{ runner.temp }}/binary-sizes
         run: |
           set -euo pipefail
           dotnet run build/release-binary-size.cs -- \
             measure \
-            --image 'ghcr.io/${{ env.image_name }}@${{ steps.docker_build.outputs.digest }}' \
-            --variant '${{ matrix.base-image-type }}' \
-            --platform '${{ matrix.platform }}' \
-            --output '${{ runner.temp }}/binary-sizes'
+            --image "$BINARY_SIZE_IMAGE" \
+            --variant "$BINARY_SIZE_VARIANT" \
+            --platform "$BINARY_SIZE_PLATFORM" \
+            --output "$BINARY_SIZE_OUTPUT"
       - name: Upload digest
         if: steps.docker_build.outputs.digest != ''
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -446,14 +451,18 @@ jobs:
       - name: Append binary size comparison
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BINARY_SIZE_SIZES_DIR: /tmp/binary-sizes
+          BINARY_SIZE_CHANGES_FILE: ${{ steps.changelog.outputs.changes }}
+          BINARY_SIZE_REPO: ${{ github.repository }}
+          BINARY_SIZE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           dotnet run build/release-binary-size.cs -- \
             append-release \
-            --sizes-dir /tmp/binary-sizes \
-            --changes-file "${{ steps.changelog.outputs.changes }}" \
-            --repo "${{ github.repository }}" \
-            --tag "${{ github.ref_name }}"
+            --sizes-dir "$BINARY_SIZE_SIZES_DIR" \
+            --changes-file "$BINARY_SIZE_CHANGES_FILE" \
+            --repo "$BINARY_SIZE_REPO" \
+            --tag "$BINARY_SIZE_TAG"
       - name: Extract version from tag name
         id: version
         run: |
