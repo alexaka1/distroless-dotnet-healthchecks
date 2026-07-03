@@ -35,7 +35,7 @@ public class SimpleHealthCheck(
                 {
                     return new SimpleHealthCheckResult(
                         HealthStatus.Unhealthy,
-                        description: $"HTTP {(int)result.StatusCode} {result.StatusCode:G}",
+                        description: $"HTTP {result.StatusCode:D} {result.StatusCode:G}",
                         exception: null,
                         data: new Dictionary<string, object>
                         {
