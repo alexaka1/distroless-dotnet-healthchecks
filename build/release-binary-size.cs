@@ -232,6 +232,7 @@ static class BinarySizeMeasurer
         var executableSize = new FileInfo(executablePath).Length;
         var totalSize = Directory
             .EnumerateFiles(publishDirectory, "*", SearchOption.AllDirectories)
+            .Where(path => !IsBuildxExportArtifact(path))
             .Sum(path => new FileInfo(path).Length);
 
         var measurement = new BinarySizeMeasurement(variant, platform, executableSize, totalSize);
@@ -240,6 +241,19 @@ static class BinarySizeMeasurer
         var outputPath = Path.Combine(outputDirectory, $"{variant}-{safePlatform}.json");
         var json = JsonSerializer.Serialize(measurement, JsonOptions);
         await File.WriteAllTextAsync(outputPath, json, cancellationToken);
+    }
+
+    private static bool IsBuildxExportArtifact(string path)
+    {
+        var fileName = Path.GetFileName(path);
+
+        if (fileName.Equals("provenance.json", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return fileName.StartsWith("sbom", StringComparison.OrdinalIgnoreCase)
+            && fileName.EndsWith(".spdx.json", StringComparison.OrdinalIgnoreCase);
     }
 }
 
