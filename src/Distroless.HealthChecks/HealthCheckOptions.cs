@@ -1,5 +1,4 @@
 using System.Net;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Distroless.HealthChecks;
@@ -13,9 +12,7 @@ public class HealthCheckOptions
     public const string Key = "HealthCheck";
 }
 
-public partial class HealthCheckOptionsValidator(
-    ILogger<HealthCheckOptionsValidator> logger,
-    IOptions<Features.Features> features)
+public class HealthCheckOptionsValidator(IOptions<Features.Features> features)
     : IValidateOptions<HealthCheckOptions>
 {
     private readonly Lazy<IPAddress[]> _localAddresses = new(() =>
@@ -62,36 +59,15 @@ public partial class HealthCheckOptionsValidator(
                 return true;
             }
 
-            // Get the IP addresses of the given hostname
             var hostAddresses = Dns.GetHostAddresses(uri.Host);
-            LogHostAddress(uri, hostAddresses);
-
-            // Get the IP addresses of the local machine
             var localAddresses = _localAddresses.Value;
-            LogHostAddress(localAddresses);
-
-            // Check if any of the host's addresses match any of the local addresses
             return hostAddresses.Any(hostAddr => localAddresses.Any(hostAddr.Equals));
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            LogUnableToDetermineHostAddress(e, uri);
+            return false;
         }
-
-        return false;
     }
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Unable to determine host address of {Uri}",
-        EventName = "UnableToDetermineHostAddress")]
-    private partial void LogUnableToDetermineHostAddress(Exception ex, Uri uri);
-
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Host address of uri {Uri} is {HostAddress}",
-        EventName = "UriHostAddress")]
-    private partial void LogHostAddress(Uri uri, IPAddress[] hostAddress);
-
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Host address of machine is {HostAddress}",
-        EventName = "HostAddress")]
-    private partial void LogHostAddress(IPAddress[] hostAddress);
 }
 
 public class PostConfigureHealthCheckOptions
