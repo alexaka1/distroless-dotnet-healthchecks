@@ -12,6 +12,7 @@ internal enum ConsoleLogLevel
     Warning = 3,
     Error = 4,
     Critical = 5,
+    None = 6,
 }
 
 internal static class ConsoleLog
@@ -127,15 +128,14 @@ internal static class ConsoleLog
     public static void Critical(string category, string message, Exception exception) =>
         Write(ConsoleLogLevel.Critical, category, 0, message, exception);
 
-    private static bool IsEnabled(IConfiguration configuration, string category, ConsoleLogLevel level)
+    internal static bool IsEnabled(IConfiguration configuration, string category, ConsoleLogLevel level)
     {
         var current = category;
         while (true)
         {
-            var configured = configuration.GetValue<ConsoleLogLevel?>($"Logging:LogLevel:{current}");
-            if (configured.HasValue)
+            if (TryGetConfiguredLevel(configuration, $"Logging:LogLevel:{current}", out var configured))
             {
-                return level >= configured.Value;
+                return IsLevelEnabled(level, configured);
             }
 
             var lastDot = current.LastIndexOf('.');
@@ -147,9 +147,26 @@ internal static class ConsoleLog
             current = current[..lastDot];
         }
 
-        var defaultLevel = configuration.GetValue("Logging:LogLevel:Default", ConsoleLogLevel.Error);
-        return level >= defaultLevel;
+        var defaultLevel = TryGetConfiguredLevel(configuration, "Logging:LogLevel:Default", out var defaultConfigured)
+            ? defaultConfigured
+            : ConsoleLogLevel.Error;
+        return IsLevelEnabled(level, defaultLevel);
     }
+
+    private static bool TryGetConfiguredLevel(IConfiguration configuration, string key, out ConsoleLogLevel level)
+    {
+        var value = configuration[key];
+        if (string.IsNullOrEmpty(value))
+        {
+            level = default;
+            return false;
+        }
+
+        return Enum.TryParse(value, ignoreCase: true, out level);
+    }
+
+    private static bool IsLevelEnabled(ConsoleLogLevel level, ConsoleLogLevel configured) =>
+        configured != ConsoleLogLevel.None && level >= configured;
 
     private static string FormatAddresses(System.Net.IPAddress[] hostAddress) =>
         string.Join(',', hostAddress.Select(address => address.ToString()));
@@ -177,6 +194,7 @@ internal static class ConsoleLog
         ConsoleLogLevel.Warning => "warn",
         ConsoleLogLevel.Error => "fail",
         ConsoleLogLevel.Critical => "crit",
+        ConsoleLogLevel.None => "none",
         _ => "none",
     };
 }

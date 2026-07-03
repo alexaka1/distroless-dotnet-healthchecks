@@ -47,13 +47,14 @@ public class SimpleHealthCheck(
             }
             catch (Exception e)
             {
-                ConsoleLog.HealthCheckException(configuration, Category, uri, e);
-                return new SimpleHealthCheckResult(
+                var failure = new SimpleHealthCheckResult(
                     HealthStatus.Unhealthy,
                     description: null,
                     exception: e,
                     data: new Dictionary<string, object> { ["Uri"] = uri },
                     stopwatch.Elapsed);
+                ConsoleLog.HealthCheckException(configuration, Category, uri, e);
+                return failure;
             }
         }
 

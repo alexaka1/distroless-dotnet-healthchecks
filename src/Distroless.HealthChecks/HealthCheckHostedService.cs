@@ -21,6 +21,11 @@ public class HealthCheckHostedService(
 
         if (result.Status is not HealthStatus.Healthy)
         {
+            if (statusResult.HealthStatus > result.Status)
+            {
+                statusResult.HealthStatus = result.Status;
+            }
+
             ConsoleLog.HealthCheckEnd(
                 configuration,
                 SimpleHealthCheck.Name,
@@ -33,11 +38,6 @@ public class HealthCheckHostedService(
             ConsoleLog.HealthCheckFailed(
                 configuration,
                 JsonSerializer.Serialize(report, HealthCheckSerializerContext.Default.HealthFailureReport));
-
-            if (statusResult.HealthStatus > result.Status)
-            {
-                statusResult.HealthStatus = result.Status;
-            }
         }
 
         await host.StopAsync(stoppingToken);
