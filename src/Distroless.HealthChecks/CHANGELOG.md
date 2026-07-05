@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1293](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1293) [`7ff6304`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/7ff630443a8ca2481afeec9fd2f6084d10515471) Thanks [@alexaka1](https://github.com/alexaka1)! - Reduce native binary size by removing health check framework dependencies, using a static HttpClient, and enabling AOT feature switches. Restore structured JSON failure reports and console-compatible stderr output without using `ILogger` in application code.
+
 ## 1.5.8
 
 ### Patch Changes
