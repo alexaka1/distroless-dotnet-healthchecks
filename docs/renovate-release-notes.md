@@ -14,7 +14,7 @@ tries them in this order:
 3. If neither source works, use a compare link when one is available.
 
 The implementation is in Renovate's
-[`addReleaseNotes()` function](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/release-notes.ts).
+[`addReleaseNotes()` function](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/release-notes.ts).
 
 ## 1. Locate the source repository
 
@@ -34,7 +34,7 @@ https://github.com/alexaka1/distroless-dotnet-healthchecks/tree/main/src/Distrol
 ```
 
 Renovate's
-[`addMetaData()` function](https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.ts)
+[`addMetaData()` function](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/modules/datasource/metadata.ts)
 recognizes the GitHub tree URL and normalizes it into:
 
 ```text
@@ -48,7 +48,7 @@ multi-architecture image index metadata.
 ## 2. Determine which versions need notes
 
 Renovate does not simply request the latest changelog entry. Its
-[`getInRangeReleases()` function](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/releases.ts)
+[`getInRangeReleases()` function](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/releases.ts)
 gets the available releases from the dependency datasource and filters them to
 the update range:
 
@@ -66,7 +66,7 @@ every compatible intermediate release. For example, an update from `1.5.5` to
 ## 3. Find a changelog file
 
 For GitHub repositories, Renovate's
-[`getReleaseNotesMd()` function](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/github/index.ts):
+[`getReleaseNotesMd()` function](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/github/index.ts):
 
 1. Reads the repository's default branch.
 2. Requests its Git tree.
@@ -116,7 +116,7 @@ For version `1.6.0`, Renovate returns the content after `## 1.6.0` and before
 selected entry.
 
 The parsing and section selection are implemented by
-[`getReleaseNotesMd()`](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/release-notes.ts).
+[`getReleaseNotesMd()`](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/release-notes.ts).
 
 ## 5. Fall back to GitHub Release bodies
 
@@ -129,9 +129,9 @@ releases and attempts to match a release using:
 4. A user-configured `extractVersion` regular expression.
 
 The GitHub release list is fetched by Renovate's
-[`getReleaseList()` function](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/github/index.ts),
+[`getReleaseList()` function](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/github/index.ts),
 and matching is performed in
-[`getReleaseNotes()`](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/release-notes.ts).
+[`getReleaseNotes()`](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/release-notes.ts).
 
 For this image, Renovate sees:
 
@@ -178,7 +178,7 @@ immediately.
 
 - [Renovate and changelogs](https://docs.renovatebot.com/key-concepts/changelogs/)
 - [Renovate Docker datasource](https://docs.renovatebot.com/modules/datasource/docker/)
-- [Changelog entry point](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/index.ts)
-- [Release-range filtering](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/releases.ts)
-- [Changelog and GitHub Release parsing](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/release-notes.ts)
-- [GitHub changelog and release fetching](https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/github/index.ts)
+- [Changelog entry point](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/index.ts)
+- [Release-range filtering](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/releases.ts)
+- [Changelog and GitHub Release parsing](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/release-notes.ts)
+- [GitHub changelog and release fetching](https://github.com/renovatebot/renovate/blob/016ca59a5cc0f6c63c7716f0fcc2234b84544b4f/lib/workers/repository/update/pr/changelog/github/index.ts)
