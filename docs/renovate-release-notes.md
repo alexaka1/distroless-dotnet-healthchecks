@@ -1,8 +1,8 @@
 # How Renovate discovers release notes
 
 This document explains how Renovate discovers release notes for the
-`alexaka1/distroless-dotnet-healthchecks` container image, why it previously
-could not find them, and how the image metadata fixes discovery.
+`alexaka1/distroless-dotnet-healthchecks` container image and why its OCI source
+metadata identifies the package directory.
 
 ## Summary
 
@@ -74,15 +74,16 @@ For GitHub repositories, Renovate's
 4. Filters the tree for recognized changelog filenames.
 5. Fetches the selected file as a Git blob.
 
-Without `sourceDirectory`, Renovate performs a non-recursive root tree lookup.
-It therefore could not see:
+The changelog for this image is nested at:
 
 ```text
 src/Distroless.HealthChecks/CHANGELOG.md
 ```
 
-Publishing the package directory in the OCI source URL causes Renovate to use a
-recursive lookup and find that file.
+Identifying `src/Distroless.HealthChecks` as `sourceDirectory` makes Renovate
+request the recursive Git tree and scope changelog filename matching to the
+package directory. This connects the Docker package metadata to the changelog
+that describes its releases.
 
 ## 4. Extract the matching changelog section
 
@@ -158,8 +159,8 @@ version `1.6.0`.
 
 ## Result and limitation
 
-The package-directory source metadata makes Renovate display the matching
-entry from `src/Distroless.HealthChecks/CHANGELOG.md` without requiring custom
+The package-directory source metadata lets Renovate display the matching entry
+from `src/Distroless.HealthChecks/CHANGELOG.md` without requiring custom
 configuration in every consuming repository.
 
 It does not make Renovate consume the richer GitHub Release body containing
