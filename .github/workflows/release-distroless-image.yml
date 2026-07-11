@@ -63,6 +63,10 @@ jobs:
         with:
           images: |
             name=ghcr.io/${{ env.image_name }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}/tree/main/src/Distroless.HealthChecks
+          annotations: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}/tree/main/src/Distroless.HealthChecks
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
       - name: Get Git commit timestamp
@@ -240,6 +244,8 @@ jobs:
             type=semver,pattern={{major}}.{{minor}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/distroless-dotnet-healthchecks@0.0.') }}
             type=semver,pattern={{major}},match=${{ env.VERSION_REGEX }},enable=${{ !startsWith(github.ref, 'refs/tags/distroless-dotnet-healthchecks@0.') }}
             type=edge
+          annotations: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}/tree/main/src/Distroless.HealthChecks
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
           VERSION_REGEX: '^distroless-dotnet-healthchecks@(\d+\.\d+\.\d+.*)$'
