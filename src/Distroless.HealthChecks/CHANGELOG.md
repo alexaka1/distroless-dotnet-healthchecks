@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.6.1
+
+### Patch Changes
+
+- [#1320](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1320) [`c4bc3fc`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/c4bc3fc487eac91943c85e0677a1f50509f8acd6) Thanks [@alexaka1](https://github.com/alexaka1)! - Point the container image source metadata at the package directory so Renovate can discover the existing changelog and include release notes in downstream update pull requests.
+
 ## 1.6.0
 
 ### Minor Changes
