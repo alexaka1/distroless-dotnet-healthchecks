@@ -1,20 +1,20 @@
 # this file contains the test cases for the base images
 # this is so dependabot can conveniently update these images
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:e2a34f0f2b3b8c0f0c1c9291238af64f19e3e8a0ecbdd73547140aede56b791e
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:49cb3b45cd69eeee6579a34a80c6af5e47a27e49734292068f18bdd7ff568e46
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:8dc16556c8b4045e452cf68eb269eef8f0695882131dbb7f64fe4647cf916078
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:864ad0e4e53dca2ba24f3e6c91a23ab4da966a560e972448a3378a2d4c895726
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:5b4290317dfea284ebb52d6bdd85aa649fbfb83ed73500402e9a432ca732e337
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:05371b64798559bd65c2e9cb728235c6a85427f39944e02a77f37ce6a6f62c01
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine@sha256:0f3eddbb6f96aefc608e2bb8bd3aa30cc76475668de0c21277065e339ca28a31
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:a74e3641349c4ef08b657dd8704825e05012ad1c419611fe9f5576fc422335c6
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine@sha256:5a7cc218b62062048e8622edaa06fc6a68b1afe9d46bb914417cb2ed2b3ed0bf
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0@sha256:f534ca3286269111594f485c4dd6f3b4e030154bb721e3616d27f55e8b952203
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble@sha256:53c46707b70db19a8e3da705b0fc0ef3a0aa8922bac651144a14a17961659126
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled@sha256:08ff1d4515ad69316a9432820f3a29f3bd3a88b0a43582848b90a1fcd54d21d3
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-azurelinux3.0-distroless@sha256:956364bd7d64e98776dcb48a12961b3cbaba927476895ec234c413ef6e5f5065
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine@sha256:7dd44bd4c712dea9b3f13fe77c16fd9cae98a83d8f9d676f786a89fcab83ad90
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0@sha256:97ebc1fdcce68defae5b31f5ce6be6c1abe86ac7fe0247d454a3a92685df2f95
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:8.0-noble-chiseled-aot@sha256:320e13df8f613ccd8bbf128b5a2504ab623b1237b6008bf9ebc6dff86231b4f1
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0@sha256:ec7e51a6c081dad3baac83c6cf94d263d2ccfc1be5da3354f239f37e5cd84832
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble@sha256:7cebc55d514dee386a5fe7111a59cc63143ce80d84f888b812741c7a43fced15
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-noble-chiseled@sha256:d108310d73a80e2e186d8c1d2162d130f6e6b8994ea2cb11a341845dcbef7b7f
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:9.0-azurelinux3.0-distroless@sha256:0ce1c307d30bf0afd6dc0551ac2b98691361e7c5e3615d31adbc81bf0a054b44
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0@sha256:ebf77bcda11592a859834333025c23c44a812d7a120c7bf290a19ca32697c40e
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine@sha256:297e573be253dafcba4eee8ab29e8e05ab3c5f13f966b3537af2256864de5668
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0@sha256:894098eafc82e5fa02ba9f2b71d426dc78252876b9e914caae77ed95cfce185a
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine@sha256:ad7cd1ed2e913fbd806f8ecc0e8bb8e9e8fb7cfd4d3fa43be9aa0b4cd8008bf5
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0@sha256:83b8944617c3f912cd52f9766ea622479e657f58f59258ba546f133c73276934
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-noble-chiseled@sha256:94cbec9af5f0804479edd7298f2f5bae919403d1012047d6cd6a0daae67740ff
 FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-azurelinux3.0-distroless@sha256:7d3e45e97fc5a4b4d24b5301dddc677ec909b126f4ed5c8e397e6a153f7d5e84
