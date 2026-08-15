@@ -1,5 +1,5 @@
 #!/usr/bin/env dotnet
-#:package NuGet.Versioning@7.6.0
+#:package NuGet.Versioning@7.9.0
 #:package System.CommandLine@2.0.11
 #:property PublishAot=false
 
