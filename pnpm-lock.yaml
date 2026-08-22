@@ -10,7 +10,7 @@ overrides:
 importers:
 
   .:
-    dependencies:
+    devDependencies:
       '@changesets/changelog-github':
         specifier: 1.0.0
         version: 1.0.0
