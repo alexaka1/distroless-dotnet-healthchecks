@@ -22,7 +22,7 @@ fi
 if [ ${#SNAPSHOT_ARG[@]} -eq 0 ]; then
   pnpm run changeset:version
 else
-  pnpm run changeset:version "${SNAPSHOT_ARG[@]}"
+  pnpm run changeset:version -- "${SNAPSHOT_ARG[@]}"
 fi
 
 # Define the source folder

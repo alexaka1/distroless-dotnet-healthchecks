@@ -1,15 +1,13 @@
 {
-  "$schema": "https://unpkg.com/@changesets/config@3.1.2/schema.json",
+  "$schema": "https://unpkg.com/@changesets/config@4.0.0/schema.json",
   "changelog": ["@changesets/changelog-github", { "repo": "alexaka1/distroless-dotnet-healthchecks" }],
   "commit": false,
   "fixed": [],
   "linked": [],
   "access": "restricted",
   "baseBranch": "main",
+  "format": "auto",
   "updateInternalDependencies": "patch",
   "ignore": [],
-  "privatePackages": {
-    "version": true,
-    "tag": true
-  }
+  "privatePackages": true
 }
