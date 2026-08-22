@@ -8,7 +8,7 @@ on:
       snapshot:
         required: false
         type: string
-        description: 'Snapshot name to use when versioning. Set to "true" to snapshot without a name.'
+        description: 'Snapshot name to use when versioning. Leave empty to version normally. Set to "true" to snapshot without a name.'
     secrets:
       RELEASE_BOT_APP_ID:
         required: true
@@ -20,10 +20,11 @@ on:
         required: false
         type: choice
         options:
-          - ''
+          - none
           - 'true'
-          - 'hotfix'
-        description: 'Snapshot name to use when versioning. Set to "true" to snapshot without a name.'
+          - hotfix
+        default: none
+        description: 'Snapshot name to use when versioning. Use none to version normally. Set to true to snapshot without a name.'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-changesets
@@ -33,7 +34,7 @@ permissions: {}
 jobs:
   select-mode:
     name: Select Changesets mode
-    if: ${{ inputs.snapshot == '' }}
+    if: ${{ inputs.snapshot == '' || inputs.snapshot == 'none' }}
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     defaults:
@@ -71,7 +72,7 @@ jobs:
 
   version:
     name: Version packages
-    if: ${{ inputs.snapshot == '' && needs.select-mode.outputs.mode == 'version' }}
+    if: ${{ (inputs.snapshot == '' || inputs.snapshot == 'none') && needs.select-mode.outputs.mode == 'version' }}
     needs: select-mode
     runs-on: ubuntu-24.04-arm
     environment: release
@@ -121,7 +122,7 @@ jobs:
 
   publish:
     name: Tag release
-    if: ${{ inputs.snapshot == '' && needs.select-mode.outputs.mode == 'publish' }}
+    if: ${{ (inputs.snapshot == '' || inputs.snapshot == 'none') && needs.select-mode.outputs.mode == 'publish' }}
     needs: select-mode
     runs-on: ubuntu-24.04-arm
     environment: release
@@ -170,7 +171,7 @@ jobs:
 
   snapshot:
     name: Create snapshot release
-    if: ${{ inputs.snapshot != '' }}
+    if: ${{ inputs.snapshot != '' && inputs.snapshot != 'none' }}
     runs-on: ubuntu-24.04-arm
     environment: release
     timeout-minutes: 10
