@@ -9,5 +9,8 @@
   "format": "auto",
   "updateInternalDependencies": "patch",
   "ignore": [],
-  "privatePackages": true
+  "privatePackages": {
+    "version": true,
+    "tag": true
+  }
 }
