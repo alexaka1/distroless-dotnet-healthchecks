@@ -42,6 +42,7 @@ jobs:
         shell: bash
     permissions:
       contents: read
+      actions: write
     outputs:
       mode: ${{ steps.select-mode.outputs.mode }}
     steps:
@@ -117,8 +118,8 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: pnpm run version
-          commit-message: 'Version packages'
-          pr-title: 'Version packages'
+          commit-message: 'Version Packages'
+          pr-title: 'Version Packages'
 
   publish:
     name: Tag release
@@ -166,7 +167,7 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: pnpm run changeset:tag
-          create-github-releases: false
+          create-github-releases: true
           push-git-tags: true
 
   snapshot:
