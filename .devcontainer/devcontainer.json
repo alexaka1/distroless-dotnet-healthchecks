@@ -12,7 +12,7 @@
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/node:1": {
-      "version": "24.19.0",
+      "version": "24.20.0",
       // # renovate: datasource=npm packageName=pnpm
       "pnpmVersion": "11.24.0"
     }
