@@ -154,6 +154,7 @@ jobs:
         with:
           files: artifacts/**/*.trx
           action_fail: false
+          fail_on: nothing
   success:
     timeout-minutes: 2
     if: ${{ always() }}
