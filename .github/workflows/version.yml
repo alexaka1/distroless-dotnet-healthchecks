@@ -35,7 +35,7 @@ jobs:
   select-mode:
     name: Select Changesets mode
     if: ${{ inputs.snapshot == '' || inputs.snapshot == 'none' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     defaults:
       run:
@@ -75,7 +75,7 @@ jobs:
     name: Version packages
     if: ${{ (inputs.snapshot == '' || inputs.snapshot == 'none') && needs.select-mode.outputs.mode == 'version' }}
     needs: select-mode
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     environment: release
     timeout-minutes: 10
     defaults:
@@ -125,7 +125,7 @@ jobs:
     name: Tag release
     if: ${{ (inputs.snapshot == '' || inputs.snapshot == 'none') && needs.select-mode.outputs.mode == 'publish' }}
     needs: select-mode
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     environment: release
     timeout-minutes: 10
     defaults:
@@ -173,7 +173,7 @@ jobs:
   snapshot:
     name: Create snapshot release
     if: ${{ inputs.snapshot != '' && inputs.snapshot != 'none' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     environment: release
     timeout-minutes: 10
     defaults:
