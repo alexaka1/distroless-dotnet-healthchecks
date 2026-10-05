@@ -157,7 +157,7 @@ jobs:
   merge-and-publish-distroless-dotnet-healthcheck:
     name: Merge digest under tags (${{ matrix.base-image-type }})
     needs: publish-digest-distroless-dotnet-healthcheck
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     environment: ${{ 'Production' }}
     timeout-minutes: 10
     permissions:
