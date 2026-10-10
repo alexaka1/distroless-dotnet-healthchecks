@@ -140,7 +140,7 @@ jobs:
             --output "$BINARY_SIZE_OUTPUT"
       - name: Upload digest
         if: steps.docker_build.outputs.digest != ''
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: digests-${{ matrix.base-image-type }}-${{ env.PLATFORM_SAFE }}
           path: ${{ runner.temp }}/digests-${{ matrix.base-image-type }}/*
@@ -148,7 +148,7 @@ jobs:
           retention-days: 2
       - name: Upload binary size
         if: steps.docker_build.outputs.digest != ''
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: binary-size-${{ matrix.base-image-type }}-${{ env.PLATFORM_SAFE }}
           path: ${{ runner.temp }}/binary-sizes/*.json
@@ -353,7 +353,7 @@ jobs:
           variant='${{ matrix.base-image-type }}'
           printf '%s\n' "$variant" > variant.txt
       - name: Upload merged artifact (digest + metadata)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           # Use a slash-free name for artifacts to avoid issues
           name: merged-${{ matrix.base-image-type }}
