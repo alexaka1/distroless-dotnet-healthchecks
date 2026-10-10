@@ -89,7 +89,7 @@ jobs:
           tags: ${{ env.HEALTHCHECK_IMAGE_NAME }}:${{ env.HEALTHCHECK_IMAGE_TAG }}
           outputs: type=docker,dest=${{ runner.temp }}/image.tar
       - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ env.HEALTHCHECK_IMAGE_NAME }}-${{ matrix.target-os }}-${{ matrix.platform }}-${{ matrix.base-image-type }}
           path: ${{ runner.temp }}/image.tar
