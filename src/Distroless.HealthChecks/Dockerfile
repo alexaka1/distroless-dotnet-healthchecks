@@ -2,8 +2,8 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 ARG BUILD_CONFIGURATION=Release
 ARG BASE_IMAGE_TYPE=ubuntu-chiseled
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble-chiseled@sha256:bc6ba0158e93277ca1a5bc0881d13b08e6ca7f6d98db623592095eaf7fd7a816 AS base-ubuntu
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine@sha256:ad7cd1ed2e913fbd806f8ecc0e8bb8e9e8fb7cfd4d3fa43be9aa0b4cd8008bf5 AS base-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled@sha256:47ef522a67d1434d8b48361f05d4f55b37717094f56b83a580032c067d2ea0e7 AS base-ubuntu
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-alpine@sha256:9fb897322515d33730f87cb3dc3a43694f6f260f8e3e7a537c791fcda60ced66 AS base-alpine
 
 # Support both "ubuntu" and "ubuntu-chiseled" values for BASE_IMAGE_TYPE.
 FROM base-ubuntu AS base-ubuntu-chiseled
@@ -11,10 +11,10 @@ FROM base-ubuntu AS base-ubuntu-chiseled
 FROM base-${BASE_IMAGE_TYPE} AS base
 WORKDIR /app
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:10.0-noble-aot@sha256:1ab4cc99a58e0aa4cdcb7e081d90b9a212c5b89afff9d197a53ee2da0e96f8bb AS build-ubuntu
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:11.0-resolute-aot@sha256:a87d46f838f76eb8685a39aff819d8de74a944c2fe6d8141d99496721259b088 AS build-ubuntu
 # alpine does not use cross compilation, because https://github.com/dotnet/runtime/issues/92294, also see https://github.com/dotnet/aspire/pull/10275 for more context
 # TL;DR native builder to build for a specific `arch`
-FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0-alpine-aot@sha256:393a02d99119791e0b44a93995aad7c9d089ee2c402e2e3cb096d5e0b734ca7d AS build-alpine
+FROM mcr.microsoft.com/dotnet/nightly/sdk:11.0-alpine-aot@sha256:c088f666e9e6a70304d17f686cbc483f97b6fb31e2df35b488c2ba7da1b3d8a1 AS build-alpine
 
 # Support both "ubuntu" and "ubuntu-chiseled" for build stage, matching base mapping.
 FROM build-ubuntu AS build-ubuntu-chiseled
@@ -22,6 +22,8 @@ FROM build-ubuntu AS build-ubuntu-chiseled
 FROM build-${BASE_IMAGE_TYPE} AS build
 ARG BUILD_CONFIGURATION
 ARG TARGETARCH
+# The MSBuild server is on by default in .NET 11 and cannot stay running across Docker RUN steps.
+ENV DOTNET_CLI_USE_MSBUILD_SERVER=false
 WORKDIR /src
 COPY ["nuget.config", "./"]
 COPY ["src/Distroless.HealthChecks/Distroless.HealthChecks.csproj", "src/Distroless.HealthChecks/"]
