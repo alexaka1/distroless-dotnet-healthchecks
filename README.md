@@ -13,10 +13,10 @@ This is a simple AOT .NET app, that is able to run a health check against a list
 
 ## Usage
 
-It works with any `.NET 8`, `.NET 9` or `.NET 10` base image. For example
+It works with any `.NET 8`, `.NET 9`, `.NET 10`, or `.NET 11` base image. For example
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled AS final
 # Get the executable and copy it to /healthchecks
 COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 / /healthchecks
 # Setup the healthcheck using the EXEC array syntax
@@ -81,7 +81,7 @@ To decode a key:
 
 ## Building
 
-You will need the .NET 9 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.
+You will need the .NET 11 SDK installed, along with docker and buildx. You don't need Node, unless you plan to open PRs, in which case it is recommended you also add changesets to your PRs.
 
 On Windows you must use WSL2 as the docker backend.
 
