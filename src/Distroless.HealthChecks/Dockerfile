@@ -11,7 +11,6 @@ FROM base-ubuntu AS base-ubuntu-chiseled
 FROM base-${BASE_IMAGE_TYPE} AS base
 WORKDIR /app
 
-# .NET 11 Ubuntu images are 26.04 (resolute). The ubuntu-chiseled build-arg still selects this stage.
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/nightly/sdk:11.0-resolute-aot@sha256:a87d46f838f76eb8685a39aff819d8de74a944c2fe6d8141d99496721259b088 AS build-ubuntu
 # alpine does not use cross compilation, because https://github.com/dotnet/runtime/issues/92294, also see https://github.com/dotnet/aspire/pull/10275 for more context
 # TL;DR native builder to build for a specific `arch`
