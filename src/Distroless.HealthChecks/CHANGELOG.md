@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.7.0
+
+### Minor Changes
+
+- [#1447](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1447) [`05759c4`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/05759c4846699508423390e501512dddaef3a319) Thanks [@alexaka1](https://github.com/alexaka1)! - Upgrade the Native AOT health check to .NET 11. Container tests now include .NET 11 runtime-deps images, alongside the existing .NET 8, 9, and 10 images.
+
 ## 1.6.1
 
 ### Patch Changes
