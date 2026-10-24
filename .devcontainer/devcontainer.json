@@ -14,7 +14,7 @@
 		"ghcr.io/devcontainers/features/node:1": {
       "version": "24.22.0",
       // # renovate: datasource=npm packageName=pnpm
-      "pnpmVersion": "11.28.6"
+      "pnpmVersion": "11.28.7"
     }
 	},
 
