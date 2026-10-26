@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "packageguard": {
-      "version": "2.10.1",
+      "version": "2.11.2",
       "commands": [
         "PackageGuard"
       ],
