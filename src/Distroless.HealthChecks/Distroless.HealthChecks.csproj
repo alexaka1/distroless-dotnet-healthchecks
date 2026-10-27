@@ -93,7 +93,7 @@
     <Error Condition="!Exists('$(_CycloneDxManifest)')" Text="CycloneDX tool manifest was not found at '$(_CycloneDxManifest)'." />
     <Error Condition="!Exists('$(_RuntimePackScript)')" Text="Runtime pack SBOM script was not found at '$(_RuntimePackScript)'." />
     <Exec
-      Command="dotnet tool run dotnet-CycloneDX --tool-manifest &quot;$(_CycloneDxManifest)&quot; -- &quot;$(MSBuildProjectFullPath)&quot; --output &quot;$(_ContainerSbomDirectory)&quot; --filename Distroless.HealthChecks.cdx.json --disable-package-restore --no-serial-number --spec-version 1.6 --runtime $(RuntimeIdentifier) --set-name $(PackageId) --set-version $(Version) --set-nuget-purl"
+      Command="dotnet tool run dotnet-CycloneDX --allow-roll-forward -- &quot;$(MSBuildProjectFullPath)&quot; --output &quot;$(_ContainerSbomDirectory)&quot; --filename Distroless.HealthChecks.cdx.json --disable-package-restore --no-serial-number --spec-version 1.6 --runtime $(RuntimeIdentifier) --set-name $(PackageId) --set-version $(Version) --set-nuget-purl"
       EnvironmentVariables="DOTNET_ROLL_FORWARD=Major;DOTNET_CLI_TELEMETRY_OPTOUT=1;DOTNET_NOLOGO=1" />
     <Exec
       Command="dotnet run --file &quot;$(_RuntimePackScript)&quot; -- --assets &quot;$(ProjectAssetsFile)&quot; --sbom &quot;$(_ContainerSbom)&quot; --runtime $(RuntimeIdentifier)"
