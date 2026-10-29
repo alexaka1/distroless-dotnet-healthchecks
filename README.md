@@ -17,7 +17,7 @@ It works with any `.NET 8`, `.NET 9`, `.NET 10`, or `.NET 11` base image. For ex
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled AS final
-# Get the executable and copy it to /healthchecks
+# Copy the image root, including the executable and Distroless.HealthChecks.cdx.json
 COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 / /healthchecks
 # Setup the healthcheck using the EXEC array syntax
 HEALTHCHECK CMD ["/healthchecks/Distroless.HealthChecks", "--uri", "http://localhost:8080/healthz"]
@@ -27,7 +27,7 @@ WORKDIR /app
 ENTRYPOINT ["dotnet", "My.Awesome.Webapp.dll"]
 ```
 
-The published docker image contains only the executable of the health check at root. This is so it can be conveniently copied inside a Dockerfile.
+The published image root contains the health check executable and `Distroless.HealthChecks.cdx.json`. Copy that whole root, as in the example above. `docker build --sbom=true` reads the CycloneDX file, including the NuGet packages and the .NET runtime pack. The executable also carries its package name and version in an ELF `.note.package` note, so a Dockerfile that copies only the binary still identifies the tool.
 
 It takes in a single argument named `uri`, which is a URI that the app will check. If the URI returns a 200 status code, the health check will pass.
 

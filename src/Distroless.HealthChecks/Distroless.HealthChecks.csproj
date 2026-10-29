@@ -39,6 +39,19 @@
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
   </PropertyGroup>
 
+  <!--
+    Clang is the native linker driver, and -Wl splits on commas, so the JSON is one -Xlinker argument.
+    Single quotes survive the /bin/sh invocation MSBuild uses for the link command.
+  -->
+  <PropertyGroup Label="Package metadata" Condition="'$(PublishAot)' == 'true' and $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux'))">
+    <ElfPackageArchitecture Condition="$([System.String]::Copy('$(RuntimeIdentifier)').Contains('arm64'))">aarch64</ElfPackageArchitecture>
+    <ElfPackageArchitecture Condition="'$(ElfPackageArchitecture)' == ''">x86_64</ElfPackageArchitecture>
+    <ElfPackageMetadata>{"type":"generic","name":"$(PackageId)","version":"$(Version)","architecture":"$(ElfPackageArchitecture)","system":"nuget","license":"$(PackageLicenseExpression)"}</ElfPackageMetadata>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(ElfPackageMetadata)' != ''">
+    <LinkerArg Include="-Xlinker '--package-metadata=$(ElfPackageMetadata)'" />
+  </ItemGroup>
+
   <PropertyGroup Label="Source generation">
     <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
@@ -69,4 +82,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="GenerateContainerSbom" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux'))">
+    <PropertyGroup>
+      <_CycloneDxManifest>$(MSBuildThisFileDirectory)../../.config/dotnet-tools.json</_CycloneDxManifest>
+      <_RuntimePackScript>$(MSBuildThisFileDirectory)../../build/include-runtime-packs.cs</_RuntimePackScript>
+      <_ContainerSbomDirectory>$([System.IO.Path]::GetFullPath('$(PublishDir)'))</_ContainerSbomDirectory>
+      <_ContainerSbom>$([System.IO.Path]::Combine('$(_ContainerSbomDirectory)', 'Distroless.HealthChecks.cdx.json'))</_ContainerSbom>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_CycloneDxManifest)')" Text="CycloneDX tool manifest was not found at '$(_CycloneDxManifest)'." />
+    <Error Condition="!Exists('$(_RuntimePackScript)')" Text="Runtime pack SBOM script was not found at '$(_RuntimePackScript)'." />
+    <Exec
+      Command="dotnet tool run dotnet-CycloneDX --allow-roll-forward -- &quot;$(MSBuildProjectFullPath)&quot; --output &quot;$(_ContainerSbomDirectory)&quot; --filename Distroless.HealthChecks.cdx.json --disable-package-restore --no-serial-number --spec-version 1.6 --runtime $(RuntimeIdentifier) --set-name $(PackageId) --set-version $(Version) --set-nuget-purl"
+      EnvironmentVariables="DOTNET_ROLL_FORWARD=Major;DOTNET_CLI_TELEMETRY_OPTOUT=1;DOTNET_NOLOGO=1" />
+    <Exec
+      Command="dotnet run --file &quot;$(_RuntimePackScript)&quot; -- --assets &quot;$(ProjectAssetsFile)&quot; --sbom &quot;$(_ContainerSbom)&quot; --runtime $(RuntimeIdentifier)"
+      EnvironmentVariables="DOTNET_CLI_TELEMETRY_OPTOUT=1;DOTNET_NOLOGO=1" />
+  </Target>
 </Project>

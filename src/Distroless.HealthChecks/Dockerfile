@@ -26,8 +26,11 @@ ARG TARGETARCH
 ENV DOTNET_CLI_USE_MSBUILD_SERVER=false
 WORKDIR /src
 COPY ["nuget.config", "./"]
+COPY [".config/dotnet-tools.json", ".config/"]
+COPY ["build/include-runtime-packs.cs", "build/"]
 COPY ["src/Distroless.HealthChecks/Distroless.HealthChecks.csproj", "src/Distroless.HealthChecks/"]
-RUN dotnet restore "src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" -a $TARGETARCH
+RUN dotnet restore "src/Distroless.HealthChecks/Distroless.HealthChecks.csproj" -a $TARGETARCH \
+    && dotnet tool restore --tool-manifest .config/dotnet-tools.json
 COPY ["src/", "./src/"]
 WORKDIR "/src/src/Distroless.HealthChecks"
 
@@ -35,7 +38,9 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION
 ARG TARGETARCH
 ARG BASE_IMAGE_TYPE
-RUN case "$TARGETARCH" in \
+ARG SOURCE_DATE_EPOCH
+RUN if [ -n "${SOURCE_DATE_EPOCH}" ]; then export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}"; fi; \
+    case "$TARGETARCH" in \
       amd64) ARCH_SUFFIX="x64" ;; \
       arm64) ARCH_SUFFIX="arm64" ;; \
       *) echo "Unsupported arch: $TARGETARCH" >&2 && exit 1 ;; \
