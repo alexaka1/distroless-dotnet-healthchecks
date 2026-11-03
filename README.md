@@ -27,7 +27,7 @@ WORKDIR /app
 ENTRYPOINT ["dotnet", "My.Awesome.Webapp.dll"]
 ```
 
-The published docker image contains only the executable of the health check at root. This is so it can be conveniently copied inside a Dockerfile.
+The published docker image contains the health check at its root. This is so it can be conveniently copied inside a Dockerfile.
 
 It takes in a single argument named `uri`, which is a URI that the app will check. If the URI returns a 200 status code, the health check will pass.
 
@@ -78,6 +78,28 @@ To decode a key:
 1. Take the key name (the part before the first `,`, if present).
 2. Search the [.NET runtime repository](https://github.com/dotnet/runtime) for that string in a `Strings.resx` file.
 3. The matching `<value>` entry is the human-readable message.
+
+## SBOM and vulnerability scanning
+
+This section is for teams that track their image contents with SBOMs or vulnerability scanners. If that's not you, the usage above is all you need.
+
+The health check is a Native AOT executable, so the .NET runtime and its NuGet dependencies are compiled into it. A scanner can't find them by looking at the file. We publish that information in these places:
+
+| Where | What it contains | How to read it |
+| --- | --- | --- |
+| `Distroless.HealthChecks.cdx.json` at the image root | CycloneDX SBOM, generated at publish from the restored packages. It lists the NuGet packages and the .NET runtime pack compiled into the executable. | Syft and `docker buildx build --sbom=true` pick it up when it is copied into your image. |
+| ELF `.note.package` in the executable | The tool's name, version, architecture, and license | Syft reads it from the executable itself. |
+| BuildKit attestations on each release image | SPDX SBOM and SLSA provenance of this image | `docker buildx imagetools inspect ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 --format '{{ json .SBOM }}'` |
+| GitHub artifact attestation on each release image | Signed build provenance | `gh attestation verify`, as shown under [Security](#security) |
+
+The tool is identified as `pkg:generic/Alexaka1.Distroless.HealthChecks@<version>`. Its dependencies keep their `pkg:nuget` purls, which are what .NET security advisories match.
+
+What your scanner sees depends on what you copy:
+
+- **Copy the image root** (`COPY --from=ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 / /healthchecks`, as in the examples above). The CycloneDX file comes along, so your image's SBOM includes the .NET runtime version and a .NET CVE will be reported against your image.
+- **Copy only the executable.** Your SBOM records the tool's name and version, but not the .NET runtime inside it, so .NET CVEs in the health check will not be reported.
+
+A .NET runtime fix reaches you through a new release of this image. Rebuild your image on that release to pick it up, for example by letting Renovate or Dependabot update the image digest.
 
 ## Building
 
