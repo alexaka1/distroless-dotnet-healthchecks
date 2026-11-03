@@ -1,5 +1,15 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.8.0
+
+### Minor Changes
+
+- [#1471](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1471) [`3cf084b`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/3cf084b900295f829b280a3de3c6b023453787f6) Thanks [@alexaka1](https://github.com/alexaka1)! - Attach the health check to each GitHub release as a tarball for linux-x64, linux-arm64, linux-musl-x64 and linux-musl-arm64. Each tarball holds the image root (the executable, `appsettings.json` and the CycloneDX SBOM) and has a signed build provenance attestation.
+
+### Patch Changes
+
+- [#1460](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1460) [`2cfddcc`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/2cfddccb211fc23cbf8a6c54a0a4549d8b4c198f) Thanks [@alexaka1](https://github.com/alexaka1)! - Identify the Native AOT health check in Docker SBOM scans. The executable carries an ELF package note with its name and version, and publish writes a CycloneDX file next to it so a copied image root includes the NuGet graph and the .NET runtime pack.
+
 ## 1.7.0
 
 ### Minor Changes
