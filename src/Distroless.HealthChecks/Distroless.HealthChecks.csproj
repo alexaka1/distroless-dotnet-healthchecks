@@ -84,6 +84,7 @@
   </ItemGroup>
 
   <Target Name="GenerateContainerSbom" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux'))">
+    <Exec Command="dotnet tool restore" EnvironmentVariables="DOTNET_CLI_TELEMETRY_OPTOUT=1;DOTNET_NOLOGO=1" />
     <Exec
       Command="dotnet tool run dotnet-CycloneDX -- &quot;$(MSBuildProjectFullPath)&quot; --output &quot;$(PublishDir)&quot; --filename Distroless.HealthChecks.cdx.json --disable-package-restore --no-serial-number --spec-version 1.6 --runtime $(RuntimeIdentifier) --set-name $(PackageId) --set-version $(Version)"
       EnvironmentVariables="DOTNET_CLI_TELEMETRY_OPTOUT=1;DOTNET_NOLOGO=1" />
