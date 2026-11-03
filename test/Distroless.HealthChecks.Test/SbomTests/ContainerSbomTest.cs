@@ -37,8 +37,7 @@ public sealed class ContainerSbomTest(ITestContextAccessor testContext) : IAsync
             .Build();
         await _image.CreateAsync(cancellationToken);
 
-        _container = new ContainerBuilder()
-            .WithImage(_image)
+        _container = new ContainerBuilder(_image)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
                 Regex.Escape("Application started. Press Ctrl+C to shut down."),
                 strategy => strategy.WithTimeout(TimeSpan.FromSeconds(30))))
