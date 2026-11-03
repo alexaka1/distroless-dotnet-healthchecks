@@ -22,6 +22,15 @@
   ],
   packageRules: [
     {
+      description: 'Updates to the shipped health check stay in the release notes (.github/release.yml)',
+      matchFileNames: [
+        'src/Distroless.HealthChecks/**',
+      ],
+      addLabels: [
+        'release-notes',
+      ],
+    },
+    {
       description: 'Skip major upgrades for .NET',
       matchPackageNames: [
         'mcr.microsoft.com/dotnet/**',

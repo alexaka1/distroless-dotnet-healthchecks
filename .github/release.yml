@@ -1,0 +1,14 @@
+changelog:
+  exclude:
+    authors:
+      - alexaka1-release-bot[bot]
+  categories:
+    - title: Health check dependency updates
+      labels:
+        - release-notes
+    - title: Other changes
+      labels:
+        - '*'
+      exclude:
+        authors:
+          - renovate[bot]

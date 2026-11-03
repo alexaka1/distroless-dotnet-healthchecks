@@ -65,6 +65,23 @@ ENTRYPOINT ["./My.Awesome.Aot.WebApp"]
 
 The image uses semver. It is recommended that you pin it to at least a major version, instead of `latest`. I.e. `ghcr.io/alexaka1/distroless-dotnet-healthchecks:1`.
 
+### Release binaries
+
+If you can't copy from the image, each [GitHub release](https://github.com/alexaka1/distroless-dotnet-healthchecks/releases) has the image root as a tarball. It contains the executable, `appsettings.json`, and the CycloneDX SBOM.
+
+| Asset | libc | Architecture |
+| --- | --- | --- |
+| `distroless-dotnet-healthchecks-linux-x64.tar.gz` | glibc (from the `ubuntu-chiseled` build) | x64 |
+| `distroless-dotnet-healthchecks-linux-arm64.tar.gz` | glibc (from the `ubuntu-chiseled` build) | arm64 |
+| `distroless-dotnet-healthchecks-linux-musl-x64.tar.gz` | musl (from the `alpine` build) | x64 |
+| `distroless-dotnet-healthchecks-linux-musl-arm64.tar.gz` | musl (from the `alpine` build) | arm64 |
+
+```shell
+curl -fsSLO https://github.com/alexaka1/distroless-dotnet-healthchecks/releases/latest/download/distroless-dotnet-healthchecks-linux-x64.tar.gz
+gh attestation verify distroless-dotnet-healthchecks-linux-x64.tar.gz --repo alexaka1/distroless-dotnet-healthchecks
+mkdir -p healthchecks && tar -xzf distroless-dotnet-healthchecks-linux-x64.tar.gz -C healthchecks
+```
+
 ### .NET Configuration
 
 The `Uri` parameter is just a convenience input for baking in the url to the Dockerfile. You can however set logic to your builds to configure the underlying Uri array instead. Such as: `DISTROLESS_HEALTHCHECKS_Uris__0=http://localhost:8080/healthz` and `DISTROLESS_HEALTHCHECKS_Uris__1=http://localhost/some/other/path`.
@@ -90,7 +107,7 @@ The health check is a Native AOT executable, so the .NET runtime and its NuGet d
 | `Distroless.HealthChecks.cdx.json` at the image root | CycloneDX SBOM, generated at publish from the restored packages. It lists the NuGet packages and the .NET runtime pack compiled into the executable. | Syft and `docker buildx build --sbom=true` pick it up when it is copied into your image. |
 | ELF `.note.package` in the executable | The tool's name, version, architecture, and license | Syft reads it from the executable itself. |
 | BuildKit attestations on each release image | SPDX SBOM and SLSA provenance of this image | `docker buildx imagetools inspect ghcr.io/alexaka1/distroless-dotnet-healthchecks:1 --format '{{ json .SBOM }}'` |
-| GitHub artifact attestation on each release image | Signed build provenance | `gh attestation verify`, as shown under [Security](#security) |
+| GitHub artifact attestation on each release image and [release binary](#release-binaries) | Signed build provenance | `gh attestation verify`, as shown under [Security](#security) |
 
 The tool is identified as `pkg:generic/Alexaka1.Distroless.HealthChecks@<version>`. Its dependencies keep their `pkg:nuget` purls, which are what .NET security advisories match.
 
