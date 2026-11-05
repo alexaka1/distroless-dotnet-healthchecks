@@ -1,5 +1,11 @@
 # alexaka1/distroless-dotnet-healthchecks
 
+## 1.8.1
+
+### Patch Changes
+
+- [#1474](https://github.com/alexaka1/distroless-dotnet-healthchecks/pull/1474) [`66ad680`](https://github.com/alexaka1/distroless-dotnet-healthchecks/commit/66ad680dc42ab413757587c15722959ad61964b8) Thanks [@alexaka1](https://github.com/alexaka1)! - Build the health check with the .NET 11 RC 3 SDK, which fixes the Native AOT compiler vulnerability [GHSA-p3jp-9v83-76w9](https://github.com/advisories/GHSA-p3jp-9v83-76w9) (CVE-2026-111497). 1.8.0 was never published, because its release build failed on this advisory, so this release ships the 1.8.0 changes too.
+
 ## 1.8.0
 
 ### Minor Changes
