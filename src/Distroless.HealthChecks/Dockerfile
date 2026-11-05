@@ -2,8 +2,8 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 ARG BUILD_CONFIGURATION=Release
 ARG BASE_IMAGE_TYPE=ubuntu-chiseled
-FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled@sha256:47ef522a67d1434d8b48361f05d4f55b37717094f56b83a580032c067d2ea0e7 AS base-ubuntu
-FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-alpine@sha256:9fb897322515d33730f87cb3dc3a43694f6f260f8e3e7a537c791fcda60ced66 AS base-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled@sha256:0a70ecd3350d11f4a5377be3a9e44372ef28281ee162b71f498ed69fea901745 AS base-ubuntu
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-alpine@sha256:f4d3801cac2204e2f961a931dd67a99975a436a8b5ad055898bc7029b712d44d AS base-alpine
 
 # Support both "ubuntu" and "ubuntu-chiseled" values for BASE_IMAGE_TYPE.
 FROM base-ubuntu AS base-ubuntu-chiseled
