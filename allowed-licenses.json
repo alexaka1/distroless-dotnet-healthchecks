@@ -4,7 +4,8 @@
       "licenses": [
         "Apache-2.0",
         "MIT",
-        "ISC"
+        "ISC",
+        "Microsoft .NET Library License"
       ]
     },
     "deny": {
