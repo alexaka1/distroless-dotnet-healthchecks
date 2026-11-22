@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 0  # a full history is required for pull request analysis
           persist-credentials: 'false'
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@13e3acbbaeb2cbfc37893b98e74594985edf42eb # v2026.2.4
+        uses: JetBrains/qodana-action@aa698739cd4b8204ad53291bea7e16cd75da3c9f # v2026.3.1
         with:
           # Community for .NET does not support pr-mode yet; see JetBrains/qodana-action tests/dotnet
           pr-mode: false
@@ -73,7 +73,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: 'false'
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@13e3acbbaeb2cbfc37893b98e74594985edf42eb # v2026.2.4
+        uses: JetBrains/qodana-action@aa698739cd4b8204ad53291bea7e16cd75da3c9f # v2026.3.1
         with:
           pr-mode: false
           args: --no-statistics=true
